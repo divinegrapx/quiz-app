@@ -1,4 +1,4 @@
-const SHEET_API_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbw0j_m0dkBRGaeiUUC9ulq6U7YodA9WxxonZlK9F_g2RCNNuvMul3Pt7Ie8QJ65428/exec";
 
 let questions = [];
 let current = 0;
