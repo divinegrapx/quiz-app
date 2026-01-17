@@ -1,4 +1,4 @@
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbw0j_m0dkBRGaeiUUC9ulq6U7YodA9WxxonZlK9F_g2RCNNuvMul3Pt7Ie8QJ65428/exec";
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzG5usO5zvLsQ6njTvz-Zo4uJ4k7yNXlCJN-dClmkF8EiEC9EMpBtDUHT9QVDQ-XDzRuQ/exec";
 
 let questions = [];
 let current = 0;
