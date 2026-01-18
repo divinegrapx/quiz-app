@@ -29,7 +29,7 @@ body {
 }
 
 .answer-btn:active {
-  background-color: #009acd; /* darker blue when pressed */
+  background-color: #009acd; /* darker blue */
 }
 
 /* Lifelines */
@@ -45,6 +45,7 @@ body {
   background: #333;
   height: 20px;
   position: relative;
+  display: none; /* hidden until quiz starts */
 }
 
 #timer-bar {
@@ -69,6 +70,7 @@ body {
   margin: 10px auto;
   background: #333;
   height: 10px;
+  display: none; /* hidden until quiz starts */
 }
 
 #progress-bar {
