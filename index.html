@@ -6,7 +6,7 @@
   <title>Neon Quiz App</title>
   <link rel="stylesheet" href="style.css">
 
-  <!-- Firebase (compat SDKs) -->
+  <!-- Firebase SDKs (compat version for easier migration) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
@@ -18,11 +18,10 @@
 
   <!-- LOGIN / REGISTER -->
   <div id="authDiv">
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
+    <input type="email" id="email" placeholder="Email" /><br>
+    <input type="password" id="password" placeholder="Password" /><br>
     <button id="loginEmailBtn">Login with Email</button>
-    <button id="registerBtn">Register</button>
-    <hr>
+    <button id="registerBtn">Register</button><br><br>
     <button id="loginGoogleBtn">Login with Google</button>
     <button id="loginFacebookBtn">Login with Facebook</button>
   </div>
@@ -45,6 +44,7 @@
     <select id="questionCount">
       <option value="10">10</option>
       <option value="20">20</option>
+      <option value="25">25</option>
       <option value="30">30</option>
     </select>
 
@@ -70,7 +70,9 @@
 
   <!-- QUIZ -->
   <div id="quiz"></div>
-  <div id="hint-box"></div>
+
+  <!-- HINT -->
+  <div id="hint-box" style="display:none;"></div>
 
   <!-- MONEY LADDER -->
   <ul id="money-list" style="display:none;"></ul>
