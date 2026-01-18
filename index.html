@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neon Quiz App</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Quiz App</title>
+<link rel="stylesheet" href="style.css">
 
-  <!-- Firebase (compat SDKs) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<!-- Firebase (compat SDKs) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -18,10 +18,7 @@
 
   <!-- LOGIN -->
   <div id="loginDiv">
-    <button id="loginGoogleBtn">Login with Google</button>
-    <button id="loginFacebookBtn">Login with Facebook</button>
-    <button id="loginEmailBtn">Login / Register with Email</button>
-    <div id="loginError" style="color:red; margin-top:10px;"></div>
+    <button id="loginBtn">Login with Google</button>
   </div>
 
   <!-- CATEGORY SELECTION -->
@@ -41,6 +38,7 @@
     <label for="questionCount">Number of Questions:</label>
     <select id="questionCount">
       <option value="10">10</option>
+      <option value="15">15</option>
       <option value="20">20</option>
       <option value="25">25</option>
       <option value="30">30</option>
@@ -68,10 +66,9 @@
 
   <!-- QUIZ -->
   <div id="quiz"></div>
-  <div id="hint-box"></div>
 
   <!-- MONEY LADDER -->
-  <ul id="money-list" style="display:none;"></ul>
+  <ul id="money-list" style="display:flex; flex-direction:column-reverse; gap:5px;"></ul>
 
   <!-- LEADERBOARD -->
   <h2>🏆 Leaderboard</h2>
