@@ -1,7 +1,10 @@
 // ==================== FIREBASE SETUP ====================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { 
+  getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, 
+  collection, query, orderBy, limit, onSnapshot 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // 🔥 PASTE YOUR FIREBASE CONFIG BELOW
 const firebaseConfig = {
@@ -79,27 +82,61 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ==================== LEADERBOARD ====================
-  function loadLeaderboard() {
+  // ==================== LEADERBOARD WITH AVATARS + LAST SCORE ====================
+  async function loadLeaderboard() {
     const q = query(
       collection(db, "users"),
       orderBy("bestScore", "desc"),
       limit(10)
     );
 
-    // Live updates
     onSnapshot(q, (snapshot) => {
       leaderboardList.innerHTML = "";
+      let first = true;
       snapshot.forEach(doc => {
         const user = doc.data();
+
         const li = document.createElement("li");
-        li.textContent = `${user.name} — ${user.bestScore}`;
+        li.style.display = "flex";
+        li.style.alignItems = "center";
+        li.style.gap = "10px";
+        li.style.padding = "5px";
+        li.style.borderRadius = "5px";
+
+        // Avatar image
+        const img = document.createElement("img");
+        img.src = user.avatar || "https://via.placeholder.com/30?text=?";
+        img.alt = user.name;
+        img.width = 30;
+        img.height = 30;
+        img.style.borderRadius = "50%";
+        img.style.objectFit = "cover";
+
+        // Username + bestScore + lastScore
+        const span = document.createElement("span");
+        span.textContent = `${user.name} — Best: ${user.bestScore} | Last: ${user.lastScore}`;
+
+        li.appendChild(img);
+        li.appendChild(span);
+
+        // Crown for top user
+        if (first) {
+          span.textContent = `👑 ${span.textContent}`;
+          first = false;
+        }
+
+        // Highlight current user
+        if (auth.currentUser && doc.id === auth.currentUser.uid) {
+          li.style.backgroundColor = "#333";
+          li.style.color = "#f0c000";
+          li.style.fontWeight = "bold";
+        }
+
         leaderboardList.appendChild(li);
       });
     });
   }
 
-  // Load leaderboard immediately
   loadLeaderboard();
 
   // ==================== MONEY LADDER ====================
@@ -239,7 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // 🔥 SAVE SCORE TO FIRESTORE
       if (auth.currentUser) {
-        const userRef = doc(db, "users", auth.currentUser.uid);
+        const userRef = doc(db, auth.currentUser.uid);
         const snap = await getDoc(userRef);
         if (snap.exists()) {
           const data = snap.data();
