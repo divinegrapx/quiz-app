@@ -1,10 +1,10 @@
-console.log("script.js loaded ✅");
+document.addEventListener("DOMContentLoaded", () => {
 
 /* ===============================
-   DOM ELEMENTS
+   DOM
 ================================ */
-
 const quizDiv = document.getElementById("quiz");
+const startBtn = document.getElementById("startBtn");
 const lifelines = document.getElementById("lifelines");
 const progressBar = document.getElementById("progress-bar");
 const timerBar = document.getElementById("timer-bar");
@@ -16,86 +16,76 @@ const questionCount = document.getElementById("questionCount");
 const fiftyBtn = document.getElementById("fiftyBtn");
 const hintBtn = document.getElementById("hintBtn");
 
-const correctSound = document.getElementById("correct-sound");
-const wrongSound = document.getElementById("wrong-sound");
-
 /* ===============================
    STATE
 ================================ */
-
 let questions = [];
 let current = 0;
 let score = 0;
-let timer = null;
-let timeLeft = 25;
+let timer;
+let timeLeft = 20;
 let fiftyUsed = false;
 let hintUsed = false;
 
 /* ===============================
-   FALLBACK QUESTIONS
+   FALLBACK (ALWAYS WORKS)
 ================================ */
-
 const fallbackQuestions = [
   {
     question: "What color is the sky?",
     correctAnswer: "Blue",
-    incorrectAnswers: ["Red", "Green", "Yellow"]
+    incorrectAnswers: ["Red","Green","Yellow"]
   },
   {
     question: "How many days are in a week?",
     correctAnswer: "7",
-    incorrectAnswers: ["5", "6", "8"]
+    incorrectAnswers: ["5","6","8"]
   }
 ];
 
 /* ===============================
-   REQUIRED GLOBAL FUNCTIONS
-   (because HTML uses onclick)
+   EVENTS
 ================================ */
+startBtn.addEventListener("click", startQuiz);
+fiftyBtn.addEventListener("click", useFifty);
+hintBtn.addEventListener("click", useHint);
 
-function startQuiz() {
-  console.log("Start Quiz clicked ✅");
-
-  document.getElementById("categoryDiv").style.display = "none";
+/* ===============================
+   START QUIZ
+================================ */
+async function startQuiz() {
+  startBtn.disabled = true;
   lifelines.style.display = "flex";
+  quizDiv.textContent = "Loading...";
 
+  current = 0;
+  score = 0;
   fiftyUsed = false;
   hintUsed = false;
   fiftyBtn.disabled = false;
   hintBtn.disabled = false;
 
-  current = 0;
-  score = 0;
-  progressBar.style.width = "0%";
-
-  loadQuestions();
-}
-
-async function loadQuestions() {
-  quizDiv.innerHTML = "<p>Loading questions…</p>";
-
   try {
     const res = await fetch(
-      `https://the-trivia-api.com/api/questions?categories=${categorySelect.value}&limit=${questionCount.value}`
+      `https://the-trivia-api.com/api/questions?limit=${questionCount.value}`
     );
-
-    if (!res.ok) throw new Error("API error");
-
+    if (!res.ok) throw "API error";
     questions = await res.json();
-    if (!questions.length) throw new Error("Empty");
-
-  } catch (e) {
-    console.warn("Using fallback questions");
+    if (!questions.length) throw "Empty";
+  } catch {
     questions = fallbackQuestions;
   }
 
   showQuestion();
 }
 
+/* ===============================
+   SHOW QUESTION
+================================ */
 function showQuestion() {
   clearInterval(timer);
-  timeLeft = 25;
-  updateTimer();
+  timeLeft = 20;
+  updateTimer(); // ✅ ensure numbers show immediately
 
   const q = questions[current];
   const answers = [...q.incorrectAnswers, q.correctAnswer]
@@ -103,11 +93,11 @@ function showQuestion() {
 
   quizDiv.innerHTML = `<h2>${q.question}</h2>`;
 
-  answers.forEach(answer => {
+  answers.forEach(a => {
     const btn = document.createElement("button");
-    btn.textContent = answer;
+    btn.textContent = a;
     btn.className = "answer-btn";
-    btn.onclick = () => checkAnswer(answer);
+    btn.onclick = () => checkAnswer(a);
     quizDiv.appendChild(btn);
   });
 
@@ -118,7 +108,6 @@ function showQuestion() {
 /* ===============================
    TIMER
 ================================ */
-
 function startTimer() {
   timer = setInterval(() => {
     timeLeft--;
@@ -131,39 +120,38 @@ function startTimer() {
 }
 
 function updateTimer() {
+  // ✅ Update the visible countdown number
   timerText.textContent = `${timeLeft}s`;
-  timerBar.style.width = `${(timeLeft / 25) * 100}%`;
+
+  // Update the progress bar
+  timerBar.style.width = `${(timeLeft / 20) * 100}%`;
 }
 
 /* ===============================
-   ANSWERS
+   ANSWER
 ================================ */
-
 function checkAnswer(answer) {
   clearInterval(timer);
-
   const correct = questions[current].correctAnswer;
 
-  document.querySelectorAll(".answer-btn").forEach(btn => {
-    btn.disabled = true;
-    if (btn.textContent === correct) btn.classList.add("correct");
-    if (btn.textContent === answer && answer !== correct) btn.classList.add("wrong");
+  document.querySelectorAll(".answer-btn").forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add("correct");
+    if (b.textContent === answer && answer !== correct) b.classList.add("wrong");
   });
 
-  answer === correct ? correctSound.play() : wrongSound.play();
   if (answer === correct) score++;
-
   setTimeout(nextQuestion, 1200);
 }
 
+/* ===============================
+   NEXT
+================================ */
 function nextQuestion() {
   current++;
   if (current >= questions.length) {
-    quizDiv.innerHTML = `
-      <h2>🎉 Finished!</h2>
-      <p>Score: ${score}/${questions.length}</p>
-      <button onclick="location.reload()">Restart</button>
-    `;
+    quizDiv.innerHTML = `<h2>Finished</h2><p>${score}/${questions.length}</p>`;
+    startBtn.disabled = false;
     lifelines.style.display = "none";
     progressBar.style.width = "100%";
     return;
@@ -174,31 +162,25 @@ function nextQuestion() {
 /* ===============================
    LIFELINES
 ================================ */
-
 function useFifty() {
   if (fiftyUsed) return;
   fiftyUsed = true;
   fiftyBtn.disabled = true;
 
   const correct = questions[current].correctAnswer;
-  const wrongs = [...document.querySelectorAll(".answer-btn")]
-    .filter(b => b.textContent !== correct)
-    .slice(0, 2);
-
-  wrongs.forEach(b => b.style.visibility = "hidden");
+  document.querySelectorAll(".answer-btn")
+    .forEach(b => {
+      if (b.textContent !== correct && Math.random() > 0.5) {
+        b.style.display = "none";
+      }
+    });
 }
 
 function useHint() {
   if (hintUsed) return;
   hintUsed = true;
   hintBtn.disabled = true;
-  alert("💡 Think carefully — the answer is simpler than it looks.");
+  alert("Think simple 🙂");
 }
 
-/* ===============================
-   EXPOSE TO GLOBAL (CRITICAL)
-================================ */
-
-window.startQuiz = startQuiz;
-window.useFifty = useFifty;
-window.useHint = useHint;
+});
