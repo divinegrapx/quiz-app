@@ -106,16 +106,3 @@ function restartQuiz() {
   document.getElementById("quiz").innerHTML = "";
   currentQuestion = 0;
   score = 0;
-  updateProgress(true);
-}
-
-// Update progress bar
-function updateProgress(finish = false) {
-  const progress = document.getElementById("progress-bar");
-  if (finish) {
-    progress.style.width = "100%";
-  } else {
-    const percent = ((currentQuestion) / questions.length) * 100;
-    progress.style.width = percent + "%";
-  }
-}
