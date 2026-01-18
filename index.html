@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Quiz App</title>
+<title>Neon Quiz Millionaire</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,7 +11,6 @@
 <div class="container">
   <h1>🎯 Neon Quiz Challenge</h1>
 
-  <!-- Category & Number Selection -->
   <div id="categoryDiv">
     <label for="categorySelect">Choose Category:</label>
     <select id="categorySelect">
@@ -27,46 +26,43 @@
 
     <label for="questionCount">Number of Questions:</label>
     <select id="questionCount">
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="15">15</option>
       <option value="20">20</option>
-      <option value="21">21</option>
-      <option value="22">22</option>
-      <option value="23">23</option>
-      <option value="24">24</option>
-      <option value="25">25</option>
-      <option value="26">26</option>
-      <option value="27">27</option>
-      <option value="28">28</option>
-      <option value="29">29</option>
-      <option value="30">30</option>
     </select>
 
     <br><br>
-    <!-- Start button MUST have this ID -->
     <button id="startBtn">START QUIZ</button>
   </div>
 
-  <!-- Lifelines -->
-  <div id="lifelines">
-    <button id="fiftyBtn">50:50 ✂️</button>
-    <button id="hintBtn">💡 Hint</button>
+  <div id="quiz-area">
+    <div id="quiz-and-timer">
+      <div id="quiz"></div>
+      <div id="hint-box"></div>
+
+      <div id="lifelines">
+        <button id="fiftyBtn">50:50 ✂️</button>
+        <button id="hintBtn">💡 Hint</button>
+      </div>
+
+      <div id="timer-container">
+        <span id="timer-text">20s</span>
+        <div id="timer-bar"></div>
+      </div>
+
+      <div id="progress-container">
+        <div id="progress-bar"></div>
+      </div>
+    </div>
+
+    <div id="money-ladder">
+      <ul id="money-list">
+        <!-- JS will fill -->
+      </ul>
+    </div>
   </div>
 
-  <!-- Timer -->
-  <div id="timer-container">
-    <span id="timer-text">20s</span>
-    <div id="timer-bar"></div>
-  </div>
-
-  <!-- Progress -->
-  <div id="progress-container">
-    <div id="progress-bar"></div>
-  </div>
-
-  <!-- Quiz area -->
-  <div id="quiz"></div>
-
-  <!-- Hint display -->
-  <div id="hint-box"></div>
 </div>
 
 <script src="script.js"></script>
