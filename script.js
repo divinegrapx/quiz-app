@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const questionCount = document.getElementById("questionCount");
   const fiftyBtn = document.getElementById("fiftyBtn");
   const hintBtn = document.getElementById("hintBtn");
+  const hintBox = document.getElementById("hint-box");
 
   let questions = [], current = 0, score = 0, timer, timeLeft = 20;
   let fiftyUsed = false, hintUsed = false;
@@ -31,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     lifelines.style.display = "flex";
     timerContainer.style.display = "block";
     progressContainer.style.display = "block";
+    hintBox.style.display = "none";
     quizDiv.innerHTML = "Loading...";
 
     current = 0; score = 0; fiftyUsed = false; hintUsed = false;
@@ -60,6 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearInterval(timer);
     timeLeft = 20;
     updateTimer();
+    hintBox.style.display = "none";
 
     const q = questions[current];
     const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
@@ -122,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
       timerContainer.style.display = "none";
       progressContainer.style.display = "none";
       progressBar.style.width = "100%";
+      hintBox.style.display = "none";
       return;
     }
     showQuestion();
@@ -144,7 +148,8 @@ document.addEventListener("DOMContentLoaded", () => {
     hintBtn.disabled = true;
 
     const q = questions[current];
-    alert("💡 Hint: " + (q.hint || "Think carefully about this question."));
+    hintBox.textContent = "💡 Hint: " + q.hint;
+    hintBox.style.display = "block";
   }
 
 });
