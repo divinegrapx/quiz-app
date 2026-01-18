@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Neon Quiz Challenge</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase SDK -->
+
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -20,7 +21,7 @@
     <button id="loginBtn">Login with Google</button>
   </div>
 
-  <!-- Category and number of questions selection -->
+  <!-- Category selection -->
   <div id="categoryDiv" style="display:none;">
     <label for="categorySelect">Choose Category:</label>
     <select id="categorySelect">
@@ -67,7 +68,7 @@
   <!-- Money ladder -->
   <ol id="money-list" style="display:none;"></ol>
 
-  <!-- Leaderboard -->
+  <!-- Leaderboard placeholder -->
   <div id="leaderboard-container">
     <h2>🏆 Leaderboard</h2>
     <ol id="leaderboard-list"></ol>
