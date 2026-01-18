@@ -4,14 +4,15 @@ import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWith
 import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
-// -------------------- Firebase Config --------------------
+// -------------------- Your Firebase Config --------------------
 const firebaseConfig = {
-  apiKey: "AIza....", // <-- Replace with your Firebase API key
+  apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
   authDomain: "neon-quiz-app.firebaseapp.com",
   projectId: "neon-quiz-app",
   storageBucket: "neon-quiz-app.appspot.com",
-  messagingSenderId: "1234567890",
-  appId: "1:1234567890:web:abcdef123456"
+  messagingSenderId: "891061147021",
+  appId: "1:891061147021:web:7b3d80020f642da7b699c4",
+  measurementId: "G-7LKHH1EHQW"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -59,9 +60,7 @@ loginForm?.addEventListener("submit", async (e) => {
   try {
     await signInWithEmailAndPassword(auth, email, password);
     loginForm.reset();
-  } catch (err) {
-    alert("Login Error: " + err.message);
-  }
+  } catch (err) { alert("Login Error: " + err.message); }
 });
 
 registerForm?.addEventListener("submit", async (e) => {
@@ -69,14 +68,11 @@ registerForm?.addEventListener("submit", async (e) => {
   const email = registerForm.email.value;
   const password = registerForm.password.value;
   const username = registerForm.username.value;
-
   try {
     const userCred = await createUserWithEmailAndPassword(auth, email, password);
     await setDoc(doc(db, "users", userCred.user.uid), { username, score: 0, avatar: "", history: [] });
     registerForm.reset();
-  } catch (err) {
-    alert("Register Error: " + err.message);
-  }
+  } catch (err) { alert("Register Error: " + err.message); }
 });
 
 logoutBtn?.addEventListener("click", async () => { await signOut(auth); });
@@ -85,7 +81,6 @@ logoutBtn?.addEventListener("click", async () => { await signOut(auth); });
 avatarInput?.addEventListener("change", async (e) => {
   const file = e.target.files[0];
   if (!file || !currentUser) return;
-
   const storageRef = ref(storage, `avatars/${currentUser.uid}_${file.name}`);
   await uploadBytes(storageRef, file);
   userAvatarUrl = await getDownloadURL(storageRef);
@@ -101,7 +96,6 @@ onAuthStateChanged(auth, async (user) => {
     avatarContainer.style.display = "block";
     loginForm.style.display = "none";
     registerForm.style.display = "none";
-
     const docSnap = await getDoc(doc(db, "users", user.uid));
     if (docSnap.exists()) userAvatarUrl = docSnap.data().avatar || "";
     showLeaderboard();
@@ -131,13 +125,12 @@ async function showLeaderboard() {
   });
 }
 
-// -------------------- Fetch Questions from Open Trivia DB --------------------
+// -------------------- Fetch Trivia Questions from Open Trivia DB --------------------
 async function loadQuestions(amount = 20) {
   const response = await fetch(`https://opentdb.com/api.php?amount=${amount}&type=multiple`);
   const data = await response.json();
-
   return data.results.map(q => {
-    const choices = shuffleArray([...q.incorrect_answers, q.correct_answer].map(decodeHTML));
+    const choices = shuffleArray([...q.incorrect_answers.map(decodeHTML), decodeHTML(q.correct_answer)]);
     return {
       question: decodeHTML(q.question),
       choices: choices,
@@ -153,90 +146,73 @@ function decodeHTML(html) {
   return txt.value;
 }
 
-// -------------------- Start Quiz --------------------
+// -------------------- Quiz Functions --------------------
 startQuizBtn?.addEventListener("click", async () => {
-  score = 0; questionIndex = 0; usedHints = 0; usedFifty = false;
-
+  score = 0;
+  questionIndex = 0;
+  usedHints = 0;
+  usedFifty = false;
   const selectedCount = parseInt(questionCountSelect.value) || 20;
   questions = await loadQuestions(selectedCount);
-
   quizContainer.style.display = "block";
   showQuestion();
 });
 
-// -------------------- Show Question --------------------
 function showQuestion() {
   if (questionIndex >= questions.length) return endQuiz();
   const q = questions[questionIndex];
   questionEl.textContent = q.question;
   choicesEl.innerHTML = "";
-
-  q.choices.forEach((choice, i) => {
+  q.choices.forEach((choice,i)=> {
     const btn = document.createElement("button");
     btn.textContent = choice;
     btn.className = "neon-btn";
-    btn.addEventListener("click", () => checkAnswer(i));
+    btn.addEventListener("click", ()=>checkAnswer(i));
     choicesEl.appendChild(btn);
   });
-
-  timeLeft = 20;
-  timerEl.textContent = timeLeft;
+  timeLeft=20; timerEl.textContent=timeLeft;
   clearInterval(timer);
-  timer = setInterval(() => {
-    timeLeft--;
-    timerEl.textContent = timeLeft;
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      wrongSound.play();
-      questionIndex++;
-      showQuestion();
-    }
-  }, 1000);
+  timer=setInterval(()=>{
+    timeLeft--; timerEl.textContent=timeLeft;
+    if(timeLeft<=0){ clearInterval(timer); wrongSound.play(); questionIndex++; showQuestion();}
+  },1000);
 }
 
-// -------------------- Check Answer --------------------
-function checkAnswer(selected) {
-  const correctIndex = questions[questionIndex].answer;
-  if (selected === correctIndex) { score++; correctSound.play(); }
-  else { wrongSound.play(); }
-  questionIndex++;
-  showQuestion();
+function checkAnswer(selected){
+  const correctIndex=questions[questionIndex].answer;
+  if(selected===correctIndex){ score++; correctSound.play(); } else { wrongSound.play(); }
+  questionIndex++; showQuestion();
 }
 
-// -------------------- Hints --------------------
-hintBtn?.addEventListener("click", () => {
-  if (usedHints >= 1) return alert("Hint already used!");
-  alert("Hint: " + questions[questionIndex].hint);
+hintBtn?.addEventListener("click", ()=>{
+  if(usedHints>=1) return alert("Hint already used!");
+  alert("Hint: "+questions[questionIndex].hint);
   usedHints++;
 });
 
-// -------------------- 50:50 --------------------
-fiftyBtn?.addEventListener("click", () => {
-  if (usedFifty) return alert("50:50 already used!");
-  const q = questions[questionIndex];
-  const buttons = choicesEl.querySelectorAll("button");
-  let removed = 0;
-  buttons.forEach((btn, idx) => {
-    if (idx !== q.answer && removed < 2) { btn.style.display = "none"; removed++; }
+fiftyBtn?.addEventListener("click", ()=>{
+  if(usedFifty) return alert("50:50 already used!");
+  const q=questions[questionIndex];
+  let removed=0;
+  choicesEl.querySelectorAll("button").forEach((btn,idx)=>{
+    if(idx!==q.answer && removed<2){ btn.style.display="none"; removed++; }
   });
-  usedFifty = true;
+  usedFifty=true;
 });
 
-// -------------------- End Quiz --------------------
-async function endQuiz() {
+async function endQuiz(){
   clearInterval(timer);
-  scoreEl.textContent = score;
-  quizContainer.style.display = "none";
-
-  if (!currentUser) return;
-  const userRef = doc(db, "users", currentUser.uid);
-  const docSnap = await getDoc(userRef);
-  const prevHistory = docSnap.data().history || [];
-  prevHistory.push({ date: new Date().toISOString(), score });
-  const newScore = Math.max(docSnap.data().score || 0, score);
-  await updateDoc(userRef, { score: newScore, history: prevHistory });
+  scoreEl.textContent=score;
+  quizContainer.style.display="none";
+  if(!currentUser) return;
+  const userRef=doc(db,"users",currentUser.uid);
+  const docSnap=await getDoc(userRef);
+  const prevHistory=docSnap.data().history||[];
+  prevHistory.push({date:new Date().toISOString(), score});
+  const newScore=Math.max(docSnap.data().score||0,score);
+  await updateDoc(userRef,{score:newScore, history:prevHistory});
   showLeaderboard();
 }
 
 // -------------------- Utility --------------------
-function shuffleArray(arr) { return arr.sort(() => Math.random() - 0.5); }
+function shuffleArray(arr){ return arr.sort(()=>Math.random()-0.5); }
