@@ -7,20 +7,26 @@
 </head>
 <body>
 
-  <h1>🏆 Quiz Game</h1>
+  <h1 id="quiz-title">🏆 Quiz Game</h1>
 
   <!-- LOGIN -->
   <button id="loginBtn">Login with Google</button>
 
   <!-- QUIZ CONTROLS -->
-  <button id="startBtn">Start Quiz</button>
+  <div id="quiz-controls">
+    <label for="categorySelect">Category:</label>
+    <select id="categorySelect">
+      <option value="science">Science</option>
+      <option value="history">History</option>
+      <option value="geography">Geography</option>
+      <option value="math">Math</option>
+    </select>
 
-  <select id="categorySelect">
-    <option value="science">Science</option>
-    <option value="history">History</option>
-  </select>
+    <label for="questionCount">Questions:</label>
+    <input type="number" id="questionCount" value="3" min="1" max="10">
 
-  <input type="number" id="questionCount" value="3" min="1" max="10">
+    <button id="startBtn">Start Quiz</button>
+  </div>
 
   <!-- LIFELINES -->
   <div id="lifelines" style="display:none;">
