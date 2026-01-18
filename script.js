@@ -13,14 +13,18 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ---------------- DOM ----------------
-const googleBtn = document.getElementById("googleBtn");
-const facebookBtn = document.getElementById("facebookBtn");
-const emailLoginBtn = document.getElementById("emailLoginBtn");
-const emailRegisterBtn = document.getElementById("emailRegisterBtn");
+// ---------------- DOM ELEMENTS ----------------
+const googleBtn = document.getElementById("googleLoginBtn");
+const facebookBtn = document.getElementById("facebookLoginBtn");
+const emailBtn = document.getElementById("emailRegisterBtn");
+const emailDiv = document.getElementById("emailDiv");
 const emailInput = document.getElementById("emailInput");
-const passInput = document.getElementById("passInput");
-const loginDiv = document.getElementById("loginDiv");
+const passwordInput = document.getElementById("passwordInput");
+const emailLoginBtn = document.getElementById("emailLoginBtn");
+const emailRegisterBtn = document.getElementById("emailRegisterSubmitBtn");
+const emailCancelBtn = document.getElementById("emailCancelBtn");
+
+const authDiv = document.getElementById("authDiv");
 const categoryDiv = document.getElementById("categoryDiv");
 const startBtn = document.getElementById("startBtn");
 const categorySelect = document.getElementById("categorySelect");
@@ -35,293 +39,154 @@ const timerContainer = document.getElementById("timer-container");
 const timerBar = document.getElementById("timer-bar");
 const timerText = document.getElementById("timer-text");
 const moneyList = document.getElementById("money-list");
-const quizTitle = document.getElementById("quiz-title");
+const quizContainer = document.getElementById("quiz-container");
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
 
-// Hint box
-const hintBox = document.createElement("div");
-hintBox.id = "hint-box";
-quizDiv.parentNode.insertBefore(hintBox, quizDiv.nextSibling);
-
 // ---------------- GLOBALS ----------------
-let questions = [], current = 0, score = 0, timer, timeLeft = 20;
-let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
+let questions = [], current=0, score=0, timer, timeLeft=20;
+let fiftyUsed=false, hintUsed=false, ladderLevel=0;
 
 // ---------------- FALLBACK QUESTIONS ----------------
 const fallbackQuestions = [
-  { question: "What color is the sky?", correctAnswer: "Blue", incorrectAnswers: ["Red","Green","Yellow"], hint: "It's the same color as the ocean." },
-  { question: "How many days are in a week?", correctAnswer: "7", incorrectAnswers: ["5","6","8"], hint: "Think Monday to Sunday." },
-  { question: "Which planet is known as the Red Planet?", correctAnswer: "Mars", incorrectAnswers: ["Venus","Jupiter","Saturn"], hint: "Named after Roman god of war." }
+  { question:"What color is the sky?", correctAnswer:"Blue", incorrectAnswers:["Red","Green","Yellow"], hint:"It's the same color as the ocean." },
+  { question:"How many days are in a week?", correctAnswer:"7", incorrectAnswers:["5","6","8"], hint:"Think Monday to Sunday." },
+  { question:"Which planet is known as the Red Planet?", correctAnswer:"Mars", incorrectAnswers:["Venus","Jupiter","Saturn"], hint:"Named after Roman god of war." }
 ];
 
+const moneyLevels = ["$100","$200","$300","$500","$1,000","$2,000","$4,000","$8,000","$16,000","$32,000"];
+
 // ---------------- LOGIN ----------------
-googleBtn.addEventListener("click", () => {
+googleBtn.onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(userLoggedIn)
-    .catch(err => alert(err.message));
-});
+  auth.signInWithPopup(provider).then(userLoggedIn).catch(console.error);
+};
 
-facebookBtn.addEventListener("click", () => {
+facebookBtn.onclick = () => {
   const provider = new firebase.auth.FacebookAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(userLoggedIn)
-    .catch(err => alert(err.message));
-});
+  auth.signInWithPopup(provider).then(userLoggedIn).catch(console.error);
+};
 
-emailRegisterBtn.addEventListener("click", () => {
-  auth.createUserWithEmailAndPassword(emailInput.value, passInput.value)
-    .then(userLoggedIn)
-    .catch(err => alert(err.message));
-});
+emailBtn.onclick = ()=>{ authDiv.style.display="none"; emailDiv.style.display="block"; };
+emailCancelBtn.onclick = ()=>{ emailDiv.style.display="none"; authDiv.style.display="block"; };
+emailLoginBtn.onclick = async ()=>{
+  try { 
+    const res = await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+    userLoggedIn(res); 
+  } catch(e){ alert("Login failed: "+e.message);}
+};
+emailRegisterBtn.onclick = async ()=>{
+  try { 
+    const res = await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+    userLoggedIn(res); 
+  } catch(e){ alert("Register failed: "+e.message);}
+};
 
-emailLoginBtn.addEventListener("click", () => {
-  auth.signInWithEmailAndPassword(emailInput.value, passInput.value)
-    .then(userLoggedIn)
-    .catch(err => alert(err.message));
-});
-
-function userLoggedIn(result) {
-  loginDiv.style.display = "none";
-  categoryDiv.style.display = "block";
-  quizTitle.textContent = `🎯 Welcome ${result.user.displayName || result.user.email}`;
-  updateLeaderboard();
+function userLoggedIn(result){
+  authDiv.style.display="none";
+  categoryDiv.style.display="block";
 }
 
-// ---------------- START QUIZ ----------------
-startBtn.addEventListener("click", startQuiz);
-fiftyBtn.addEventListener("click", useFifty);
-hintBtn.addEventListener("click", useHint);
+// ---------------- QUIZ ----------------
+startBtn.onclick = startQuiz;
+fiftyBtn.onclick = useFifty;
+hintBtn.onclick = useHint;
 
-async function startQuiz() {
-  startBtn.disabled = true;
-  quizDiv.style.display = "flex";
-  lifelines.style.display = "flex";
-  progressContainer.style.display = "block";
-  timerContainer.style.display = "block";
-  moneyList.style.display = "flex";
-  hintBox.style.display = "none";
-  quizDiv.innerHTML = "Loading...";
-
-  ladderLevel = 0;
-  current = 0;
-  score = 0;
-  fiftyUsed = false;
-  hintUsed = false;
-  fiftyBtn.disabled = false;
-  hintBtn.disabled = false;
-  progressBar.style.width = "0%";
+async function startQuiz(){
+  startBtn.disabled=true;
+  quizContainer.style.display="block";
+  lifelines.style.display="flex";
+  progressContainer.style.display="block";
+  timerContainer.style.display="block";
+  moneyList.style.display="block";
+  ladderLevel=current=score=0; fiftyUsed=hintUsed=false;
+  fiftyBtn.disabled=hintBtn.disabled=false;
+  progressBar.style.width="0%";
 
   buildMoneyLadder();
 
-  quizTitle.textContent = `🎯 ${categorySelect.value.replace(/_/g," ").toUpperCase()} — ${questionCount.value} Questions`;
-
-  try {
+  try{
     const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`);
-    if (!res.ok) throw "API error";
+    if(!res.ok) throw "API error";
     let data = await res.json();
-    if (!data.length) throw "Empty API";
-
-    questions = data.map(q => ({
-      question: q.question,
-      correctAnswer: q.correctAnswer,
-      incorrectAnswers: q.incorrectAnswers,
-      hint: q.hint || "Think carefully."
-    }));
-  } catch {
-    questions = fallbackQuestions;
-  }
+    if(!data.length) throw "Empty API";
+    questions = data.map(q=>({ question:q.question, correctAnswer:q.correctAnswer, incorrectAnswers:q.incorrectAnswers, hint:q.hint||"Think carefully." }));
+  } catch { questions=fallbackQuestions; }
 
   showQuestion();
 }
 
-// ---------------- MONEY LADDER ----------------
-function buildMoneyLadder() {
-  moneyList.innerHTML = "";
-  const num = parseInt(questionCount.value);
-  for(let i = num; i >= 1; i--){
-    const li = document.createElement("li");
-    li.textContent = `$${i*100}`;
+// ---------------- FUNCTIONS ----------------
+function buildMoneyLadder(){
+  moneyList.innerHTML="";
+  const totalQ=parseInt(questionCount.value);
+  const levels = moneyLevels.slice(0,totalQ).reverse();
+  levels.forEach(l=>{
+    const li=document.createElement("li");
+    li.textContent=l;
     moneyList.appendChild(li);
-  }
+  });
 }
 
-// ---------------- SHOW QUESTION ----------------
-function showQuestion() {
-  clearInterval(timer);
-  timeLeft = 20;
-  updateTimer();
-  hintBox.style.display = "none";
-
-  const q = questions[current];
-  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
-
-  quizDiv.innerHTML = `<h2>${q.question}</h2><div id="feedback"></div>`;
-  answers.forEach(a => {
-    const btn = document.createElement("button");
-    btn.textContent = a;
-    btn.className = "option-btn";
-    btn.onclick = () => checkAnswer(a);
+function showQuestion(){
+  clearInterval(timer); timeLeft=20; updateTimer();
+  const q=questions[current];
+  const answers=[...q.incorrectAnswers, q.correctAnswer].sort(()=>Math.random()-0.5);
+  quizDiv.innerHTML=`<h2>${q.question}</h2><div id="feedback"></div>`;
+  answers.forEach(a=>{
+    const btn=document.createElement("button");
+    btn.textContent=a;
+    btn.className="option-btn";
+    btn.onclick=()=>checkAnswer(a);
     quizDiv.appendChild(btn);
   });
-
-  progressBar.style.width = `${(current / questions.length) * 100}%`;
+  progressBar.style.width=`${(current/questions.length)*100}%`;
   startTimer();
 }
 
-// ---------------- TIMER ----------------
-function startTimer() {
-  timerText.style.display = "block";
-  timer = setInterval(() => {
-    timeLeft--;
-    updateTimer();
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      nextQuestion(false);
-    }
-  }, 1000);
+function startTimer(){
+  timerText.style.display="block";
+  timer=setInterval(()=>{
+    timeLeft--; updateTimer();
+    if(timeLeft<=0){ clearInterval(timer); nextQuestion(); }
+  },1000);
 }
 
-function updateTimer() {
-  timerText.textContent = `${timeLeft}s`;
-  timerBar.style.width = `${(timeLeft / 20) * 100}%`;
-}
+function updateTimer(){ timerText.textContent=`${timeLeft}s`; timerBar.style.width=`${(timeLeft/20)*100}%`; }
 
-// ---------------- CHECK ANSWER ----------------
-function checkAnswer(answer) {
+function checkAnswer(answer){
   clearInterval(timer);
-  const correct = questions[current].correctAnswer;
-  const feedbackDiv = document.getElementById("feedback");
-
-  document.querySelectorAll(".option-btn").forEach(b => {
-    b.disabled = true;
-    if (b.textContent === correct) b.classList.add("correct");
-    if (b.textContent === answer && answer !== correct) b.classList.add("wrong");
+  const correct=questions[current].correctAnswer;
+  const fb=document.getElementById("feedback");
+  document.querySelectorAll(".option-btn").forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===correct)b.classList.add("correct");
+    if(b.textContent===answer && answer!==correct)b.classList.add("wrong");
   });
-
-  if (answer === correct) {
-    score++;
-    ladderLevel++;
-    updateMoneyLadder();
-    feedbackDiv.textContent = "✅ Correct!";
-    feedbackDiv.style.color = "lime";
-    correctSound.play();
-    setTimeout(() => nextQuestion(), 1000);
-  } else {
-    feedbackDiv.textContent = "❌ Wrong!";
-    feedbackDiv.style.color = "red";
-    wrongSound.play();
-    setTimeout(() => nextQuestion(), 1000);
-  }
+  if(answer===correct){ score++; ladderLevel++; updateMoneyLadder(); fb.textContent="✅ Correct!"; correctSound.play(); setTimeout(nextQuestion,1000);}
+  else{ fb.textContent="❌ Wrong!"; wrongSound.play(); setTimeout(nextQuestion,1000);}
 }
 
-// ---------------- NEXT QUESTION ----------------
-function nextQuestion() {
+function nextQuestion(){
   current++;
-  if (current >= questions.length) {
-    quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>
-      <button onclick="location.reload()">Restart</button>`;
-    startBtn.disabled = false;
-    lifelines.style.display = "none";
-    timerContainer.style.display = "none";
-    progressContainer.style.display = "none";
-    moneyList.style.display = "none";
-    hintBox.style.display = "none";
-
-    const user = auth.currentUser;
-    saveScore(user, score);
+  if(current>=questions.length){
+    quizDiv.innerHTML=`<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p><button onclick="location.reload()">Restart</button>`;
+    lifelines.style.display=timerContainer.style.display=progressContainer.style.display=moneyList.style.display="none";
     return;
   }
   showQuestion();
 }
 
-// ---------------- LIFELINES ----------------
-function useFifty() {
-  if (fiftyUsed) return;
-  fiftyUsed = true;
-  fiftyBtn.disabled = true;
-
-  const correct = questions[current].correctAnswer;
-  const btns = Array.from(document.querySelectorAll(".option-btn"));
-  let removed = 0;
-  btns.forEach(b => {
-    if (b.textContent !== correct && removed < 2 && Math.random() > 0.3) {
-      b.style.display = "none";
-      removed++;
-    }
+function useFifty(){
+  if(fiftyUsed)return; fiftyUsed=true; fiftyBtn.disabled=true;
+  const correct=questions[current].correctAnswer;
+  let removed=0;
+  document.querySelectorAll(".option-btn").forEach(b=>{
+    if(b.textContent!==correct && removed<2 && Math.random()>0.3){ b.style.display="none"; removed++; }
   });
 }
 
-function useHint() {
-  if (hintUsed) return;
-  hintUsed = true;
-  hintBtn.disabled = true;
-
-  const q = questions[current];
-  hintBox.textContent = "💡 Hint: " + q.hint;
-  hintBox.style.display = "block";
+function useHint(){
+  if(hintUsed)return; hintUsed=true; hintBtn.disabled=true;
+  const q=questions[current]; quizDiv.innerHTML+=`<div id="hint-box">💡 Hint: ${q.hint}</div>`;
 }
-
-// ---------------- MONEY LADDER ----------------
-function updateMoneyLadder() {
-  const lis = moneyList.querySelectorAll("li");
-  lis.forEach(li => li.classList.remove("current"));
-  const idx = moneyList.children.length - ladderLevel - 1;
-  if (lis[idx]) lis[idx].classList.add("current");
-}
-
-// ---------------- LEADERBOARD ----------------
-async function saveScore(user, score) {
-  if (!user) return;
-  const userData = {
-    uid: user.uid,
-    name: user.displayName || user.email,
-    avatar: user.photoURL || "",
-    score: score,
-    date: firebase.firestore.FieldValue.serverTimestamp()
-  };
-
-  try {
-    await db.collection("leaderboard").doc(user.uid).set(userData, { merge: true });
-    updateLeaderboard();
-  } catch (err) {
-    console.error("Error saving score:", err);
-  }
-}
-
-async function updateLeaderboard() {
-  const list = document.getElementById("leaderboard-list");
-  list.innerHTML = "Loading...";
-  try {
-    const snapshot = await db.collection("leaderboard")
-      .orderBy("score", "desc")
-      .limit(10)
-      .get();
-
-    list.innerHTML = "";
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const li = document.createElement("li");
-      li.style.display = "flex";
-      li.style.alignItems = "center";
-      li.style.gap = "8px";
-
-      const img = document.createElement("img");
-      img.src = data.avatar || "";
-      img.width = 30;
-      img.height = 30;
-      img.style.borderRadius = "50%";
-
-      li.appendChild(img);
-      li.appendChild(document.createTextNode(`${data.name} — ${data.score} pts`));
-      list.appendChild(li);
-    });
-  } catch (err) {
-    console.error("Error loading leaderboard:", err);
-    list.innerHTML = "Failed to load leaderboard.";
-  }
-}
-
-// ---------------- INIT ----------------
-updateLeaderboard();
