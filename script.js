@@ -1,3 +1,53 @@
+// ==================== FIREBASE SETUP ====================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// 🔥 PASTE YOUR FIREBASE CONFIG BELOW
+const firebaseConfig = {
+  apiKey: "PASTE_HERE",
+  authDomain: "PASTE_HERE",
+  projectId: "PASTE_HERE",
+  storageBucket: "PASTE_HERE",
+  messagingSenderId: "PASTE_HERE",
+  appId: "PASTE_HERE"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+// ==================== CREATE USER PROFILE FUNCTION ====================
+async function createUserProfile(user) {
+  const userRef = doc(db, "users", user.uid);
+  const snap = await getDoc(userRef);
+
+  if (!snap.exists()) {
+    await setDoc(userRef, {
+      name: user.displayName || "Anonymous",
+      avatar: user.photoURL || "",
+      bestScore: 0,
+      lastScore: 0,
+      createdAt: serverTimestamp()
+    });
+  }
+}
+
+// ==================== GOOGLE LOGIN BUTTON (optional) ====================
+document.addEventListener("DOMContentLoaded", () => {
+  const loginBtn = document.getElementById("loginBtn");
+  if (loginBtn) {
+    loginBtn.addEventListener("click", async () => {
+      const result = await signInWithPopup(auth, provider);
+      createUserProfile(result.user);
+      alert("Logged in as " + result.user.displayName);
+    });
+  }
+});
+
+// ==================== QUIZ LOGIC ====================
 document.addEventListener("DOMContentLoaded", () => {
   const quizDiv = document.getElementById("quiz");
   const startBtn = document.getElementById("startBtn");
@@ -29,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function buildMoneyLadder() {
     moneyList.innerHTML = "";
-    const levelsToUse = moneyLevels.slice(0, questionCount.value); // dynamic
+    const levelsToUse = moneyLevels.slice(0, questionCount.value);
     levelsToUse.reverse().forEach((amount) => {
       const li = document.createElement("li");
       li.textContent = amount;
@@ -141,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function nextQuestion(correct) {
+  async function nextQuestion(correct) {
     current++;
     if (current >= questions.length) {
       quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>
@@ -152,6 +202,21 @@ document.addEventListener("DOMContentLoaded", () => {
       progressContainer.style.display = "none";
       progressBar.style.width = "100%";
       hintBox.style.display = "none";
+
+      // 🔥 SAVE SCORE TO FIRESTORE
+      if (auth.currentUser) {
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          const data = snap.data();
+          const bestScore = data.bestScore || 0;
+          await updateDoc(userRef, {
+            lastScore: score,
+            bestScore: Math.max(score, bestScore)
+          });
+        }
+      }
+
       return;
     }
     showQuestion();
