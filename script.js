@@ -34,10 +34,7 @@ const moneyList = document.getElementById("money-list");
 const quizTitle = document.getElementById("quiz-title");
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
-
-const hintBox = document.createElement("div");
-hintBox.id = "hint-box";
-quizDiv.parentNode.insertBefore(hintBox, quizDiv.nextSibling);
+const hintBox = document.getElementById("hint-box");
 
 // ---------------- GLOBALS ----------------
 let questions = [], current = 0, score = 0, timer, timeLeft = 20;
@@ -157,7 +154,7 @@ function startTimer() {
     updateTimer();
     if (timeLeft <= 0) {
       clearInterval(timer);
-      nextQuestion(false);
+      nextQuestion();
     }
   }, 1000);
 }
