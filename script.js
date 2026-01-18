@@ -11,12 +11,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const questionCount = document.getElementById("questionCount");
   const fiftyBtn = document.getElementById("fiftyBtn");
   const hintBtn = document.getElementById("hintBtn");
-  const hintBox = document.getElementById("hint-box");
+  const hintBox = document.createElement("div");
+  hintBox.id = "hint-box";
+  quizDiv.parentNode.insertBefore(hintBox, quizDiv.nextSibling);
   const moneyList = document.getElementById("money-list");
+  const quizTitle = document.getElementById("quiz-title");
   const correctSound = document.getElementById("correct-sound");
   const wrongSound = document.getElementById("wrong-sound");
 
-  // HIDE quiz, lifelines, progress, timer, money ladder at start
+  // Hide everything initially
   quizDiv.style.display = "none";
   lifelines.style.display = "none";
   progressContainer.style.display = "none";
@@ -37,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function buildMoneyLadder() {
     moneyList.innerHTML = "";
     const levelsToUse = moneyLevels.slice(0, questionCount.value);
-    levelsToUse.reverse().forEach((amount) => {
+    levelsToUse.reverse().forEach(amount => {
       const li = document.createElement("li");
       li.textContent = amount;
       moneyList.appendChild(li);
@@ -49,7 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
   hintBtn.addEventListener("click", useHint);
 
   async function startQuiz() {
-    // SHOW all necessary elements
     startBtn.disabled = true;
     quizDiv.style.display = "flex";
     lifelines.style.display = "flex";
@@ -59,11 +61,19 @@ document.addEventListener("DOMContentLoaded", () => {
     hintBox.style.display = "none";
     quizDiv.innerHTML = "Loading...";
 
-    current = 0; score = 0; fiftyUsed = false; hintUsed = false; ladderLevel = 0;
-    fiftyBtn.disabled = false; hintBtn.disabled = false;
+    ladderLevel = 0;
+    current = 0;
+    score = 0;
+    fiftyUsed = false;
+    hintUsed = false;
+    fiftyBtn.disabled = false;
+    hintBtn.disabled = false;
     progressBar.style.width = "0%";
 
     buildMoneyLadder();
+
+    // Update title dynamically
+    quizTitle.textContent = `🎯 Neon Quiz — ${categorySelect.value.replace(/_/g," ").toUpperCase()} — ${questionCount.value} Questions`;
 
     try {
       const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`);
@@ -98,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
     answers.forEach(a => {
       const btn = document.createElement("button");
       btn.textContent = a;
-      btn.className = "option-btn"; // match your CSS
+      btn.className = "option-btn";
       btn.onclick = () => checkAnswer(a);
       quizDiv.appendChild(btn);
     });
@@ -114,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
       updateTimer();
       if (timeLeft <= 0) {
         clearInterval(timer);
-        nextQuestion(false); // timed out
+        nextQuestion(false);
       }
     }, 1000);
   }
@@ -151,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function nextQuestion(correct) {
+  function nextQuestion() {
     current++;
     if (current >= questions.length) {
       quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>
@@ -161,7 +171,6 @@ document.addEventListener("DOMContentLoaded", () => {
       timerContainer.style.display = "none";
       progressContainer.style.display = "none";
       moneyList.style.display = "none";
-      progressBar.style.width = "100%";
       hintBox.style.display = "none";
       return;
     }
