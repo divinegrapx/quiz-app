@@ -58,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const correctSound = document.getElementById("correct-sound");
   const wrongSound = document.getElementById("wrong-sound");
   const leaderboardList = document.getElementById("leaderboard-list");
+  const quizTitle = document.getElementById("quiz-title");
 
   let questions = [], current = 0, score = 0, timer, timeLeft = 20;
   let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
@@ -163,8 +164,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     buildMoneyLadder();
 
-    // Use fallback questions for simplicity
-    questions = fallbackQuestions;
+    // Update quiz title with category
+    quizTitle.textContent = `🏆 Quiz — ${categorySelect.value.charAt(0).toUpperCase() + categorySelect.value.slice(1)}`;
+
+    // Fetch real questions or use fallback
+    try {
+      const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`);
+      if (!res.ok) throw "API error";
+      const data = await res.json();
+      if (!data.length) throw "Empty API";
+
+      questions = data.map(q => ({
+        question: q.question,
+        correctAnswer: q.correctAnswer,
+        incorrectAnswers: q.incorrectAnswers,
+        hint: q.hint || "Think carefully."
+      }));
+    } catch {
+      questions = fallbackQuestions;
+    }
 
     showQuestion();
   }
@@ -252,7 +270,6 @@ document.addEventListener("DOMContentLoaded", () => {
       progressBar.style.width = "100%";
       hintBox.style.display = "none";
 
-      // SAVE SCORE
       if (auth.currentUser) {
         const userRef = doc(db, "users", auth.currentUser.uid);
         const snap = await getDoc(userRef);
