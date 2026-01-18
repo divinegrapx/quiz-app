@@ -1,71 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Quiz Millionaire</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Quiz Game</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-  <h1>🎯 Neon Quiz Challenge</h1>
+  <h1>🏆 Quiz Game</h1>
 
-  <div id="categoryDiv">
-    <label for="categorySelect">Choose Category:</label>
-    <select id="categorySelect">
-      <option value="science">Science</option>
-      <option value="history">History</option>
-      <option value="geography">Geography</option>
-      <option value="music">Music</option>
-      <option value="film_and_tv">Film & TV</option>
-      <option value="sports">Sports</option>
-      <option value="food_and_drink">Food & Drink</option>
-      <option value="general_knowledge">General Knowledge</option>
-    </select>
+  <!-- LOGIN -->
+  <button id="loginBtn">Login with Google</button>
 
-    <label for="questionCount">Number of Questions:</label>
-    <select id="questionCount">
-      <option value="5">5</option>
-      <option value="10">10</option>
-      <option value="15">15</option>
-      <option value="20">20</option>
-    </select>
+  <!-- QUIZ CONTROLS -->
+  <button id="startBtn">Start Quiz</button>
 
-    <br><br>
-    <button id="startBtn">START QUIZ</button>
+  <select id="categorySelect">
+    <option value="science">Science</option>
+    <option value="history">History</option>
+  </select>
+
+  <input type="number" id="questionCount" value="3" min="1" max="10">
+
+  <!-- LIFELINES -->
+  <div id="lifelines" style="display:none;">
+    <button id="fiftyBtn">50/50</button>
+    <button id="hintBtn">Hint</button>
   </div>
 
-  <div id="quiz-area">
-    <div id="quiz-and-timer">
-      <div id="quiz"></div>
-      <div id="hint-box"></div>
-
-      <div id="lifelines">
-        <button id="fiftyBtn">50:50 ✂️</button>
-        <button id="hintBtn">💡 Hint</button>
-      </div>
-
-      <div id="timer-container">
-        <span id="timer-text">20s</span>
-        <div id="timer-bar"></div>
-      </div>
-
-      <div id="progress-container">
-        <div id="progress-bar"></div>
-      </div>
-    </div>
-
-    <div id="money-ladder">
-      <ul id="money-list"></ul>
-    </div>
+  <!-- TIMER -->
+  <div id="timer-container" style="display:none;">
+    <div id="timer-bar"></div>
+    <div id="timer-text"></div>
   </div>
-</div>
 
-<!-- Sounds -->
-<audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
-<audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
+  <!-- PROGRESS -->
+  <div id="progress-container" style="display:none;">
+    <div id="progress-bar"></div>
+  </div>
 
-<script src="script.js"></script>
+  <!-- HINT BOX -->
+  <div id="hint-box" style="display:none;"></div>
+
+  <!-- QUIZ -->
+  <div id="quiz"></div>
+
+  <!-- MONEY LADDER -->
+  <ol id="money-list"></ol>
+
+  <!-- LEADERBOARD -->
+  <div id="leaderboard-container">
+    <h2>🏆 Leaderboard</h2>
+    <ol id="leaderboard-list"></ol>
+  </div>
+
+  <!-- AUDIO -->
+  <audio id="correct-sound" src="correct.mp3"></audio>
+  <audio id="wrong-sound" src="wrong.mp3"></audio>
+
+  <script type="module" src="script.js"></script>
 </body>
 </html>
