@@ -1,172 +1,218 @@
+/* ==================== GENERAL ==================== */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: radial-gradient(circle at top, #0a0a0a, #111);
+  background-color: #111;
   color: #fff;
-  margin: 0;
-  padding: 0;
-}
-
-.container {
-  max-width: 1000px;
-  margin: 20px auto;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 20px;
+  margin: 0;
 }
 
-h1 {
-  font-size: 36px;
-  text-shadow: 0 0 15px #0ff, 0 0 30px #00bfff;
+h2 {
+  margin-bottom: 15px;
+}
+
+/* ==================== QUIZ CONTAINER ==================== */
+#quiz {
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  background-color: #222;
   margin-bottom: 20px;
   text-align: center;
 }
 
-#quiz-area {
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-}
-
-#quiz-and-timer {
-  width: 65%;
-}
-
-#money-ladder {
-  width: 30%;
-  background: #111;
-  border: 2px solid #00bfff;
-  border-radius: 12px;
-  padding: 15px;
-  text-align: right;
-  height: 100%;
-}
-
-#money-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-#money-list li {
-  padding: 8px 12px;
-  margin: 4px 0;
-  border-radius: 8px;
-  background: #222;
-  transition: all 0.3s;
-}
-
-#money-list li.current {
-  background: #0ff;
-  color: #000;
-  font-weight: bold;
-  box-shadow: 0 0 15px #0ff, 0 0 30px #00ffff;
-  text-shadow: 0 0 10px #fff;
-}
-
+/* ==================== ANSWER BUTTONS ==================== */
 .answer-btn {
   display: block;
-  width: 70%;
-  margin: 12px auto;
-  padding: 15px;
-  font-size: 18px;
-  color: #fff;
-  background-color: #1e90ff;
+  width: 80%;
+  max-width: 400px;
+  margin: 10px auto;
+  padding: 12px;
+  font-size: 1rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 0 10px #1e90ff;
-  text-shadow: 0 0 5px #fff;
+  background-color: #333;
+  color: #fff;
+  transition: 0.3s;
 }
 
 .answer-btn:hover {
-  box-shadow: 0 0 20px #00ffff, 0 0 30px #00bfff;
+  background-color: #555;
 }
 
-.answer-btn:active {
-  background-color: #0d3f66;
-  box-shadow: 0 0 15px #009acd;
+.answer-btn.correct {
+  background-color: lime !important;
+  color: #000;
 }
 
+.answer-btn.wrong {
+  background-color: red !important;
+  color: #fff;
+}
+
+/* ==================== START BUTTON ==================== */
+#startBtn, #loginBtn {
+  padding: 12px 25px;
+  font-size: 1rem;
+  margin: 10px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: #f0c000;
+  color: #111;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+#startBtn:hover, #loginBtn:hover {
+  background-color: #e6b800;
+}
+
+/* ==================== LIFELINES ==================== */
 #lifelines {
   display: none;
-  margin: 15px 0;
+  margin-bottom: 10px;
 }
 
-#lifelines button {
-  margin: 0 10px;
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #00bfff;
+#fiftyBtn, #hintBtn {
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  margin: 0 5px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  background-color: #444;
   color: #fff;
-  box-shadow: 0 0 10px #00bfff;
+  transition: 0.3s;
 }
 
-#lifelines button:active {
-  background-color: #009acd;
-  box-shadow: 0 0 15px #009acd;
+#fiftyBtn:hover, #hintBtn:hover {
+  background-color: #666;
 }
 
+/* ==================== TIMER ==================== */
 #timer-container {
-  width: 100%;
-  background: #222;
-  height: 25px;
-  position: relative;
-  border-radius: 12px;
-  margin-top: 10px;
   display: none;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 15px;
 }
 
 #timer-bar {
-  height: 100%;
+  height: 15px;
+  background-color: lime;
   width: 100%;
-  background-color: #00ff00;
-  border-radius: 12px;
-  transition: width 0.3s;
+  transition: 1s linear;
+  border-radius: 8px;
 }
 
 #timer-text {
-  font-size: 22px;
-  font-weight: bold;
-  color: yellow;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: -30px;
-  text-shadow: 0 0 10px #ff0;
+  text-align: right;
+  margin-top: 5px;
 }
 
+/* ==================== PROGRESS BAR ==================== */
 #progress-container {
-  width: 100%;
-  margin-top: 10px;
-  background: #333;
-  height: 15px;
-  border-radius: 12px;
   display: none;
+  width: 100%;
+  max-width: 600px;
+  background-color: #333;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  height: 15px;
 }
 
 #progress-bar {
   height: 100%;
   width: 0%;
-  background-color: #0ff;
-  border-radius: 12px;
-  transition: width 0.3s;
-  box-shadow: 0 0 10px #0ff;
+  background-color: #f0c000;
+  border-radius: 10px;
+  transition: 0.5s;
 }
 
-#feedback {
-  font-size: 22px;
-  font-weight: bold;
-  margin: 10px 0;
-  text-shadow: 0 0 10px #0ff;
-}
-
+/* ==================== HINT BOX ==================== */
 #hint-box {
-  font-size: 18px;
-  font-weight: bold;
-  color: #0ff;
-  margin-top: 15px;
   display: none;
-  text-shadow: 0 0 10px #0ff;
+  margin: 10px auto;
+  padding: 10px;
+  background-color: #333;
+  border-radius: 8px;
+  max-width: 500px;
+  text-align: center;
+  font-style: italic;
+  color: #f0c000;
+}
+
+/* ==================== MONEY LADDER ==================== */
+#money-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px auto;
+  max-width: 200px;
+  text-align: center;
+}
+
+#money-list li {
+  padding: 5px 0;
+  border-bottom: 1px solid #444;
+}
+
+#money-list li.current {
+  color: lime;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* ==================== LEADERBOARD ==================== */
+#leaderboard-container {
+  margin-top: 30px;
+  padding: 15px;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  background: #111;
+  color: #fff;
+  width: 250px;
+  text-align: center;
+}
+
+#leaderboard-container h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: #f0c000;
+}
+
+#leaderboard-list {
+  list-style: decimal;
+  padding-left: 20px;
+}
+
+#leaderboard-list li {
+  padding: 5px 0;
+  font-size: 1.1rem;
+  transition: 0.3s;
+}
+
+#leaderboard-list li:hover {
+  color: #f0c000;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 650px) {
+  #quiz, #timer-container, #progress-container {
+    width: 90%;
+  }
+
+  .answer-btn {
+    width: 90%;
+  }
+
+  #money-list, #leaderboard-container {
+    width: 90%;
+  }
 }
