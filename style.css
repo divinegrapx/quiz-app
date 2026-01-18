@@ -1,8 +1,8 @@
 /* Body & container */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #141e30, #243b55);
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
   color: #fff;
   display: flex;
   justify-content: center;
@@ -10,40 +10,51 @@ body {
   min-height: 100vh;
 }
 
+/* Main container */
 .container {
   width: 95%;
   max-width: 500px;
   text-align: center;
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
 /* Titles */
-h1 { font-size: 2rem; margin-bottom: 20px; }
+h1 {
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+  text-shadow: 0 0 15px #00f2fe, 0 0 30px #00f2fe;
+}
 
 /* Category selection */
 select, button {
   padding: 12px 20px;
   margin: 10px 0;
-  border-radius: 8px;
+  border-radius: 12px;
   border: none;
   font-size: 16px;
+  transition: 0.3s;
 }
 
 button {
   font-weight: bold;
   cursor: pointer;
-  transition: 0.3s;
 }
 
-button:hover:not(:disabled) { opacity: 0.9; }
+button:hover:not(:disabled) {
+  opacity: 0.85;
+}
 
 /* Quiz card */
 #quiz-card {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 25px;
   margin-top: 20px;
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-  min-height: 250px;
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+  min-height: 300px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -53,28 +64,28 @@ button:hover:not(:disabled) { opacity: 0.9; }
 /* Progress bar */
 #progress-container {
   background: rgba(255,255,255,0.2);
-  border-radius: 10px;
+  border-radius: 15px;
   width: 100%;
   height: 25px;
   margin-bottom: 10px;
   overflow: hidden;
-  box-shadow: 0 0 5px #00c6ff inset, 0 0 10px #00c6ff inset;
-}
-
-@keyframes progressGlow {
-  0% { background-position: 0% 50%; box-shadow:0 0 5px #00c6ff,0 0 15px #00c6ff;}
-  50% { background-position: 100% 50%; box-shadow:0 0 10px #00c6ff,0 0 25px #00c6ff;}
-  100% { background-position: 0% 50%; box-shadow:0 0 5px #00c6ff,0 0 15px #00c6ff;}
+  box-shadow: 0 0 8px #00f2fe inset, 0 0 15px #00f2fe inset;
 }
 
 #progress-bar {
   height: 100%;
   width: 0%;
-  border-radius: 10px;
-  background: linear-gradient(90deg,#00c6ff,#00ffea,#00c6ff);
+  border-radius: 15px;
+  background: linear-gradient(90deg,#00f2fe,#00c6ff,#00f2fe);
   background-size: 200% 200%;
   animation: progressGlow 2s linear infinite;
   transition: width 0.4s ease-in-out, background 0.5s ease;
+}
+
+@keyframes progressGlow {
+  0% { background-position: 0% 50%; box-shadow:0 0 5px #00f2fe,0 0 15px #00f2fe; }
+  50% { background-position: 100% 50%; box-shadow:0 0 10px #00f2fe,0 0 25px #00f2fe; }
+  100% { background-position: 0% 50%; box-shadow:0 0 5px #00f2fe,0 0 15px #00f2fe; }
 }
 
 /* Timer */
@@ -82,19 +93,20 @@ button:hover:not(:disabled) { opacity: 0.9; }
   width: 100%;
   height: 25px;
   background: rgba(255,255,255,0.2);
-  border-radius: 12px;
+  border-radius: 15px;
   margin-bottom: 15px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 0 5px #ff6a00 inset;
 }
 
 #timer-bar {
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg,#ff0000,#ff4444);
-  border-radius: 12px;
+  background: linear-gradient(90deg,#ff6a00,#ffb347);
+  border-radius: 15px;
   transition: width 1s linear;
-  box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000 inset;
+  box-shadow: 0 0 10px #ff6a00, 0 0 20px #ffb347 inset;
 }
 
 #timer-text {
@@ -106,39 +118,78 @@ button:hover:not(:disabled) { opacity: 0.9; }
   pointer-events: none;
 }
 
-/* Lifeline buttons */
+/* Lifelines */
 #lifelines {
   margin-bottom: 15px;
-  display: flex; justify-content: center; gap: 10px;
+  display: flex; justify-content: center; gap: 12px;
 }
 
 #lifelines button {
-  padding: 10px 18px; font-size: 16px; font-weight: bold;
-  border-radius: 12px; border: none; cursor: pointer;
-  background: #ffaa00; color:#000; display:flex; align-items:center; gap:6px;
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 15px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  color:#fff;
+  display:flex; align-items:center; gap:6px;
   transition: 0.3s;
-  animation: glow 1.5s infinite alternate;
+  box-shadow: 0 0 10px #ff416c, 0 0 20px #ff4b2b inset;
 }
 
-@keyframes glow {
-  0% { box-shadow:0 0 5px #ffcc00,0 0 10px #ffcc00;}
-  50% { box-shadow:0 0 15px #ffcc00,0 0 30px #ffcc00;}
-  100% { box-shadow:0 0 5px #ffcc00,0 0 10px #ffcc00;}
+#lifelines button:hover:not(:disabled) {
+  transform: scale(1.05);
+  opacity: 0.9;
 }
 
-#lifelines button:hover:not(:disabled) { background:#ffcc00; }
-#lifelines button:disabled { opacity:0.5; cursor:not-allowed; animation:none; }
+#lifelines button:disabled { 
+  opacity: 0.5; cursor:not-allowed; box-shadow:none; 
+}
 
 /* Quiz content */
-#quiz h2 { font-size: 1.2rem; margin-bottom: 15px; }
-.option-btn {
-  display: block; width: 90%; max-width: 300px;
-  margin: 10px auto; padding: 12px; font-size:16px;
-  cursor:pointer; border-radius:8px; border:none;
-  background: #ffffff30; color:#fff; transition:0.3s;
+#quiz h2 {
+  font-size: 1.3rem; margin-bottom: 15px;
+  text-shadow: 0 0 10px #00f2fe;
 }
-.option-btn:hover:not(:disabled) { background:#00aaff60; }
-.option-btn:disabled { cursor:not-allowed; opacity:0.8; }
 
-#result { font-size:1.2rem; margin-top:10px; font-weight:bold; min-height:24px; }
-#nextBtn { margin-top:15px; }
+.option-btn {
+  display: block; width: 90%; max-width: 320px;
+  margin: 10px auto; padding: 14px;
+  font-size:16px; font-weight:600;
+  cursor:pointer; border-radius:12px; border:none;
+  background: linear-gradient(135deg,#00f2fe,#00c6ff);
+  color:#fff; transition:0.3s, transform 0.2s;
+  box-shadow: 0 0 5px #00f2fe,0 0 15px #00c6ff inset;
+}
+
+.option-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  background: linear-gradient(135deg,#00c6ff,#00f2fe);
+}
+
+.option-btn:disabled {
+  cursor:not-allowed;
+  opacity:0.7;
+}
+
+#result {
+  font-size:1.2rem; margin-top:12px; font-weight:bold; min-height:24px;
+  text-shadow: 0 0 10px #fff;
+}
+
+#nextBtn {
+  margin-top:15px;
+  padding: 10px 20px;
+  font-size:16px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  background: linear-gradient(135deg,#f7971e,#ffd200);
+  color:#000;
+  font-weight:bold;
+  box-shadow:0 0 10px #ffd200 inset,0 0 20px #f7971e;
+  transition: 0.3s, transform 0.2s;
+}
+
+#nextBtn:hover { transform: scale(1.05); }
