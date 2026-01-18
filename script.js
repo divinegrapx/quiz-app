@@ -1,8 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-/* ===============================
-   DOM
-================================ */
 const quizDiv = document.getElementById("quiz");
 const startBtn = document.getElementById("startBtn");
 const lifelines = document.getElementById("lifelines");
@@ -16,9 +13,6 @@ const questionCount = document.getElementById("questionCount");
 const fiftyBtn = document.getElementById("fiftyBtn");
 const hintBtn = document.getElementById("hintBtn");
 
-/* ===============================
-   STATE
-================================ */
 let questions = [];
 let current = 0;
 let score = 0;
@@ -27,32 +21,25 @@ let timeLeft = 20;
 let fiftyUsed = false;
 let hintUsed = false;
 
-/* ===============================
-   FALLBACK (ALWAYS WORKS)
-================================ */
 const fallbackQuestions = [
   {
     question: "What color is the sky?",
     correctAnswer: "Blue",
-    incorrectAnswers: ["Red","Green","Yellow"]
+    incorrectAnswers: ["Red","Green","Yellow"],
+    hint: "It's the same color as the ocean on a clear day."
   },
   {
     question: "How many days are in a week?",
     correctAnswer: "7",
-    incorrectAnswers: ["5","6","8"]
+    incorrectAnswers: ["5","6","8"],
+    hint: "Think about Monday to Sunday."
   }
 ];
 
-/* ===============================
-   EVENTS
-================================ */
 startBtn.addEventListener("click", startQuiz);
 fiftyBtn.addEventListener("click", useFifty);
 hintBtn.addEventListener("click", useHint);
 
-/* ===============================
-   START QUIZ
-================================ */
 async function startQuiz() {
   startBtn.disabled = true;
   lifelines.style.display = "flex";
@@ -72,6 +59,13 @@ async function startQuiz() {
     if (!res.ok) throw "API error";
     questions = await res.json();
     if (!questions.length) throw "Empty";
+    
+    // Add generic hint if missing
+    questions = questions.map(q => ({
+      ...q,
+      hint: "Think carefully about the answer."
+    }));
+    
   } catch {
     questions = fallbackQuestions;
   }
@@ -79,19 +73,15 @@ async function startQuiz() {
   showQuestion();
 }
 
-/* ===============================
-   SHOW QUESTION
-================================ */
 function showQuestion() {
   clearInterval(timer);
   timeLeft = 20;
-  updateTimer(); // ✅ ensure numbers show immediately
+  updateTimer();
 
   const q = questions[current];
-  const answers = [...q.incorrectAnswers, q.correctAnswer]
-    .sort(() => Math.random() - 0.5);
+  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
 
-  quizDiv.innerHTML = `<h2>${q.question}</h2>`;
+  quizDiv.innerHTML = `<h2>${q.question}</h2><div id="feedback"></div>`;
 
   answers.forEach(a => {
     const btn = document.createElement("button");
@@ -105,10 +95,8 @@ function showQuestion() {
   startTimer();
 }
 
-/* ===============================
-   TIMER
-================================ */
 function startTimer() {
+  timerText.style.display = "block";
   timer = setInterval(() => {
     timeLeft--;
     updateTimer();
@@ -120,19 +108,15 @@ function startTimer() {
 }
 
 function updateTimer() {
-  // ✅ Update the visible countdown number
   timerText.textContent = `${timeLeft}s`;
-
-  // Update the progress bar
   timerBar.style.width = `${(timeLeft / 20) * 100}%`;
 }
 
-/* ===============================
-   ANSWER
-================================ */
 function checkAnswer(answer) {
   clearInterval(timer);
   const correct = questions[current].correctAnswer;
+
+  const feedbackDiv = document.getElementById("feedback");
 
   document.querySelectorAll(".answer-btn").forEach(b => {
     b.disabled = true;
@@ -140,17 +124,24 @@ function checkAnswer(answer) {
     if (b.textContent === answer && answer !== correct) b.classList.add("wrong");
   });
 
-  if (answer === correct) score++;
-  setTimeout(nextQuestion, 1200);
+  if (answer === correct) {
+    score++;
+    feedbackDiv.textContent = "✅ Correct!";
+    feedbackDiv.style.color = "lime";
+  } else {
+    feedbackDiv.textContent = "❌ Wrong!";
+    feedbackDiv.style.color = "red";
+  }
+
+  // Show the feedback for 1 second before moving to next question
+  setTimeout(nextQuestion, 1000);
 }
 
-/* ===============================
-   NEXT
-================================ */
 function nextQuestion() {
   current++;
   if (current >= questions.length) {
-    quizDiv.innerHTML = `<h2>Finished</h2><p>${score}/${questions.length}</p>`;
+    quizDiv.innerHTML = `<h2>Finished</h2><p>Score: ${score}/${questions.length}</p>
+      <button onclick="location.reload()">Restart</button>`;
     startBtn.disabled = false;
     lifelines.style.display = "none";
     progressBar.style.width = "100%";
@@ -159,9 +150,6 @@ function nextQuestion() {
   showQuestion();
 }
 
-/* ===============================
-   LIFELINES
-================================ */
 function useFifty() {
   if (fiftyUsed) return;
   fiftyUsed = true;
@@ -180,7 +168,9 @@ function useHint() {
   if (hintUsed) return;
   hintUsed = true;
   hintBtn.disabled = true;
-  alert("Think simple 🙂");
+
+  const q = questions[current];
+  alert("💡 Hint: " + (q.hint || "Think carefully about the answer."));
 }
 
 });
