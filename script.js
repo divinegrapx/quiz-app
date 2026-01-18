@@ -1,4 +1,4 @@
-// ---------------- FIREBASE CONFIG ----------------
+ // ---------------- FIREBASE CONFIG ----------------
 const firebaseConfig = {
   apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
   authDomain: "neon-quiz-app.firebaseapp.com",
@@ -35,10 +35,13 @@ const quizTitle = document.getElementById("quiz-title");
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
 
-// Hint box
-const hintBox = document.createElement("div");
-hintBox.id = "hint-box";
-quizDiv.parentNode.insertBefore(hintBox, quizDiv.nextSibling);
+// Create hint box
+let hintBox = document.getElementById("hint-box");
+if(!hintBox){
+    hintBox = document.createElement("div");
+    hintBox.id = "hint-box";
+    quizDiv.parentNode.insertBefore(hintBox, quizDiv.nextSibling);
+}
 
 // ---------------- GLOBALS ----------------
 let questions = [], current = 0, score = 0, timer, timeLeft = 20;
@@ -65,7 +68,7 @@ loginBtn.addEventListener("click", () => {
     })
     .catch(error => {
       console.error("Login error:", error);
-      alert("Login failed! Check console.");
+      alert("Login failed! Make sure your domain is authorized in Firebase.");
     });
 });
 
@@ -211,6 +214,7 @@ function nextQuestion() {
 
     const user = auth.currentUser;
     saveScore(user, score);
+
     return;
   }
   showQuestion();
