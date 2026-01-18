@@ -1,212 +1,275 @@
-/* ==================== GENERAL ==================== */
+/* ================= BODY & CONTAINER ================= */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #111;
-  color: #fff;
-  text-align: center;
   margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  width: 95%;
+  max-width: 500px;
+  text-align: center;
   padding: 20px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
-h1, h2 {
+h1 {
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+  text-shadow: 0 0 15px #00f2fe, 0 0 30px #00f2fe;
+}
+
+/* ================= SELECT & BUTTONS ================= */
+select, button {
+  padding: 12px 20px;
   margin: 10px 0;
-}
-
-/* ==================== QUIZ CONTROLS ==================== */
-#quiz-controls {
-  margin: 15px 0;
-}
-
-#categorySelect, #questionCount, #startBtn, #loginBtn {
-  margin: 5px;
-  padding: 5px 10px;
+  border-radius: 12px;
+  border: none;
   font-size: 16px;
+  transition: 0.3s;
 }
 
-/* ==================== LIFELINES ==================== */
-#lifelines {
-  margin: 10px 0;
-}
-
-#lifelines button {
-  padding: 5px 10px;
-  margin: 0 5px;
-  background-color: #222;
-  color: #fff;
-  border: 1px solid #555;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: 0.2s;
-}
-
-#lifelines button:hover:enabled {
-  background-color: #444;
-}
-
-/* ==================== QUIZ QUESTIONS ==================== */
-#quiz h2 {
-  font-size: 20px;
-  margin-bottom: 15px;
-}
-
-.answer-btn {
-  display: block;
-  margin: 8px auto;
-  padding: 10px 20px;
-  width: 200px;
-  background-color: #222;
-  color: #fff;
-  border: 1px solid #555;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.answer-btn:hover:enabled {
-  background-color: #444;
-}
-
-.answer-btn.correct {
-  background-color: green;
-}
-
-.answer-btn.wrong {
-  background-color: red;
-}
-
-#feedback {
-  margin: 10px 0;
+button {
   font-weight: bold;
+  cursor: pointer;
 }
 
-/* ==================== TIMER ==================== */
-#timer-container {
-  margin: 10px 0;
-  width: 300px;
-  margin-left: auto;
-  margin-right: auto;
+button:hover:not(:disabled) {
+  opacity: 0.85;
 }
 
-#timer-bar {
-  height: 15px;
-  background-color: #444;
-  border-radius: 5px;
-  overflow: hidden;
-  margin-bottom: 5px;
+/* ================= QUIZ CARD ================= */
+#quiz {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 25px;
+  margin-top: 20px;
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
 
-#timer-text {
-  font-size: 16px;
+#quiz h2 {
+  font-size: 1.3rem; 
+  margin-bottom: 15px;
+  text-shadow: 0 0 10px #00f2fe;
 }
 
-/* ==================== PROGRESS BAR ==================== */
+.option-btn {
+  display: block; width: 90%; max-width: 320px;
+  margin: 10px auto; padding: 14px;
+  font-size:16px; font-weight:600;
+  cursor:pointer; border-radius:12px; border:none;
+  background: linear-gradient(135deg,#00f2fe,#00c6ff);
+  color:#fff; transition:0.3s, transform 0.2s;
+  box-shadow: 0 0 5px #00f2fe,0 0 15px #00c6ff inset;
+}
+
+.option-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  background: linear-gradient(135deg,#00c6ff,#00f2fe);
+}
+
+.option-btn:disabled {
+  cursor:not-allowed;
+  opacity:0.7;
+}
+
+/* Feedback */
+#feedback {
+  margin-top: 12px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  min-height: 24px;
+  text-shadow: 0 0 10px #fff;
+}
+
+/* ================= PROGRESS BAR ================= */
 #progress-container {
-  width: 300px;
-  height: 10px;
-  background-color: #222;
-  border-radius: 5px;
-  margin: 10px auto;
+  background: rgba(255,255,255,0.2);
+  border-radius: 15px;
+  width: 100%;
+  height: 25px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 8px #00f2fe inset, 0 0 15px #00f2fe inset;
 }
 
 #progress-bar {
-  width: 0%;
   height: 100%;
-  background-color: #0f0;
-  border-radius: 5px;
+  width: 0%;
+  border-radius: 15px;
+  background: linear-gradient(90deg,#00f2fe,#00c6ff,#00f2fe);
+  background-size: 200% 200%;
+  animation: progressGlow 2s linear infinite;
+  transition: width 0.4s ease-in-out, background 0.5s ease;
+}
+
+@keyframes progressGlow {
+  0% { background-position: 0% 50%; box-shadow:0 0 5px #00f2fe,0 0 15px #00f2fe; }
+  50% { background-position: 100% 50%; box-shadow:0 0 10px #00f2fe,0 0 25px #00f2fe; }
+  100% { background-position: 0% 50%; box-shadow:0 0 5px #00f2fe,0 0 15px #00f2fe; }
+}
+
+/* ================= TIMER ================= */
+#timer-container {
+  width: 100%;
+  height: 25px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 15px;
+  margin-bottom: 15px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 5px #ff6a00 inset;
+}
+
+#timer-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg,#ff6a00,#ffb347);
+  border-radius: 15px;
+  transition: width 1s linear;
+  box-shadow: 0 0 10px #ff6a00, 0 0 20px #ffb347 inset;
+}
+
+#timer-text {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  margin: 0; font-weight: bold;
+  color: #fff; text-shadow:0 0 5px #000;
+  pointer-events: none;
+}
+
+/* ================= LIFELINES ================= */
+#lifelines {
+  margin-bottom: 15px;
+  display: flex; justify-content: center; gap: 12px;
+}
+
+#lifelines button {
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 15px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  color:#fff;
+  display:flex; align-items:center; gap:6px;
   transition: 0.3s;
+  box-shadow: 0 0 10px #ff416c, 0 0 20px #ff4b2b inset;
 }
 
-/* ==================== HINT BOX ==================== */
-#hint-box {
-  background-color: #222;
-  color: #ff0;
-  padding: 8px 10px;
-  margin: 10px auto;
-  width: fit-content;
-  border-radius: 5px;
+#lifelines button:hover:not(:disabled) {
+  transform: scale(1.05);
+  opacity: 0.9;
 }
 
-/* ==================== MONEY LADDER ==================== */
+#lifelines button:disabled { 
+  opacity: 0.5; cursor:not-allowed; box-shadow:none; 
+}
+
+/* ================= MONEY LADDER ================= */
 #money-list {
-  list-style: none;
-  padding: 0;
-  width: 120px;
-  margin: 20px auto;
+  list-style:none;
+  padding:0;
+  margin: 20px 0;
+  display:flex;
+  flex-direction: column-reverse;
+  gap:4px;
 }
 
 #money-list li {
-  padding: 5px 10px;
-  margin-bottom: 3px;
-  background-color: #222;
-  border-radius: 5px;
-  transition: 0.3s;
+  padding:6px 10px;
+  border-radius:8px;
+  background: rgba(255,255,255,0.05);
+  text-align:right;
+  box-shadow:0 0 5px #00f2fe inset;
+  transition:0.3s, transform 0.2s;
 }
 
 #money-list li.current {
-  background-color: #f0c000;
-  color: #000;
-  font-weight: bold;
+  background: linear-gradient(135deg,#00f2fe,#00c6ff);
+  color:#fff;
+  font-weight:bold;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #00c6ff,0 0 20px #00f2fe inset;
 }
 
-/* ==================== LEADERBOARD ==================== */
+/* ================= LEADERBOARD ================= */
 #leaderboard-container {
-  margin-top: 30px;
+  margin-top: 20px;
+  background: rgba(255,255,255,0.05);
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow:0 0 10px #00f2fe inset;
+}
+
+#leaderboard-container h2 {
+  margin-bottom: 10px;
+  text-shadow:0 0 10px #00f2fe;
 }
 
 #leaderboard-list {
-  list-style: none;
-  padding: 0;
-  max-width: 300px;
-  margin: 10px auto;
+  list-style:none;
+  padding:0;
+  margin:0;
 }
 
 #leaderboard-list li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 5px;
-  border-radius: 5px;
-  background-color: #222;
-  transition: 0.3s;
-}
-
-#leaderboard-list li:hover {
-  background-color: #333;
-  cursor: pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:6px 10px;
+  border-radius:8px;
+  background: rgba(255,255,255,0.05);
+  margin-bottom:6px;
+  transition:0.3s;
 }
 
 #leaderboard-list li img {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #fff;
+  border-radius:50%;
+  width:30px;
+  height:30px;
+  object-fit:cover;
+  border:1px solid #fff;
 }
 
-#leaderboard-list li span {
-  flex: 1;
-  text-align: left;
+#leaderboard-list li:first-child {
+  background: linear-gradient(135deg,#ffd200,#f7971e);
+  font-weight:bold;
 }
 
-/* Highlight current user */
-#leaderboard-list li.current-user {
-  background-color: #333;
-  color: #f0c000;
-  font-weight: bold;
+/* ================= BUTTON STYLES ================= */
+#startBtn {
+  background: linear-gradient(135deg,#00f2fe,#00c6ff);
+  color:#fff;
+  font-weight:bold;
+  border-radius:12px;
+  box-shadow:0 0 10px #00c6ff inset;
+  transition:0.3s, transform 0.2s;
 }
 
-/* Crown for top user */
-#leaderboard-list li span::before {
-  content: "";
+#startBtn:hover:not(:disabled) {
+  transform: scale(1.05);
 }
 
-#leaderboard-list li:first-child span::before {
-  content: "👑 ";
+/* ================= CORRECT & WRONG ================= */
+.correct {
+  background: linear-gradient(135deg,#28a745,#85e085)!important;
 }
 
-/* ==================== BUTTON DISABLED ==================== */
-button:disabled {
-  background-color: #555;
-  cursor: not-allowed;
-  color: #aaa;
+.wrong {
+  background: linear-gradient(135deg,#dc3545,#ff7f7f)!important;
 }
