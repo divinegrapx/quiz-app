@@ -1,17 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Google Sheet Quiz App</title>
+  <title>Quiz App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="quiz-container">
-    <h1>Quiz App</h1>
-    <div id="quiz"></div>
-    <button id="nextBtn" onclick="nextQuestion()">Next</button>
-    <p id="score"></p>
-  </div>
-<script src="script.js"></script>
+
+  <h2>Select Quiz Category</h2>
+
+  <select id="categorySelect">
+    <option value="science">Science</option>
+    <option value="history">History</option>
+    <option value="geography">Geography</option>
+    <option value="music">Music</option>
+    <option value="film_and_tv">Film & TV</option>
+    <option value="sports">Sports</option>
+    <option value="food_and_drink">Food & Drink</option>
+    <option value="general_knowledge">General Knowledge</option>
+  </select>
+
+  <br><br>
+  <button onclick="startQuiz()">Start Quiz</button>
+
+  <hr>
+
+  <div id="quiz"></div>
+
+  <script src="script.js"></script>
 </body>
 </html>
