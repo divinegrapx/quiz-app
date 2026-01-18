@@ -29,7 +29,7 @@ body {
 }
 
 .answer-btn:active {
-  background-color: #009acd; /* slightly darker blue when pressed */
+  background-color: #009acd; /* darker blue when pressed */
 }
 
 /* Lifelines */
@@ -75,4 +75,11 @@ body {
   height: 100%;
   width: 0%;
   background-color: #0ff;
+}
+
+/* Feedback message */
+#feedback {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 10px 0;
 }
