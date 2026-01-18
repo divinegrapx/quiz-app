@@ -39,8 +39,6 @@ async function createUserProfile(user) {
 
 // ==================== DOM CONTENT LOADED ====================
 document.addEventListener("DOMContentLoaded", () => {
-
-  const loginBtn = document.getElementById("loginBtn");
   const quizDiv = document.getElementById("quiz");
   const startBtn = document.getElementById("startBtn");
   const lifelines = document.getElementById("lifelines");
@@ -57,10 +55,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const moneyList = document.getElementById("money-list");
   const correctSound = document.getElementById("correct-sound");
   const wrongSound = document.getElementById("wrong-sound");
-  const leaderboardList = document.getElementById("leaderboard-list");
   const quizTitle = document.getElementById("quiz-title");
+  const loginBtn = document.getElementById("loginBtn");
+  const leaderboardList = document.getElementById("leaderboard-list");
 
-  let questions = [], current = 0, score = 0, timer, timeLeft = 20;
+  let questions = [], current = 0, score = 0, timer, timeLeft = 25;
   let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
 
   const fallbackQuestions = [
@@ -71,22 +70,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const moneyLevels = ["$100","$200","$300","$500","$1,000","$2,000","$4,000","$8,000","$16,000","$32,000"];
 
-  // ===== LOGIN HANDLER =====
-  if (loginBtn) {
-    loginBtn.addEventListener("click", async () => {
-      const result = await signInWithPopup(auth, provider);
-      createUserProfile(result.user);
-      alert("Logged in as " + result.user.displayName);
-    });
-  }
+  // ===== LOGIN =====
+  loginBtn.addEventListener("click", async () => {
+    const result = await signInWithPopup(auth, provider);
+    createUserProfile(result.user);
+    alert("Logged in as " + result.user.displayName);
+    loginBtn.style.display = "none";
+  });
 
   // ===== LEADERBOARD =====
   async function loadLeaderboard() {
-    const q = query(
-      collection(db, "users"),
-      orderBy("bestScore", "desc"),
-      limit(10)
-    );
+    const q = query(collection(db, "users"), orderBy("bestScore", "desc"), limit(10));
     onSnapshot(q, (snapshot) => {
       leaderboardList.innerHTML = "";
       let first = true;
@@ -101,7 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const img = document.createElement("img");
         img.src = user.avatar || "https://via.placeholder.com/30?text=?";
-        img.alt = user.name;
         img.width = 30;
         img.height = 30;
         img.style.borderRadius = "50%";
@@ -128,14 +121,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
-
   loadLeaderboard();
 
   // ===== MONEY LADDER =====
   function buildMoneyLadder() {
     moneyList.innerHTML = "";
     const levelsToUse = moneyLevels.slice(0, questionCount.value);
-    levelsToUse.reverse().forEach((amount) => {
+    levelsToUse.reverse().forEach(amount => {
       const li = document.createElement("li");
       li.textContent = amount;
       moneyList.appendChild(li);
@@ -164,10 +156,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     buildMoneyLadder();
 
-    // Update quiz title with category
-    quizTitle.textContent = `🏆 Quiz — ${categorySelect.value.charAt(0).toUpperCase() + categorySelect.value.slice(1)}`;
+    // Update title with category
+    quizTitle.textContent = `🎯 Neon Quiz — ${categorySelect.value.replace(/_/g," ").replace(/\b\w/g, l => l.toUpperCase())}`;
 
-    // Fetch real questions or use fallback
+    // Fetch questions from Trivia API
     try {
       const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`);
       if (!res.ok) throw "API error";
@@ -190,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== SHOW QUESTION =====
   function showQuestion() {
     clearInterval(timer);
-    timeLeft = 20;
+    timeLeft = 25;
     updateTimer();
     hintBox.style.display = "none";
 
@@ -226,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateTimer() {
     timerText.textContent = `${timeLeft}s`;
-    timerBar.style.width = `${(timeLeft / 20) * 100}%`;
+    timerBar.style.width = `${(timeLeft / 25) * 100}%`;
   }
 
   // ===== CHECK ANSWER =====
@@ -270,6 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
       progressBar.style.width = "100%";
       hintBox.style.display = "none";
 
+      // Update Firebase score
       if (auth.currentUser) {
         const userRef = doc(db, "users", auth.currentUser.uid);
         const snap = await getDoc(userRef);
@@ -323,4 +316,5 @@ document.addEventListener("DOMContentLoaded", () => {
     if (lis[idx]) lis[idx].classList.add("current");
   }
 
+  buildMoneyLadder();
 });
