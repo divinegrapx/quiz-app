@@ -6,6 +6,7 @@ let hintUsed = false;
 let timer;
 let timeLeft = 25;
 
+// Start Quiz
 function startQuiz() {
   const category = document.getElementById("categorySelect").value;
   const API_URL = `https://the-trivia-api.com/api/questions?categories=${category}&limit=10`;
@@ -31,6 +32,7 @@ function startQuiz() {
     });
 }
 
+// Initialize Quiz
 function initializeQuiz() {
   currentQuestion = 0;
   score = 0;
@@ -45,6 +47,7 @@ function initializeQuiz() {
   updateProgress();
 }
 
+// Show current question
 function showQuestion() {
   clearInterval(timer);
   timeLeft = 25;
@@ -85,6 +88,7 @@ function showQuestion() {
   startTimer();
 }
 
+// Check answer
 function checkAnswer(selectedIndex, clickedButton) {
   const correctIndex = questions[currentQuestion].answer;
   const buttons = document.querySelectorAll(".option-btn");
@@ -92,13 +96,9 @@ function checkAnswer(selectedIndex, clickedButton) {
   const correctSound = document.getElementById("correct-sound");
   const wrongSound = document.getElementById("wrong-sound");
 
-  // Disable all answer buttons immediately
   buttons.forEach(btn => btn.disabled = true);
-
-  // Disable lifelines after answering
   document.getElementById("fiftyBtn").disabled = true;
   document.getElementById("hintBtn").disabled = true;
-
   document.getElementById("nextBtn").disabled = false;
   clearInterval(timer);
 
@@ -119,7 +119,6 @@ function checkAnswer(selectedIndex, clickedButton) {
     result.style.color = "#ff416c";
     result.style.textShadow = "0 0 10px #ff416c";
 
-    // Highlight correct answer with green gradient
     buttons[correctIndex].style.background = "linear-gradient(135deg, #00ff6a, #00f2fe)";
     buttons[correctIndex].style.color = "#000";
     buttons[correctIndex].style.boxShadow = "0 0 10px #00ff6a, 0 0 20px #00f2fe inset";
@@ -128,6 +127,7 @@ function checkAnswer(selectedIndex, clickedButton) {
   }
 }
 
+// Next question
 function nextQuestion() {
   currentQuestion++;
   if (currentQuestion < questions.length) {
@@ -142,6 +142,7 @@ function nextQuestion() {
   }
 }
 
+// Restart quiz
 function restartQuiz() {
   document.getElementById("categoryDiv").style.display = "block";
   document.getElementById("quiz").innerHTML = "";
@@ -154,20 +155,20 @@ function restartQuiz() {
   updateProgress(true);
 }
 
+// Update progress bar
 function updateProgress(finish = false) {
   const progress = document.getElementById("progress-bar");
   if (!progress) return;
   let percent = finish ? 100 : (currentQuestion / questions.length) * 100;
   progress.style.width = percent + "%";
-
   let color = "#00c6ff";
   if (percent >= 75) color = "#ffd700";
   else if (percent >= 50) color = "#00ff00";
   else if (percent >= 25) color = "#ff8c00";
-
   progress.style.background = `linear-gradient(90deg,${color},#ffffff,${color})`;
 }
 
+// Timer
 function startTimer() {
   const timerBar = document.getElementById("timer-bar");
   const timerText = document.getElementById("timer-text");
@@ -179,7 +180,6 @@ function startTimer() {
     timerBar.style.width = (timeLeft / 25 * 100) + "%";
     timerText.textContent = timeLeft + "s";
 
-    // Glow animation when <10s
     if (timeLeft <= 10) {
       timerBar.style.boxShadow = `0 0 20px #ff416c, 0 0 40px #ff4b2b inset`;
       timerBar.style.background = "linear-gradient(135deg,#ff416c,#ff4b2b)";
@@ -202,6 +202,7 @@ function startTimer() {
   }, 1000);
 }
 
+// 50:50 lifeline
 function useFifty() {
   if (fiftyUsed) return;
   const correctIndex = questions[currentQuestion].answer;
@@ -219,6 +220,7 @@ function useFifty() {
   document.getElementById("fiftyBtn").disabled = true;
 }
 
+// Hint lifeline
 function useHint() {
   if (hintUsed) return;
   const correctIndex = questions[currentQuestion].answer;
