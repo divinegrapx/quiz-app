@@ -1,7 +1,7 @@
-/* General body and container */
+/* Body & container */
 body {
   margin: 0;
-  font-family: 'Arial', sans-serif;
+  font-family: Arial, sans-serif;
   background: linear-gradient(135deg, #141e30, #243b55);
   color: #fff;
   display: flex;
@@ -17,10 +17,7 @@ body {
 }
 
 /* Titles */
-h1 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
+h1 { font-size: 2rem; margin-bottom: 20px; }
 
 /* Category selection */
 select, button {
@@ -32,16 +29,12 @@ select, button {
 }
 
 button {
-  background: #00c6ff;
-  color: #000;
   font-weight: bold;
   cursor: pointer;
   transition: 0.3s;
 }
 
-button:hover {
-  background: #00aaff;
-}
+button:hover:not(:disabled) { opacity: 0.9; }
 
 /* Quiz card */
 #quiz-card {
@@ -62,58 +55,90 @@ button:hover {
   background: rgba(255,255,255,0.2);
   border-radius: 10px;
   width: 100%;
-  height: 20px;
-  margin-bottom: 20px;
+  height: 25px;
+  margin-bottom: 10px;
   overflow: hidden;
+  box-shadow: 0 0 5px #00c6ff inset, 0 0 10px #00c6ff inset;
+}
+
+@keyframes progressGlow {
+  0% { background-position: 0% 50%; box-shadow:0 0 5px #00c6ff,0 0 15px #00c6ff;}
+  50% { background-position: 100% 50%; box-shadow:0 0 10px #00c6ff,0 0 25px #00c6ff;}
+  100% { background-position: 0% 50%; box-shadow:0 0 5px #00c6ff,0 0 15px #00c6ff;}
 }
 
 #progress-bar {
-  background: #00c6ff;
   height: 100%;
   width: 0%;
   border-radius: 10px;
-  transition: width 0.4s ease-in-out;
+  background: linear-gradient(90deg,#00c6ff,#00ffea,#00c6ff);
+  background-size: 200% 200%;
+  animation: progressGlow 2s linear infinite;
+  transition: width 0.4s ease-in-out, background 0.5s ease;
 }
+
+/* Timer */
+#timer-container {
+  width: 100%;
+  height: 25px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 12px;
+  margin-bottom: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+#timer-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg,#ff0000,#ff4444);
+  border-radius: 12px;
+  transition: width 1s linear;
+  box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000 inset;
+}
+
+#timer-text {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  margin: 0; font-weight: bold;
+  color: #fff; text-shadow:0 0 5px #000;
+  pointer-events: none;
+}
+
+/* Lifeline buttons */
+#lifelines {
+  margin-bottom: 15px;
+  display: flex; justify-content: center; gap: 10px;
+}
+
+#lifelines button {
+  padding: 10px 18px; font-size: 16px; font-weight: bold;
+  border-radius: 12px; border: none; cursor: pointer;
+  background: #ffaa00; color:#000; display:flex; align-items:center; gap:6px;
+  transition: 0.3s;
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  0% { box-shadow:0 0 5px #ffcc00,0 0 10px #ffcc00;}
+  50% { box-shadow:0 0 15px #ffcc00,0 0 30px #ffcc00;}
+  100% { box-shadow:0 0 5px #ffcc00,0 0 10px #ffcc00;}
+}
+
+#lifelines button:hover:not(:disabled) { background:#ffcc00; }
+#lifelines button:disabled { opacity:0.5; cursor:not-allowed; animation:none; }
 
 /* Quiz content */
-#quiz h2 {
-  font-size: 1.2rem;
-  margin-bottom: 15px;
-}
-
+#quiz h2 { font-size: 1.2rem; margin-bottom: 15px; }
 .option-btn {
-  display: block;
-  width: 90%;
-  max-width: 300px;
-  margin: 10px auto;
-  padding: 12px;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 8px;
-  border: none;
-  background: #ffffff30;
-  color: #fff;
-  transition: 0.3s;
+  display: block; width: 90%; max-width: 300px;
+  margin: 10px auto; padding: 12px; font-size:16px;
+  cursor:pointer; border-radius:8px; border:none;
+  background: #ffffff30; color:#fff; transition:0.3s;
 }
+.option-btn:hover:not(:disabled) { background:#00aaff60; }
+.option-btn:disabled { cursor:not-allowed; opacity:0.8; }
 
-.option-btn:hover:not(:disabled) {
-  background: #00aaff60;
-}
-
-.option-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.8;
-}
-
-/* Result text */
-#result {
-  font-size: 1.2rem;
-  margin-top: 10px;
-  font-weight: bold;
-  min-height: 24px;
-}
-
-/* Next button */
-#nextBtn {
-  margin-top: 15px;
-}
+#result { font-size:1.2rem; margin-top:10px; font-weight:bold; min-height:24px; }
+#nextBtn { margin-top:15px; }
