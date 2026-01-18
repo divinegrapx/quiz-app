@@ -18,7 +18,13 @@
 
   <!-- LOGIN -->
   <div id="loginDiv">
-    <button id="loginBtn">Login with Google</button>
+    <button id="googleBtn">Login with Google</button>
+    <button id="facebookBtn">Login with Facebook</button>
+    <h3>Or use email:</h3>
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passInput" placeholder="Password">
+    <button id="emailRegisterBtn">Register</button>
+    <button id="emailLoginBtn">Login</button>
   </div>
 
   <!-- CATEGORY SELECTION -->
@@ -47,28 +53,28 @@
     <button id="startBtn">Start Quiz</button>
   </div>
 
+  <!-- QUIZ AREA -->
+  <div class="quiz-area">
+    <div id="quiz"></div>
+
+    <!-- MONEY LADDER -->
+    <ul id="money-list"></ul>
+  </div>
+
   <!-- LIFELINES -->
   <div id="lifelines" style="display:none;">
     <button id="fiftyBtn">50:50 ✂️</button>
     <button id="hintBtn">💡 Hint</button>
   </div>
 
-  <!-- PROGRESS BAR -->
+  <!-- TIMER -->
   <div id="progress-container" style="display:none;">
     <div id="progress-bar"></div>
   </div>
-
-  <!-- TIMER -->
   <div id="timer-container" style="display:none;">
     <div id="timer-bar"></div>
     <span id="timer-text">25s</span>
   </div>
-
-  <!-- QUIZ -->
-  <div id="quiz"></div>
-
-  <!-- MONEY LADDER -->
-  <ul id="money-list" style="display:flex; flex-direction:column-reverse; gap:5px;"></ul>
 
   <!-- LEADERBOARD -->
   <h2>🏆 Leaderboard</h2>
