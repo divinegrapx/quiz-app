@@ -9,12 +9,11 @@ const firebaseConfig = {
   measurementId: "G-7LKHH1EHQW"
 };
 
-// Initialize Firebase (compat)
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ---------------- DOM ELEMENTS ----------------
+// ---------------- DOM ----------------
 const loginBtn = document.getElementById("loginBtn");
 const loginDiv = document.getElementById("loginDiv");
 const categoryDiv = document.getElementById("categoryDiv");
@@ -40,13 +39,6 @@ const hintBox = document.getElementById("hint-box");
 let questions = [], current = 0, score = 0, timer, timeLeft = 20;
 let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
 
-// ---------------- FALLBACK QUESTIONS ----------------
-const fallbackQuestions = [
-  { question: "What color is the sky?", correctAnswer: "Blue", incorrectAnswers: ["Red","Green","Yellow"], hint: "It's the same color as the ocean." },
-  { question: "How many days are in a week?", correctAnswer: "7", incorrectAnswers: ["5","6","8"], hint: "Think Monday to Sunday." },
-  { question: "Which planet is known as the Red Planet?", correctAnswer: "Mars", incorrectAnswers: ["Venus","Jupiter","Saturn"], hint: "Named after Roman god of war." }
-];
-
 // ---------------- LOGIN ----------------
 loginBtn.addEventListener("click", () => {
   const provider = new firebase.auth.GoogleAuthProvider();
@@ -62,24 +54,6 @@ loginBtn.addEventListener("click", () => {
       alert("Login failed! Check console.");
     });
 });
-
-// ---------------- MONEY LADDER ----------------
-function buildMoneyLadder() {
-  moneyList.innerHTML = "";
-  const totalQuestions = parseInt(questionCount.value);
-  for (let i = totalQuestions; i >= 1; i--) {
-    const li = document.createElement("li");
-    li.textContent = `$${i * 100}`; // dynamic amount
-    moneyList.appendChild(li);
-  }
-}
-
-function updateMoneyLadder() {
-  const lis = moneyList.querySelectorAll("li");
-  lis.forEach(li => li.classList.remove("current"));
-  const idx = moneyList.children.length - ladderLevel;
-  if (lis[idx]) lis[idx].classList.add("current");
-}
 
 // ---------------- START QUIZ ----------------
 startBtn.addEventListener("click", startQuiz);
@@ -106,6 +80,7 @@ async function startQuiz() {
   progressBar.style.width = "0%";
 
   buildMoneyLadder();
+
   quizTitle.textContent = `🎯 ${categorySelect.value.replace(/_/g," ").toUpperCase()} — ${questionCount.value} Questions`;
 
   try {
@@ -127,23 +102,48 @@ async function startQuiz() {
   showQuestion();
 }
 
+// ---------------- MONEY LADDER ----------------
+function buildMoneyLadder() {
+  moneyList.innerHTML = "";
+  const total = parseInt(questionCount.value);
+  for (let i = total; i >= 1; i--) {
+    const li = document.createElement("li");
+    li.textContent = `$${i*100}`;
+    moneyList.appendChild(li);
+  }
+}
+
+function updateMoneyLadder() {
+  const lis = moneyList.querySelectorAll("li");
+  lis.forEach(li => li.classList.remove("current"));
+  const idx = moneyList.children.length - ladderLevel;
+  if (lis[idx]) lis[idx].classList.add("current");
+}
+
 // ---------------- SHOW QUESTION ----------------
 function showQuestion() {
+  if (current >= questions.length) return endQuiz();
   clearInterval(timer);
   timeLeft = 20;
   updateTimer();
   hintBox.style.display = "none";
 
   const q = questions[current];
-  if (!q) return endQuiz();
+  quizDiv.innerHTML = "";
+  const questionEl = document.createElement("h2");
+  questionEl.textContent = q.question;
+  quizDiv.appendChild(questionEl);
+
+  const feedbackDiv = document.createElement("div");
+  feedbackDiv.id = "feedback";
+  quizDiv.appendChild(feedbackDiv);
 
   const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
-  quizDiv.innerHTML = `<h2>${q.question}</h2><div id="feedback"></div>`;
-  answers.forEach(a => {
+  answers.forEach(ans => {
     const btn = document.createElement("button");
-    btn.textContent = a;
     btn.className = "option-btn";
-    btn.onclick = () => checkAnswer(a);
+    btn.textContent = ans;
+    btn.addEventListener("click", () => checkAnswer(ans));
     quizDiv.appendChild(btn);
   });
 
@@ -166,7 +166,7 @@ function startTimer() {
 
 function updateTimer() {
   timerText.textContent = `${timeLeft}s`;
-  timerBar.style.width = `${(timeLeft / 20) * 100}%`;
+  timerBar.style.width = `${(timeLeft/20)*100}%`;
 }
 
 // ---------------- CHECK ANSWER ----------------
@@ -174,11 +174,12 @@ function checkAnswer(answer) {
   clearInterval(timer);
   const correct = questions[current].correctAnswer;
   const feedbackDiv = document.getElementById("feedback");
+  const buttons = document.querySelectorAll(".option-btn");
 
-  document.querySelectorAll(".option-btn").forEach(b => {
-    b.disabled = true;
-    if (b.textContent === correct) b.classList.add("correct");
-    if (b.textContent === answer && answer !== correct) b.classList.add("wrong");
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent === correct) btn.classList.add("correct");
+    if (btn.textContent === answer && answer !== correct) btn.classList.add("wrong");
   });
 
   if (answer === correct) {
@@ -194,22 +195,18 @@ function checkAnswer(answer) {
     wrongSound.play();
   }
 
-  setTimeout(() => nextQuestion(), 1000);
+  setTimeout(nextQuestion, 1000);
 }
 
 // ---------------- NEXT QUESTION ----------------
 function nextQuestion() {
   current++;
-  if (current >= questions.length) {
-    endQuiz();
-    return;
-  }
+  if (current >= questions.length) return endQuiz();
   showQuestion();
 }
 
 function endQuiz() {
-  quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>
-      <button onclick="location.reload()">Restart</button>`;
+  quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p><button onclick="location.reload()">Restart</button>`;
   startBtn.disabled = false;
   lifelines.style.display = "none";
   timerContainer.style.display = "none";
@@ -217,8 +214,7 @@ function endQuiz() {
   moneyList.style.display = "block";
   hintBox.style.display = "none";
 
-  const user = auth.currentUser;
-  if (user) saveScore(user, score);
+  if (auth.currentUser) saveScore(auth.currentUser, score);
 }
 
 // ---------------- LIFELINES ----------------
@@ -228,11 +224,10 @@ function useFifty() {
   fiftyBtn.disabled = true;
 
   const correct = questions[current].correctAnswer;
-  const btns = Array.from(document.querySelectorAll(".option-btn")).filter(b => b.style.display !== "none");
   let removed = 0;
-  btns.forEach(b => {
-    if (b.textContent !== correct && removed < 2) {
-      b.style.display = "none";
+  document.querySelectorAll(".option-btn").forEach(btn => {
+    if (btn.textContent !== correct && removed < 2) {
+      btn.style.display = "none";
       removed++;
     }
   });
@@ -243,62 +238,46 @@ function useHint() {
   hintUsed = true;
   hintBtn.disabled = true;
 
-  const q = questions[current];
-  hintBox.textContent = "💡 Hint: " + q.hint;
+  hintBox.textContent = "💡 Hint: " + questions[current].hint;
   hintBox.style.display = "block";
 }
 
 // ---------------- LEADERBOARD ----------------
 async function saveScore(user, score) {
   if (!user) return;
-  const userData = {
+  const data = {
     uid: user.uid,
     name: user.displayName,
     avatar: user.photoURL,
-    score: score,
+    score,
     date: firebase.firestore.FieldValue.serverTimestamp()
   };
-
-  try {
-    await db.collection("leaderboard").doc(user.uid).set(userData, { merge: true });
-    updateLeaderboard();
-  } catch (err) {
-    console.error("Error saving score:", err);
-  }
+  await db.collection("leaderboard").doc(user.uid).set(data, {merge:true});
+  updateLeaderboard();
 }
 
 async function updateLeaderboard() {
   const list = document.getElementById("leaderboard-list");
   list.innerHTML = "Loading...";
   try {
-    const snapshot = await db.collection("leaderboard")
-      .orderBy("score", "desc")
-      .limit(10)
-      .get();
-
+    const snapshot = await db.collection("leaderboard").orderBy("score","desc").limit(10).get();
     list.innerHTML = "";
     snapshot.forEach(doc => {
-      const data = doc.data();
+      const d = doc.data();
       const li = document.createElement("li");
-      li.style.display = "flex";
-      li.style.alignItems = "center";
-      li.style.gap = "8px";
+      li.style.display = "flex"; li.style.alignItems = "center"; li.style.gap = "8px";
 
       const img = document.createElement("img");
-      img.src = data.avatar;
-      img.width = 30;
-      img.height = 30;
-      img.style.borderRadius = "50%";
+      img.src = d.avatar; img.width = 30; img.height = 30; img.style.borderRadius="50%";
 
       li.appendChild(img);
-      li.appendChild(document.createTextNode(`${data.name} — ${data.score} pts`));
+      li.appendChild(document.createTextNode(`${d.name} — ${d.score} pts`));
       list.appendChild(li);
     });
-  } catch (err) {
-    console.error("Error loading leaderboard:", err);
+  } catch (e) {
+    console.error(e);
     list.innerHTML = "Failed to load leaderboard.";
   }
 }
 
-// Initialize leaderboard
 updateLeaderboard();
