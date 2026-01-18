@@ -1,10 +1,12 @@
-// Get DOM elements
+// DOM Elements
 const quizDiv = document.getElementById("quiz");
 const startBtn = document.getElementById("startBtn");
 const lifelines = document.getElementById("lifelines");
 const progressBar = document.getElementById("progress-bar");
+const progressContainer = document.getElementById("progress-container");
 const timerBar = document.getElementById("timer-bar");
 const timerText = document.getElementById("timer-text");
+const timerContainer = document.getElementById("timer-container");
 
 const categorySelect = document.getElementById("categorySelect");
 const questionCount = document.getElementById("questionCount");
@@ -51,6 +53,8 @@ hintBtn.addEventListener("click", useHint);
 async function startQuiz() {
   startBtn.disabled = true;
   lifelines.style.display = "flex";
+  timerContainer.style.display = "block";
+  progressContainer.style.display = "block";
   quizDiv.innerHTML = "Loading...";
 
   current = 0;
@@ -59,6 +63,7 @@ async function startQuiz() {
   hintUsed = false;
   fiftyBtn.disabled = false;
   hintBtn.disabled = false;
+  progressBar.style.width = "0%";
 
   try {
     const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`);
@@ -154,6 +159,8 @@ function nextQuestion() {
       <button onclick="location.reload()">Restart</button>`;
     startBtn.disabled = false;
     lifelines.style.display = "none";
+    timerContainer.style.display = "none";
+    progressContainer.style.display = "none";
     progressBar.style.width = "100%";
     return;
   }
