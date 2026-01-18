@@ -11,38 +11,57 @@
 <div class="container">
   <h1>🎯 Neon Quiz Challenge</h1>
 
+  <!-- Category and number of questions selection -->
   <div id="categoryDiv">
     <label for="categorySelect">Choose Category:</label>
     <select id="categorySelect">
-      <option value="general_knowledge">General Knowledge</option>
       <option value="science">Science</option>
       <option value="history">History</option>
+      <option value="geography">Geography</option>
+      <option value="music">Music</option>
+      <option value="film_and_tv">Film & TV</option>
+      <option value="sports">Sports</option>
+      <option value="food_and_drink">Food & Drink</option>
+      <option value="general_knowledge">General Knowledge</option>
     </select>
 
     <label for="questionCount">Number of Questions:</label>
     <select id="questionCount">
-      <option value="5">5</option>
-      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="21">21</option>
+      <option value="22">22</option>
+      <option value="23">23</option>
+      <option value="24">24</option>
+      <option value="25">25</option>
+      <option value="26">26</option>
+      <option value="27">27</option>
+      <option value="28">28</option>
+      <option value="29">29</option>
+      <option value="30">30</option>
     </select>
 
     <br><br>
     <button id="startBtn">START QUIZ</button>
   </div>
 
+  <!-- Lifelines -->
   <div id="lifelines">
     <button id="fiftyBtn">50:50 ✂️</button>
     <button id="hintBtn">💡 Hint</button>
   </div>
 
+  <!-- Timer -->
   <div id="timer-container">
     <span id="timer-text">20s</span>
     <div id="timer-bar"></div>
   </div>
 
+  <!-- Progress bar -->
   <div id="progress-container">
     <div id="progress-bar"></div>
   </div>
 
+  <!-- Quiz area -->
   <div id="quiz"></div>
 </div>
 
