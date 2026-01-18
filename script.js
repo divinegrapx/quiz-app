@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const fiftyBtn = document.getElementById("fiftyBtn");
   const hintBtn = document.getElementById("hintBtn");
   const hintBox = document.getElementById("hint-box");
+  const moneyList = document.getElementById("money-list");
 
   let questions = [], current = 0, score = 0, timer, timeLeft = 20;
   let fiftyUsed = false, hintUsed = false;
@@ -22,6 +23,19 @@ document.addEventListener("DOMContentLoaded", () => {
     { question: "How many days are in a week?", correctAnswer: "7", incorrectAnswers: ["5","6","8"], hint: "Think about Monday to Sunday." },
     { question: "Which planet is known as the Red Planet?", correctAnswer: "Mars", incorrectAnswers: ["Venus","Jupiter","Saturn"], hint: "It's named after the Roman god of war." }
   ];
+
+  // Money ladder (example for 10 questions)
+  const moneyLevels = ["$100","$200","$300","$500","$1,000","$2,000","$4,000","$8,000","$16,000","$32,000"];
+  
+  function buildMoneyLadder() {
+    moneyList.innerHTML = "";
+    moneyLevels.slice(0, questionCount.value).reverse().forEach((amount, idx) => {
+      const li = document.createElement("li");
+      li.textContent = amount;
+      if (idx === moneyLevels.length - current -1) li.classList.add("current");
+      moneyList.appendChild(li);
+    });
+  }
 
   startBtn.addEventListener("click", startQuiz);
   fiftyBtn.addEventListener("click", useFifty);
@@ -38,6 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
     current = 0; score = 0; fiftyUsed = false; hintUsed = false;
     fiftyBtn.disabled = false; hintBtn.disabled = false;
     progressBar.style.width = "0%";
+
+    buildMoneyLadder();
 
     try {
       const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`);
@@ -77,6 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
       quizDiv.appendChild(btn);
     });
 
+    updateMoneyLadder();
     progressBar.style.width = `${(current / questions.length) * 100}%`;
     startTimer();
   }
@@ -137,8 +154,13 @@ document.addEventListener("DOMContentLoaded", () => {
     fiftyBtn.disabled = true;
 
     const correct = questions[current].correctAnswer;
-    document.querySelectorAll(".answer-btn").forEach(b => {
-      if (b.textContent !== correct && Math.random() > 0.5) b.style.display = "none";
+    const btns = Array.from(document.querySelectorAll(".answer-btn"));
+    let removed = 0;
+    btns.forEach(b => {
+      if (b.textContent !== correct && removed < 2 && Math.random() > 0.3) {
+        b.style.display = "none";
+        removed++;
+      }
     });
   }
 
@@ -151,5 +173,14 @@ document.addEventListener("DOMContentLoaded", () => {
     hintBox.textContent = "💡 Hint: " + q.hint;
     hintBox.style.display = "block";
   }
+
+  function updateMoneyLadder() {
+    const lis = moneyList.querySelectorAll("li");
+    lis.forEach(li => li.classList.remove("current"));
+    const idx = moneyLevels.length - current - 1;
+    if (lis[idx]) lis[idx].classList.add("current");
+  }
+
+  buildMoneyLadder();
 
 });
