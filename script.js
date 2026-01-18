@@ -1,6 +1,6 @@
 // ---------------- FIREBASE CONFIG ----------------
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
   authDomain: "neon-quiz-app.firebaseapp.com",
   projectId: "neon-quiz-app",
   storageBucket: "neon-quiz-app.firebasestorage.app",
