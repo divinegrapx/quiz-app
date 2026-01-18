@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  // DOM Elements
   const quizDiv = document.getElementById("quiz");
   const startBtn = document.getElementById("startBtn");
   const lifelines = document.getElementById("lifelines");
@@ -9,20 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const timerBar = document.getElementById("timer-bar");
   const timerText = document.getElementById("timer-text");
   const timerContainer = document.getElementById("timer-container");
-
   const categorySelect = document.getElementById("categorySelect");
   const questionCount = document.getElementById("questionCount");
-
   const fiftyBtn = document.getElementById("fiftyBtn");
   const hintBtn = document.getElementById("hintBtn");
 
-  let questions = [];
-  let current = 0;
-  let score = 0;
-  let timer;
-  let timeLeft = 20;
-  let fiftyUsed = false;
-  let hintUsed = false;
+  let questions = [], current = 0, score = 0, timer, timeLeft = 20;
+  let fiftyUsed = false, hintUsed = false;
 
   const fallbackQuestions = [
     { question: "What color is the sky?", correctAnswer: "Blue", incorrectAnswers: ["Red","Green","Yellow"], hint: "It's the same color as the ocean on a clear day." },
@@ -30,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
     { question: "Which planet is known as the Red Planet?", correctAnswer: "Mars", incorrectAnswers: ["Venus","Jupiter","Saturn"], hint: "It's named after the Roman god of war." }
   ];
 
-  // Event listeners
   startBtn.addEventListener("click", startQuiz);
   fiftyBtn.addEventListener("click", useFifty);
   hintBtn.addEventListener("click", useHint);
@@ -42,12 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
     progressContainer.style.display = "block";
     quizDiv.innerHTML = "Loading...";
 
-    current = 0;
-    score = 0;
-    fiftyUsed = false;
-    hintUsed = false;
-    fiftyBtn.disabled = false;
-    hintBtn.disabled = false;
+    current = 0; score = 0; fiftyUsed = false; hintUsed = false;
+    fiftyBtn.disabled = false; hintBtn.disabled = false;
     progressBar.style.width = "0%";
 
     try {
@@ -62,7 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
         incorrectAnswers: q.incorrectAnswers,
         hint: q.hint || "Think carefully about this question."
       }));
-
     } catch {
       questions = fallbackQuestions;
     }
@@ -120,14 +106,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (b.textContent === answer && answer !== correct) b.classList.add("wrong");
     });
 
-    if (answer === correct) {
-      score++;
-      feedbackDiv.textContent = "✅ Correct!";
-      feedbackDiv.style.color = "lime";
-    } else {
-      feedbackDiv.textContent = "❌ Wrong!";
-      feedbackDiv.style.color = "red";
-    }
+    if (answer === correct) { score++; feedbackDiv.textContent = "✅ Correct!"; feedbackDiv.style.color = "lime"; }
+    else { feedbackDiv.textContent = "❌ Wrong!"; feedbackDiv.style.color = "red"; }
 
     setTimeout(nextQuestion, 1000);
   }
@@ -153,10 +133,9 @@ document.addEventListener("DOMContentLoaded", () => {
     fiftyBtn.disabled = true;
 
     const correct = questions[current].correctAnswer;
-    document.querySelectorAll(".answer-btn")
-      .forEach(b => {
-        if (b.textContent !== correct && Math.random() > 0.5) b.style.display = "none";
-      });
+    document.querySelectorAll(".answer-btn").forEach(b => {
+      if (b.textContent !== correct && Math.random() > 0.5) b.style.display = "none";
+    });
   }
 
   function useHint() {
