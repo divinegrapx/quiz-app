@@ -58,7 +58,7 @@ loginBtn.addEventListener("click", () => {
       loginDiv.style.display = "none";
       categoryDiv.style.display = "block";
       quizTitle.textContent = `🎯 Welcome ${result.user.displayName}`;
-      console.log("Logged in as:", result.user.displayName);
+      updateLeaderboard();
     })
     .catch(error => {
       console.error("Login error:", error);
@@ -103,7 +103,6 @@ async function startQuiz() {
 
   buildMoneyLadder();
 
-  // Dynamic quiz title
   quizTitle.textContent = `🎯 ${categorySelect.value.replace(/_/g," ").toUpperCase()} — ${questionCount.value} Questions`;
 
   try {
@@ -206,6 +205,10 @@ function nextQuestion() {
     progressContainer.style.display = "none";
     moneyList.style.display = "none";
     hintBox.style.display = "none";
+
+    const user = auth.currentUser;
+    saveScore(user, score);
+
     return;
   }
   showQuestion();
@@ -245,3 +248,58 @@ function updateMoneyLadder() {
   const idx = moneyList.children.length - ladderLevel - 1;
   if (lis[idx]) lis[idx].classList.add("current");
 }
+
+// -------- LEADERBOARD ----------
+async function saveScore(user, score) {
+  if (!user) return;
+  const userData = {
+    uid: user.uid,
+    name: user.displayName,
+    avatar: user.photoURL,
+    score: score,
+    date: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  try {
+    await db.collection("leaderboard").doc(user.uid).set(userData, { merge: true });
+    updateLeaderboard();
+  } catch (err) {
+    console.error("Error saving score:", err);
+  }
+}
+
+async function updateLeaderboard() {
+  const list = document.getElementById("leaderboard-list");
+  list.innerHTML = "Loading...";
+  try {
+    const snapshot = await db.collection("leaderboard")
+      .orderBy("score", "desc")
+      .limit(10)
+      .get();
+
+    list.innerHTML = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const li = document.createElement("li");
+      li.style.display = "flex";
+      li.style.alignItems = "center";
+      li.style.gap = "8px";
+
+      const img = document.createElement("img");
+      img.src = data.avatar;
+      img.width = 30;
+      img.height = 30;
+      img.style.borderRadius = "50%";
+
+      li.appendChild(img);
+      li.appendChild(document.createTextNode(`${data.name} — ${data.score} pts`));
+      list.appendChild(li);
+    });
+  } catch (err) {
+    console.error("Error loading leaderboard:", err);
+    list.innerHTML = "Failed to load leaderboard.";
+  }
+}
+
+// Initialize leaderboard
+updateLeaderboard();
