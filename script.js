@@ -9,13 +9,14 @@ const firebaseConfig = {
   measurementId: "G-7LKHH1EHQW"
 };
 
+// Initialize Firebase (compat)
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ---------------- DOM ELEMENTS ----------------
+const loginBtn = document.getElementById("loginBtn");
 const loginDiv = document.getElementById("loginDiv");
-const quizTitle = document.getElementById("quiz-title");
 const categoryDiv = document.getElementById("categoryDiv");
 const startBtn = document.getElementById("startBtn");
 const categorySelect = document.getElementById("categorySelect");
@@ -30,12 +31,10 @@ const timerContainer = document.getElementById("timer-container");
 const timerBar = document.getElementById("timer-bar");
 const timerText = document.getElementById("timer-text");
 const moneyList = document.getElementById("money-list");
-const loginError = document.getElementById("login-error");
+const quizTitle = document.getElementById("quiz-title");
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
-
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
+const hintBox = document.getElementById("hint-box");
 
 // ---------------- GLOBALS ----------------
 let questions = [], current = 0, score = 0, timer, timeLeft = 20;
@@ -48,50 +47,23 @@ const fallbackQuestions = [
   { question: "Which planet is known as the Red Planet?", correctAnswer: "Mars", incorrectAnswers: ["Venus","Jupiter","Saturn"], hint: "Named after Roman god of war." }
 ];
 
-// ---------------- LOGIN HANDLERS ----------------
-document.getElementById("loginGoogleBtn").addEventListener("click", () => {
+// ---------------- LOGIN ----------------
+loginBtn.addEventListener("click", () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider)
-    .then(result => afterLogin(result.user))
-    .catch(err => showLoginError(err));
+    .then(result => {
+      loginDiv.style.display = "none";
+      categoryDiv.style.display = "block";
+      quizTitle.textContent = `🎯 Welcome ${result.user.displayName}`;
+      updateLeaderboard();
+    })
+    .catch(error => {
+      console.error("Login error:", error);
+      alert("Login failed! Make sure your domain is authorized in Firebase.");
+    });
 });
 
-document.getElementById("loginFacebookBtn").addEventListener("click", () => {
-  const provider = new firebase.auth.FacebookAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(result => afterLogin(result.user))
-    .catch(err => showLoginError(err));
-});
-
-document.getElementById("loginEmailBtn").addEventListener("click", () => {
-  const email = emailInput.value;
-  const password = passwordInput.value;
-  auth.signInWithEmailAndPassword(email, password)
-    .then(result => afterLogin(result.user))
-    .catch(err => showLoginError(err));
-});
-
-document.getElementById("registerEmailBtn").addEventListener("click", () => {
-  const email = emailInput.value;
-  const password = passwordInput.value;
-  auth.createUserWithEmailAndPassword(email, password)
-    .then(result => afterLogin(result.user))
-    .catch(err => showLoginError(err));
-});
-
-function afterLogin(user) {
-  loginDiv.style.display = "none";
-  categoryDiv.style.display = "block";
-  quizTitle.textContent = `🎯 Welcome ${user.displayName || user.email}`;
-  updateLeaderboard();
-}
-
-function showLoginError(err) {
-  console.error("Login error:", err);
-  loginError.textContent = "Login failed! " + err.message;
-}
-
-// ---------------- QUIZ HANDLERS ----------------
+// ---------------- START QUIZ ----------------
 startBtn.addEventListener("click", startQuiz);
 fiftyBtn.addEventListener("click", useFifty);
 hintBtn.addEventListener("click", useHint);
@@ -103,8 +75,8 @@ async function startQuiz() {
   progressContainer.style.display = "block";
   timerContainer.style.display = "block";
   moneyList.style.display = "block";
-  quizDiv.innerHTML = "Loading...";
   hintBox.style.display = "none";
+  quizDiv.innerHTML = "Loading...";
 
   ladderLevel = 0;
   current = 0;
@@ -115,6 +87,7 @@ async function startQuiz() {
   hintBtn.disabled = false;
   progressBar.style.width = "0%";
 
+  // ---------------- Build dynamic money ladder ----------------
   buildMoneyLadder();
 
   quizTitle.textContent = `🎯 ${categorySelect.value.replace(/_/g," ").toUpperCase()} — ${questionCount.value} Questions`;
@@ -131,23 +104,26 @@ async function startQuiz() {
       incorrectAnswers: q.incorrectAnswers,
       hint: q.hint || "Think carefully."
     }));
-  } catch {
+  } catch (err) {
+    console.warn("API failed, using fallback questions", err);
     questions = fallbackQuestions;
   }
 
   showQuestion();
 }
 
+// ---------------- MONEY LADDER ----------------
 function buildMoneyLadder() {
   moneyList.innerHTML = "";
-  const totalQuestions = parseInt(questionCount.value);
-  for (let i = 1; i <= totalQuestions; i++) {
+  const total = parseInt(questionCount.value) || 10;
+  for (let i = total; i >= 1; i--) {
     const li = document.createElement("li");
-    li.textContent = `$${i*100}`;
+    li.textContent = `$${i * 100}`;
     moneyList.appendChild(li);
   }
 }
 
+// ---------------- SHOW QUESTION ----------------
 function showQuestion() {
   clearInterval(timer);
   timeLeft = 20;
@@ -170,6 +146,7 @@ function showQuestion() {
   startTimer();
 }
 
+// ---------------- TIMER ----------------
 function startTimer() {
   timerText.style.display = "block";
   timer = setInterval(() => {
@@ -187,6 +164,7 @@ function updateTimer() {
   timerBar.style.width = `${(timeLeft / 20) * 100}%`;
 }
 
+// ---------------- CHECK ANSWER ----------------
 function checkAnswer(answer) {
   clearInterval(timer);
   const correct = questions[current].correctAnswer;
@@ -214,6 +192,7 @@ function checkAnswer(answer) {
   }
 }
 
+// ---------------- NEXT QUESTION ----------------
 function nextQuestion() {
   current++;
   if (current >= questions.length) {
@@ -233,6 +212,7 @@ function nextQuestion() {
   showQuestion();
 }
 
+// ---------------- LIFELINES ----------------
 function useFifty() {
   if (fiftyUsed) return;
   fiftyUsed = true;
@@ -259,6 +239,7 @@ function useHint() {
   hintBox.style.display = "block";
 }
 
+// ---------------- MONEY LADDER ----------------
 function updateMoneyLadder() {
   const lis = moneyList.querySelectorAll("li");
   lis.forEach(li => li.classList.remove("current"));
@@ -271,8 +252,8 @@ async function saveScore(user, score) {
   if (!user) return;
   const userData = {
     uid: user.uid,
-    name: user.displayName || user.email,
-    avatar: user.photoURL || "",
+    name: user.displayName,
+    avatar: user.photoURL,
     score: score,
     date: firebase.firestore.FieldValue.serverTimestamp()
   };
@@ -303,7 +284,7 @@ async function updateLeaderboard() {
       li.style.gap = "8px";
 
       const img = document.createElement("img");
-      img.src = data.avatar || "";
+      img.src = data.avatar;
       img.width = 30;
       img.height = 30;
       img.style.borderRadius = "50%";
