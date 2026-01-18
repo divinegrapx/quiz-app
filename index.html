@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neon Quiz Challenge</title>
+  <title>Neon Quiz App</title>
   <link rel="stylesheet" href="style.css">
 
   <!-- Firebase Compat SDKs -->
@@ -14,15 +14,13 @@
 <body>
 
 <div class="container">
-  <h1 id="quiz-title">🎯 Neon Quiz Challenge</h1>
-
   <!-- LOGIN -->
   <div id="loginDiv">
     <button id="loginBtn">Login with Google</button>
   </div>
 
-  <!-- Category selection -->
-  <div id="categoryDiv" style="display:none;">
+  <!-- CATEGORY SELECT -->
+  <div id="categoryDiv" style="display:none">
     <label for="categorySelect">Choose Category:</label>
     <select id="categorySelect">
       <option value="science">Science</option>
@@ -38,46 +36,49 @@
     <label for="questionCount">Number of Questions:</label>
     <select id="questionCount">
       <option value="20">20</option>
-      <option value="25">25</option>
       <option value="30">30</option>
     </select>
 
     <button id="startBtn">Start Quiz</button>
   </div>
 
-  <!-- Lifelines -->
-  <div id="lifelines" style="display:none;">
+  <!-- QUIZ TITLE -->
+  <h2 id="quiz-title"></h2>
+
+  <!-- QUIZ CARD -->
+  <div id="quiz" style="display:none"></div>
+
+  <!-- HINT -->
+  <div id="hint-box"></div>
+
+  <!-- LIFELINES -->
+  <div id="lifelines" style="display:none">
     <button id="fiftyBtn">50:50 ✂️</button>
     <button id="hintBtn">💡 Hint</button>
   </div>
 
-  <!-- Progress bar -->
-  <div id="progress-container" style="display:none;">
+  <!-- PROGRESS -->
+  <div id="progress-container" style="display:none">
     <div id="progress-bar"></div>
   </div>
 
-  <!-- Timer -->
-  <div id="timer-container" style="display:none;">
+  <!-- TIMER -->
+  <div id="timer-container" style="display:none">
     <div id="timer-bar"></div>
-    <span id="timer-text">25s</span>
+    <span id="timer-text">20s</span>
   </div>
 
-  <!-- Quiz area -->
-  <div id="quiz" style="display:none;"></div>
+  <!-- MONEY LADDER -->
+  <ul id="money-list" style="display:none"></ul>
 
-  <!-- Money ladder -->
-  <ol id="money-list" style="display:none;"></ol>
+  <!-- SOUNDS -->
+  <audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
+  <audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
 
-  <!-- Leaderboard -->
-  <div id="leaderboard-container" style="margin-top:20px;">
-    <h2>🏆 Leaderboard</h2>
-    <ol id="leaderboard-list"></ol>
-  </div>
+  <!-- LEADERBOARD -->
+  <h3>Leaderboard</h3>
+  <ul id="leaderboard-list"></ul>
 </div>
-
-<!-- Sounds -->
-<audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
-<audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
 
 <script src="script.js"></script>
 </body>
