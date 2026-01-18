@@ -1,218 +1,239 @@
-// -------------------- Firebase Initialization --------------------
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
-
-// -------------------- Your Firebase Config --------------------
-const firebaseConfig = {
-  apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
-  authDomain: "neon-quiz-app.firebaseapp.com",
-  projectId: "neon-quiz-app",
-  storageBucket: "neon-quiz-app.appspot.com",
-  messagingSenderId: "891061147021",
-  appId: "1:891061147021:web:7b3d80020f642da7b699c4",
-  measurementId: "G-7LKHH1EHQW"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getFirestore();
-const storage = getStorage();
-
-// -------------------- DOM Elements --------------------
-const loginForm = document.getElementById("loginForm");
-const registerForm = document.getElementById("registerForm");
-const logoutBtn = document.getElementById("logoutBtn");
-const avatarInput = document.getElementById("avatarInput");
-const leaderboardDiv = document.getElementById("leaderboard");
-const quizContainer = document.getElementById("quizContainer");
-const startQuizBtn = document.getElementById("startQuiz");
-const questionEl = document.getElementById("question");
-const choicesEl = document.getElementById("choices");
-const hintBtn = document.getElementById("hintBtn");
-const fiftyBtn = document.getElementById("fiftyBtn");
-const timerEl = document.getElementById("timer");
-const scoreEl = document.getElementById("score");
-const questionCountSelect = document.getElementById("questionCount");
-const avatarContainer = document.getElementById("avatarContainer");
-
-// -------------------- Sounds --------------------
-const correctSound = new Audio("correct.wav");
-const wrongSound = new Audio("wrong.wav");
-
-// -------------------- User State --------------------
-let currentUser = null;
-let userAvatarUrl = "";
-let score = 0;
-let questionIndex = 0;
-let timer;
-let timeLeft = 20;
 let questions = [];
-let usedHints = 0;
-let usedFifty = false;
+let currentQuestion = 0;
+let score = 0;
+let fiftyUsed = false;
+let hintUsed = false;
+let timer;
+let timeLeft = 25;
 
-// -------------------- Authentication --------------------
-loginForm?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const email = loginForm.email.value;
-  const password = loginForm.password.value;
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    loginForm.reset();
-  } catch (err) { alert("Login Error: " + err.message); }
-});
+// Start Quiz
+function startQuiz() {
+  const category = document.getElementById("categorySelect").value;
+  const questionCount = document.getElementById("questionCount").value;
+  const API_URL = `https://the-trivia-api.com/api/questions?categories=${category}&limit=${questionCount}`;
 
-registerForm?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const email = registerForm.email.value;
-  const password = registerForm.password.value;
-  const username = registerForm.username.value;
-  try {
-    const userCred = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, "users", userCred.user.uid), { username, score: 0, avatar: "", history: [] });
-    registerForm.reset();
-  } catch (err) { alert("Register Error: " + err.message); }
-});
-
-logoutBtn?.addEventListener("click", async () => { await signOut(auth); });
-
-// -------------------- Avatar Upload --------------------
-avatarInput?.addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file || !currentUser) return;
-  const storageRef = ref(storage, `avatars/${currentUser.uid}_${file.name}`);
-  await uploadBytes(storageRef, file);
-  userAvatarUrl = await getDownloadURL(storageRef);
-  await updateDoc(doc(db, "users", currentUser.uid), { avatar: userAvatarUrl });
-  alert("Avatar uploaded!");
-});
-
-// -------------------- Auth State --------------------
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUser = user;
-    logoutBtn.style.display = "inline-block";
-    avatarContainer.style.display = "block";
-    loginForm.style.display = "none";
-    registerForm.style.display = "none";
-    const docSnap = await getDoc(doc(db, "users", user.uid));
-    if (docSnap.exists()) userAvatarUrl = docSnap.data().avatar || "";
-    showLeaderboard();
-  } else {
-    currentUser = null;
-    logoutBtn.style.display = "none";
-    avatarContainer.style.display = "none";
-    loginForm.style.display = "block";
-    registerForm.style.display = "block";
-    leaderboardDiv.innerHTML = "";
-  }
-});
-
-// -------------------- Leaderboard --------------------
-async function showLeaderboard() {
-  const q = query(collection(db, "users"), orderBy("score", "desc"), limit(10));
-  const querySnapshot = await getDocs(q);
-  leaderboardDiv.innerHTML = "<h3>Leaderboard</h3>";
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-    leaderboardDiv.innerHTML += `
-      <div class="leaderboard-user">
-        <img src="${data.avatar || 'default-avatar.png'}" class="avatar">
-        <span>${data.username}</span> - <span>${data.score}</span>
-      </div>
-    `;
-  });
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      questions = data.map(q=>{
+        const options = [...q.incorrectAnswers, q.correctAnswer];
+        const correctIndex = options.indexOf(q.correctAnswer);
+        return {question:q.question, options, answer: correctIndex};
+      });
+      initializeQuiz();
+    })
+    .catch(err => {
+      console.error("API failed, using fallback questions:", err);
+      const fallbackQuestions = [
+        { question: "What is 2+2?", options: ["3","4","5","6"], answer: 1 },
+        { question: "Capital of France?", options: ["Berlin","London","Paris","Rome"], answer: 2 },
+        { question: "Which animal barks?", options: ["Cat","Dog","Cow","Horse"], answer: 1 }
+      ];
+      questions = [];
+      for (let i = 0; i < questionCount; i++) {
+        questions.push(fallbackQuestions[i % fallbackQuestions.length]);
+      }
+      initializeQuiz();
+    });
 }
 
-// -------------------- Fetch Trivia Questions from Open Trivia DB --------------------
-async function loadQuestions(amount = 20) {
-  const response = await fetch(`https://opentdb.com/api.php?amount=${amount}&type=multiple`);
-  const data = await response.json();
-  return data.results.map(q => {
-    const choices = shuffleArray([...q.incorrect_answers.map(decodeHTML), decodeHTML(q.correct_answer)]);
-    return {
-      question: decodeHTML(q.question),
-      choices: choices,
-      answer: choices.indexOf(decodeHTML(q.correct_answer)),
-      hint: "Think carefully!"
-    };
-  });
-}
-
-function decodeHTML(html) {
-  const txt = document.createElement("textarea");
-  txt.innerHTML = html;
-  return txt.value;
-}
-
-// -------------------- Quiz Functions --------------------
-startQuizBtn?.addEventListener("click", async () => {
+// Initialize Quiz
+function initializeQuiz() {
+  currentQuestion = 0;
   score = 0;
-  questionIndex = 0;
-  usedHints = 0;
-  usedFifty = false;
-  const selectedCount = parseInt(questionCountSelect.value) || 20;
-  questions = await loadQuestions(selectedCount);
-  quizContainer.style.display = "block";
+  fiftyUsed = false;
+  hintUsed = false;
+
+  document.getElementById("categoryDiv").style.display = "none";
+  document.getElementById("fiftyBtn").disabled = false;
+  document.getElementById("hintBtn").disabled = false;
+
   showQuestion();
-});
+  updateProgress();
+}
 
+// Show current question
 function showQuestion() {
-  if (questionIndex >= questions.length) return endQuiz();
-  const q = questions[questionIndex];
-  questionEl.textContent = q.question;
-  choicesEl.innerHTML = "";
-  q.choices.forEach((choice,i)=> {
+  clearInterval(timer);
+  timeLeft = 25;
+
+  document.getElementById("fiftyBtn").disabled = fiftyUsed;
+  document.getElementById("hintBtn").disabled = hintUsed;
+
+  const quizDiv = document.getElementById("quiz");
+  quizDiv.innerHTML = "";
+
+  const q = questions[currentQuestion];
+
+  const questionEl = document.createElement("h2");
+  questionEl.innerHTML = q.question;
+  quizDiv.appendChild(questionEl);
+
+  q.options.forEach((option, index) => {
     const btn = document.createElement("button");
-    btn.textContent = choice;
-    btn.className = "neon-btn";
-    btn.addEventListener("click", ()=>checkAnswer(i));
-    choicesEl.appendChild(btn);
+    btn.textContent = option;
+    btn.className = "option-btn";
+    btn.onclick = () => checkAnswer(index, btn);
+    quizDiv.appendChild(btn);
   });
-  timeLeft=20; timerEl.textContent=timeLeft;
+
+  const result = document.createElement("p");
+  result.id = "result";
+  quizDiv.appendChild(result);
+
+  const nextBtn = document.createElement("button");
+  nextBtn.id = "nextBtn";
+  nextBtn.textContent = "Next";
+  nextBtn.disabled = true;
+  nextBtn.onclick = nextQuestion;
+  quizDiv.appendChild(nextBtn);
+
+  updateProgress();
+  startTimer();
+}
+
+// Check answer
+function checkAnswer(selectedIndex, clickedButton) {
+  const correctIndex = questions[currentQuestion].answer;
+  const buttons = document.querySelectorAll(".option-btn");
+  const result = document.getElementById("result");
+  const correctSound = document.getElementById("correct-sound");
+  const wrongSound = document.getElementById("wrong-sound");
+
+  buttons.forEach(btn => btn.disabled = true);
+  document.getElementById("fiftyBtn").disabled = true;
+  document.getElementById("hintBtn").disabled = true;
+  document.getElementById("nextBtn").disabled = false;
   clearInterval(timer);
-  timer=setInterval(()=>{
-    timeLeft--; timerEl.textContent=timeLeft;
-    if(timeLeft<=0){ clearInterval(timer); wrongSound.play(); questionIndex++; showQuestion();}
-  },1000);
+
+  if (selectedIndex === correctIndex) {
+    clickedButton.style.background = "linear-gradient(135deg, #00ff6a, #00f2fe)";
+    clickedButton.style.color = "#000";
+    clickedButton.style.boxShadow = "0 0 10px #00ff6a, 0 0 20px #00f2fe inset";
+    result.textContent = "✅ Correct!";
+    result.style.color = "#00ff6a";
+    result.style.textShadow = "0 0 10px #00ff6a";
+    score++;
+    correctSound.play();
+  } else {
+    clickedButton.style.background = "linear-gradient(135deg, #ff416c, #ff4b2b)";
+    clickedButton.style.color = "#fff";
+    clickedButton.style.boxShadow = "0 0 10px #ff416c, 0 0 20px #ff4b2b inset";
+    result.textContent = "❌ Wrong!";
+    result.style.color = "#ff416c";
+    result.style.textShadow = "0 0 10px #ff416c";
+
+    buttons[correctIndex].style.background = "linear-gradient(135deg, #00ff6a, #00f2fe)";
+    buttons[correctIndex].style.color = "#000";
+    buttons[correctIndex].style.boxShadow = "0 0 10px #00ff6a, 0 0 20px #00f2fe inset";
+
+    wrongSound.play();
+  }
 }
 
-function checkAnswer(selected){
-  const correctIndex=questions[questionIndex].answer;
-  if(selected===correctIndex){ score++; correctSound.play(); } else { wrongSound.play(); }
-  questionIndex++; showQuestion();
+// Next question
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < questions.length) {
+    showQuestion();
+  } else {
+    document.getElementById("quiz").innerHTML = `
+      <h2>🎉 Quiz Finished!</h2>
+      <p>Score: ${score}/${questions.length}</p>
+      <button onclick="restartQuiz()">Restart Quiz</button>
+    `;
+    updateProgress(true);
+  }
 }
 
-hintBtn?.addEventListener("click", ()=>{
-  if(usedHints>=1) return alert("Hint already used!");
-  alert("Hint: "+questions[questionIndex].hint);
-  usedHints++;
-});
-
-fiftyBtn?.addEventListener("click", ()=>{
-  if(usedFifty) return alert("50:50 already used!");
-  const q=questions[questionIndex];
-  let removed=0;
-  choicesEl.querySelectorAll("button").forEach((btn,idx)=>{
-    if(idx!==q.answer && removed<2){ btn.style.display="none"; removed++; }
-  });
-  usedFifty=true;
-});
-
-async function endQuiz(){
-  clearInterval(timer);
-  scoreEl.textContent=score;
-  quizContainer.style.display="none";
-  if(!currentUser) return;
-  const userRef=doc(db,"users",currentUser.uid);
-  const docSnap=await getDoc(userRef);
-  const prevHistory=docSnap.data().history||[];
-  prevHistory.push({date:new Date().toISOString(), score});
-  const newScore=Math.max(docSnap.data().score||0,score);
-  await updateDoc(userRef,{score:newScore, history:prevHistory});
-  showLeaderboard();
+// Restart quiz
+function restartQuiz() {
+  document.getElementById("categoryDiv").style.display = "block";
+  document.getElementById("quiz").innerHTML = "";
+  currentQuestion = 0;
+  score = 0;
+  fiftyUsed = false;
+  hintUsed = false;
+  document.getElementById("fiftyBtn").disabled = false;
+  document.getElementById("hintBtn").disabled = false;
+  updateProgress(true);
 }
 
-// -------------------- Utility --------------------
-function shuffleArray(arr){ return arr.sort(()=>Math.random()-0.5); }
+// Update progress bar
+function updateProgress(finish = false) {
+  const progress = document.getElementById("progress-bar");
+  if (!progress) return;
+  let percent = finish ? 100 : (currentQuestion / questions.length) * 100;
+  progress.style.width = percent + "%";
+  let color = "#00c6ff";
+  if (percent >= 75) color = "#ffd700";
+  else if (percent >= 50) color = "#00ff00";
+  else if (percent >= 25) color = "#ff8c00";
+  progress.style.background = `linear-gradient(90deg,${color},#ffffff,${color})`;
+}
+
+// Timer
+function startTimer() {
+  const timerBar = document.getElementById("timer-bar");
+  const timerText = document.getElementById("timer-text");
+  timerBar.style.width = "100%";
+  timerText.textContent = timeLeft + "s";
+
+  timer = setInterval(() => {
+    timeLeft--;
+    timerBar.style.width = (timeLeft / 25 * 100) + "%";
+    timerText.textContent = timeLeft + "s";
+
+    if (timeLeft <= 10) {
+      timerBar.style.boxShadow = `0 0 20px #ff416c, 0 0 40px #ff4b2b inset`;
+      timerBar.style.background = "linear-gradient(135deg,#ff416c,#ff4b2b)";
+    }
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      timerText.textContent = "0s";
+      const buttons = document.querySelectorAll(".option-btn");
+      const correctIndex = questions[currentQuestion].answer;
+      buttons.forEach(btn => btn.disabled = true);
+      buttons[correctIndex].style.background = "linear-gradient(135deg, #00ff6a, #00f2fe)";
+      document.getElementById("result").textContent = "⏰ Time's up!";
+      document.getElementById("result").style.color = "#ff0";
+      document.getElementById("nextBtn").disabled = false;
+      document.getElementById("wrong-sound").play();
+      document.getElementById("fiftyBtn").disabled = true;
+      document.getElementById("hintBtn").disabled = true;
+    }
+  }, 1000);
+}
+
+// 50:50 lifeline
+function useFifty() {
+  if (fiftyUsed) return;
+  const correctIndex = questions[currentQuestion].answer;
+  const buttons = document.querySelectorAll(".option-btn");
+  let removed = 0;
+  for (let i = 0; i < buttons.length; i++) {
+    if (i !== correctIndex && removed < 2) {
+      buttons[i].style.opacity = "0.3";
+      buttons[i].style.pointerEvents = "none";
+      buttons[i].style.boxShadow = "0 0 5px #ff416c,0 0 10px #ff4b2b inset";
+      removed++;
+    }
+  }
+  fiftyUsed = true;
+  document.getElementById("fiftyBtn").disabled = true;
+}
+
+// Hint lifeline
+function useHint() {
+  if (hintUsed) return;
+  const correctIndex = questions[currentQuestion].answer;
+  const buttons = document.querySelectorAll(".option-btn");
+  const hintText = "💡 Hint: starts with '" + buttons[correctIndex].textContent[0] + "'";
+  const result = document.getElementById("result");
+  result.textContent = hintText;
+  result.style.color = "#ffea00";
+  result.style.textShadow = "0 0 10px #ffea00, 0 0 20px #ffd700";
+  hintUsed = true;
+  document.getElementById("hintBtn").disabled = true;
+}
