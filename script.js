@@ -22,7 +22,6 @@ function startQuiz() {
     })
     .catch(err=>{
       console.error("API failed, using fallback questions:", err);
-      // fallback questions
       questions = [
         { question: "What is 2+2?", options: ["3","4","5","6"], answer: 1 },
         { question: "Capital of France?", options: ["Berlin","London","Paris","Rome"], answer: 2 },
