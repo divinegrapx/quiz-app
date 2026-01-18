@@ -1,90 +1,77 @@
 body {
+  background-color: #111;
+  color: #fff;
   font-family: 'Arial', sans-serif;
-  background: #111;
-  color: #0ff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  text-align: center;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
   padding: 20px;
 }
 
-h2, h3 {
-  color: #0ff;
-  text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+.auth-form, #quizContainer, #avatarContainer {
+  margin: 20px 0;
+  padding: 20px;
+  border: 2px solid #0ff;
+  border-radius: 10px;
+  box-shadow: 0 0 20px #0ff;
 }
 
-input, select, button {
+input, select {
+  padding: 10px;
   margin: 5px;
-  padding: 8px;
   border-radius: 5px;
   border: none;
-  font-size: 1rem;
-}
-
-button {
-  background: #0ff;
-  color: #111;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-button:hover {
-  background: #0aa;
-  box-shadow: 0 0 10px #0ff;
-}
-
-#quizContainer {
-  margin-top: 20px;
-  width: 80%;
-  max-width: 600px;
-  background: #222;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 15px #0ff;
-}
-
-#choices {
-  display: flex;
-  flex-direction: column;
+  outline: none;
 }
 
 .neon-btn {
-  margin: 5px 0;
-  padding: 10px;
-  background: #0ff;
-  color: #111;
-  font-weight: bold;
+  padding: 10px 20px;
+  margin: 5px;
+  border: none;
   border-radius: 5px;
+  background-color: #0ff;
+  color: #000;
+  font-weight: bold;
   cursor: pointer;
-  text-align: center;
-  text-shadow: 0 0 5px #0ff;
+  box-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
   transition: 0.2s;
 }
 
 .neon-btn:hover {
-  background: #0aa;
-  box-shadow: 0 0 10px #0ff;
+  box-shadow: 0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff;
+}
+
+#choices button {
+  display: block;
+  width: 80%;
+  margin: 10px auto;
+}
+
+#timer {
+  font-size: 24px;
+  margin-bottom: 10px;
 }
 
 #leaderboard {
   margin-top: 20px;
-  width: 300px;
-  background: #222;
+  border: 2px solid #0ff;
   padding: 10px;
   border-radius: 10px;
-  box-shadow: 0 0 10px #0ff;
+  box-shadow: 0 0 20px #0ff;
 }
 
 .leaderboard-user {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin: 5px 0;
 }
 
-.avatar {
+.leaderboard-user .avatar {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  margin-right: 10px;
 }
