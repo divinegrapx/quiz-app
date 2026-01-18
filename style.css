@@ -1,77 +1,192 @@
+/* Body & container */
 body {
-  background-color: #111;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
   color: #fff;
-  font-family: 'Arial', sans-serif;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
 .container {
-  max-width: 600px;
-  margin: 0 auto;
+  width: 95%;
+  max-width: 500px;
+  text-align: center;
   padding: 20px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
-.auth-form, #quizContainer, #avatarContainer {
-  margin: 20px 0;
-  padding: 20px;
-  border: 2px solid #0ff;
-  border-radius: 10px;
-  box-shadow: 0 0 20px #0ff;
+h1 {
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+  text-shadow: 0 0 15px #00f2fe, 0 0 30px #00f2fe;
 }
 
-input, select {
-  padding: 10px;
-  margin: 5px;
-  border-radius: 5px;
+select, button {
+  padding: 12px 20px;
+  margin: 10px 0;
+  border-radius: 12px;
   border: none;
-  outline: none;
+  font-size: 16px;
+  transition: 0.3s;
 }
 
-.neon-btn {
-  padding: 10px 20px;
-  margin: 5px;
-  border: none;
-  border-radius: 5px;
-  background-color: #0ff;
-  color: #000;
+button {
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
-  transition: 0.2s;
 }
 
-.neon-btn:hover {
-  box-shadow: 0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff;
+button:hover:not(:disabled) {
+  opacity: 0.85;
 }
 
-#choices button {
-  display: block;
-  width: 80%;
-  margin: 10px auto;
-}
-
-#timer {
-  font-size: 24px;
-  margin-bottom: 10px;
-}
-
-#leaderboard {
+/* Quiz card */
+#quiz {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 25px;
   margin-top: 20px;
-  border: 2px solid #0ff;
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 0 0 20px #0ff;
-}
-
-.leaderboard-user {
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+  min-height: 300px;
   display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
-  justify-content: space-between;
-  margin: 5px 0;
 }
 
-.leaderboard-user .avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+/* Progress bar */
+#progress-container {
+  background: rgba(255,255,255,0.2);
+  border-radius: 15px;
+  width: 100%;
+  height: 25px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 8px #00f2fe inset, 0 0 15px #00f2fe inset;
 }
+
+#progress-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 15px;
+  background: linear-gradient(90deg,#00f2fe,#00c6ff,#00f2fe);
+  background-size: 200% 200%;
+  animation: progressGlow 2s linear infinite;
+  transition: width 0.4s ease-in-out, background 0.5s ease;
+}
+
+@keyframes progressGlow {
+  0% { background-position: 0% 50%; box-shadow:0 0 5px #00f2fe,0 0 15px #00f2fe; }
+  50% { background-position: 100% 50%; box-shadow:0 0 10px #00f2fe,0 0 25px #00f2fe; }
+  100% { background-position: 0% 50%; box-shadow:0 0 5px #00f2fe,0 0 15px #00f2fe; }
+}
+
+/* Timer */
+#timer-container {
+  width: 100%;
+  height: 25px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 15px;
+  margin-bottom: 15px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 5px #ff6a00 inset;
+}
+
+#timer-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg,#ff6a00,#ffb347);
+  border-radius: 15px;
+  transition: width 1s linear;
+  box-shadow: 0 0 10px #ff6a00, 0 0 20px #ffb347 inset;
+}
+
+#timer-text {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  margin: 0; font-weight: bold;
+  color: #fff; text-shadow:0 0 5px #000;
+  pointer-events: none;
+}
+
+/* Lifelines */
+#lifelines {
+  margin-bottom: 15px;
+  display: flex; justify-content: center; gap: 12px;
+}
+
+#lifelines button {
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 15px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  color:#fff;
+  display:flex; align-items:center; gap:6px;
+  transition: 0.3s;
+  box-shadow: 0 0 10px #ff416c, 0 0 20px #ff4b2b inset;
+}
+
+#lifelines button:hover:not(:disabled) {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+#lifelines button:disabled { 
+  opacity: 0.5; cursor:not-allowed; box-shadow:none; 
+}
+
+/* Quiz content */
+#quiz h2 {
+  font-size: 1.3rem; margin-bottom: 15px;
+  text-shadow: 0 0 10px #00f2fe;
+}
+
+.option-btn {
+  display: block; width: 90%; max-width: 320px;
+  margin: 10px auto; padding: 14px;
+  font-size:16px; font-weight:600;
+  cursor:pointer; border-radius:12px; border:none;
+  background: linear-gradient(135deg,#00f2fe,#00c6ff);
+  color:#fff; transition:0.3s, transform 0.2s;
+  box-shadow: 0 0 5px #00f2fe,0 0 15px #00c6ff inset;
+}
+
+.option-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  background: linear-gradient(135deg,#00c6ff,#00f2fe);
+}
+
+.option-btn:disabled {
+  cursor:not-allowed;
+  opacity:0.7;
+}
+
+#result {
+  font-size:1.2rem; margin-top:12px; font-weight:bold; min-height:24px;
+  text-shadow: 0 0 10px #fff;
+}
+
+#nextBtn {
+  margin-top:15px;
+  padding: 10px 20px;
+  font-size:16px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  background: linear-gradient(135deg,#f7971e,#ffd200);
+  color:#000;
+  font-weight:bold;
+  box-shadow:0 0 10px #ffd200 inset,0 0 20px #f7971e;
+  transition: 0.3s, transform 0.2s;
+}
+
+#nextBtn:hover { transform: scale(1.05); box-shadow:0 0 15px #ffd200,0 0 30px #ff7f50 inset; }
