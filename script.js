@@ -1,19 +1,20 @@
-// -------- FIREBASE CONFIG ----------
+// ---------------- FIREBASE CONFIG ----------------
 const firebaseConfig = {
-  apiKey: "AIza....",               // from Firebase console
-  authDomain: "your-app.firebaseapp.com",
-  projectId: "your-app",
-  storageBucket: "your-app.appspot.com",
-  messagingSenderId: "1234567890",
-  appId: "1:1234567890:web:abcdef123456"
+  apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
+  authDomain: "neon-quiz-app.firebaseapp.com",
+  projectId: "neon-quiz-app",
+  storageBucket: "neon-quiz-app.firebasestorage.app",
+  messagingSenderId: "891061147021",
+  appId: "1:891061147021:web:7b3d80020f642da7b699c4",
+  measurementId: "G-7LKHH1EHQW"
 };
 
-
+// Initialize Firebase (compat)
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// -------- DOM ELEMENTS ----------
+// ---------------- DOM ELEMENTS ----------------
 const loginBtn = document.getElementById("loginBtn");
 const loginDiv = document.getElementById("loginDiv");
 const categoryDiv = document.getElementById("categoryDiv");
@@ -38,11 +39,11 @@ const hintBox = document.createElement("div");
 hintBox.id = "hint-box";
 quizDiv.parentNode.insertBefore(hintBox, quizDiv.nextSibling);
 
-// -------- GLOBALS ----------
+// ---------------- GLOBALS ----------------
 let questions = [], current = 0, score = 0, timer, timeLeft = 20;
 let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
 
-// -------- FALLBACK QUESTIONS ----------
+// ---------------- FALLBACK QUESTIONS ----------------
 const fallbackQuestions = [
   { question: "What color is the sky?", correctAnswer: "Blue", incorrectAnswers: ["Red","Green","Yellow"], hint: "It's the same color as the ocean." },
   { question: "How many days are in a week?", correctAnswer: "7", incorrectAnswers: ["5","6","8"], hint: "Think Monday to Sunday." },
@@ -51,7 +52,7 @@ const fallbackQuestions = [
 
 const moneyLevels = ["$100","$200","$300","$500","$1,000","$2,000","$4,000","$8,000","$16,000","$32,000"];
 
-// -------- LOGIN ----------
+// ---------------- LOGIN ----------------
 loginBtn.addEventListener("click", () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider)
@@ -67,7 +68,7 @@ loginBtn.addEventListener("click", () => {
     });
 });
 
-// -------- BUILD MONEY LADDER ----------
+// ---------------- MONEY LADDER ----------------
 function buildMoneyLadder() {
   moneyList.innerHTML = "";
   const levelsToUse = moneyLevels.slice(0, questionCount.value);
@@ -78,7 +79,7 @@ function buildMoneyLadder() {
   });
 }
 
-// -------- START QUIZ ----------
+// ---------------- START QUIZ ----------------
 startBtn.addEventListener("click", startQuiz);
 fiftyBtn.addEventListener("click", useFifty);
 hintBtn.addEventListener("click", useHint);
@@ -125,7 +126,7 @@ async function startQuiz() {
   showQuestion();
 }
 
-// -------- SHOW QUESTION ----------
+// ---------------- SHOW QUESTION ----------------
 function showQuestion() {
   clearInterval(timer);
   timeLeft = 20;
@@ -148,7 +149,7 @@ function showQuestion() {
   startTimer();
 }
 
-// -------- TIMER ----------
+// ---------------- TIMER ----------------
 function startTimer() {
   timerText.style.display = "block";
   timer = setInterval(() => {
@@ -166,7 +167,7 @@ function updateTimer() {
   timerBar.style.width = `${(timeLeft / 20) * 100}%`;
 }
 
-// -------- CHECK ANSWER ----------
+// ---------------- CHECK ANSWER ----------------
 function checkAnswer(answer) {
   clearInterval(timer);
   const correct = questions[current].correctAnswer;
@@ -194,7 +195,7 @@ function checkAnswer(answer) {
   }
 }
 
-// -------- NEXT QUESTION ----------
+// ---------------- NEXT QUESTION ----------------
 function nextQuestion() {
   current++;
   if (current >= questions.length) {
@@ -215,7 +216,7 @@ function nextQuestion() {
   showQuestion();
 }
 
-// -------- LIFELINES ----------
+// ---------------- LIFELINES ----------------
 function useFifty() {
   if (fiftyUsed) return;
   fiftyUsed = true;
@@ -242,7 +243,7 @@ function useHint() {
   hintBox.style.display = "block";
 }
 
-// -------- MONEY LADDER ----------
+// ---------------- MONEY LADDER ----------------
 function updateMoneyLadder() {
   const lis = moneyList.querySelectorAll("li");
   lis.forEach(li => li.classList.remove("current"));
@@ -250,7 +251,7 @@ function updateMoneyLadder() {
   if (lis[idx]) lis[idx].classList.add("current");
 }
 
-// -------- LEADERBOARD ----------
+// ---------------- LEADERBOARD ----------------
 async function saveScore(user, score) {
   if (!user) return;
   const userData = {
