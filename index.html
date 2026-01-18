@@ -6,21 +6,23 @@
   <title>Neon Quiz App</title>
   <link rel="stylesheet" href="style.css">
 
-  <!-- Firebase Compat SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- Firebase (compat SDKs) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
 <div class="container">
+  <h1 id="quiz-title">🎯 Neon Quiz Challenge</h1>
+
   <!-- LOGIN -->
   <div id="loginDiv">
     <button id="loginBtn">Login with Google</button>
   </div>
 
-  <!-- CATEGORY SELECT -->
-  <div id="categoryDiv" style="display:none">
+  <!-- CATEGORY SELECTION -->
+  <div id="categoryDiv" style="display:none;">
     <label for="categorySelect">Choose Category:</label>
     <select id="categorySelect">
       <option value="science">Science</option>
@@ -36,48 +38,43 @@
     <label for="questionCount">Number of Questions:</label>
     <select id="questionCount">
       <option value="20">20</option>
+      <option value="25">25</option>
       <option value="30">30</option>
     </select>
 
     <button id="startBtn">Start Quiz</button>
   </div>
 
-  <!-- QUIZ TITLE -->
-  <h2 id="quiz-title"></h2>
-
-  <!-- QUIZ CARD -->
-  <div id="quiz" style="display:none"></div>
-
-  <!-- HINT -->
-  <div id="hint-box"></div>
-
   <!-- LIFELINES -->
-  <div id="lifelines" style="display:none">
+  <div id="lifelines" style="display:none;">
     <button id="fiftyBtn">50:50 ✂️</button>
     <button id="hintBtn">💡 Hint</button>
   </div>
 
-  <!-- PROGRESS -->
-  <div id="progress-container" style="display:none">
+  <!-- PROGRESS BAR -->
+  <div id="progress-container" style="display:none;">
     <div id="progress-bar"></div>
   </div>
 
   <!-- TIMER -->
-  <div id="timer-container" style="display:none">
+  <div id="timer-container" style="display:none;">
     <div id="timer-bar"></div>
-    <span id="timer-text">20s</span>
+    <span id="timer-text">25s</span>
   </div>
 
-  <!-- MONEY LADDER -->
-  <ul id="money-list" style="display:none"></ul>
+  <!-- QUIZ -->
+  <div id="quiz"></div>
 
-  <!-- SOUNDS -->
-  <audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
-  <audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
+  <!-- MONEY LADDER -->
+  <ul id="money-list" style="display:none;"></ul>
 
   <!-- LEADERBOARD -->
-  <h3>Leaderboard</h3>
+  <h2>🏆 Leaderboard</h2>
   <ul id="leaderboard-list"></ul>
+
+  <!-- Sounds -->
+  <audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
+  <audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
 </div>
 
 <script src="script.js"></script>
