@@ -17,20 +17,14 @@
   <h1 id="quiz-title">🎯 Neon Quiz Challenge</h1>
 
   <!-- LOGIN / REGISTER -->
-  <div id="loginDiv">
-    <h2>Login or Register</h2>
-
-    <button id="loginGoogleBtn">Login with Google</button>
-    <button id="loginFacebookBtn">Login with Facebook</button>
-
-    <hr>
-
+  <div id="authDiv">
     <input type="email" id="email" placeholder="Email">
     <input type="password" id="password" placeholder="Password">
-    <button id="loginEmailBtn">Login</button>
-    <button id="registerEmailBtn">Register</button>
-
-    <p id="login-error" style="color:red;"></p>
+    <button id="loginEmailBtn">Login with Email</button>
+    <button id="registerBtn">Register</button>
+    <hr>
+    <button id="loginGoogleBtn">Login with Google</button>
+    <button id="loginFacebookBtn">Login with Facebook</button>
   </div>
 
   <!-- CATEGORY SELECTION -->
@@ -49,8 +43,8 @@
 
     <label for="questionCount">Number of Questions:</label>
     <select id="questionCount">
+      <option value="10">10</option>
       <option value="20">20</option>
-      <option value="25">25</option>
       <option value="30">30</option>
     </select>
 
@@ -76,6 +70,7 @@
 
   <!-- QUIZ -->
   <div id="quiz"></div>
+  <div id="hint-box"></div>
 
   <!-- MONEY LADDER -->
   <ul id="money-list" style="display:none;"></ul>
