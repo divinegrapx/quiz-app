@@ -1,5 +1,5 @@
 /* ===============================
-   DOM ELEMENTS (ALL DEFINED)
+   DOM ELEMENTS
 ================================ */
 
 const quizDiv = document.getElementById("quiz");
@@ -31,12 +31,29 @@ let fiftyUsed = false;
 let hintUsed = false;
 
 /* ===============================
-   EVENT LISTENERS
+   EVENTS
 ================================ */
 
-startBtn.addEventListener("click", startQuiz);
-fiftyBtn.addEventListener("click", useFifty);
-hintBtn.addEventListener("click", useHint);
+startBtn.onclick = startQuiz;
+fiftyBtn.onclick = useFifty;
+hintBtn.onclick = useHint;
+
+/* ===============================
+   FALLBACK QUESTIONS (CRITICAL)
+================================ */
+
+const fallbackQuestions = [
+  {
+    question: "What color is the sky?",
+    correctAnswer: "Blue",
+    incorrectAnswers: ["Red", "Green", "Yellow"]
+  },
+  {
+    question: "How many days are in a week?",
+    correctAnswer: "7",
+    incorrectAnswers: ["5", "6", "8"]
+  }
+];
 
 /* ===============================
    START QUIZ
@@ -56,26 +73,23 @@ async function startQuiz() {
   score = 0;
   progressBar.style.width = "0%";
 
-  const category = categorySelect.value;
-  const limit = questionCount.value;
-
   try {
-    const response = await fetch(
-      `https://the-trivia-api.com/api/questions?categories=${category}&limit=${limit}`
+    const res = await fetch(
+      `https://the-trivia-api.com/api/questions?categories=${categorySelect.value}&limit=${questionCount.value}`
     );
 
-    if (!response.ok) throw new Error("API error");
+    if (!res.ok) throw new Error("API failed");
 
-    questions = await response.json();
+    questions = await res.json();
 
-    if (!questions.length) throw new Error("No questions");
+    if (!questions.length) throw new Error("Empty API");
 
-    showQuestion();
   } catch (err) {
-    quizDiv.innerHTML =
-      "<p>⚠️ Failed to load questions. Check your internet connection.</p>";
-    startBtn.disabled = false;
+    console.warn("Using fallback questions:", err);
+    questions = fallbackQuestions;
   }
+
+  showQuestion();
 }
 
 /* ===============================
@@ -88,30 +102,20 @@ function showQuestion() {
   updateTimer();
 
   const q = questions[current];
+  const answers = [...q.incorrectAnswers, q.correctAnswer]
+    .sort(() => Math.random() - 0.5);
 
-  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(
-    () => Math.random() - 0.5
-  );
+  quizDiv.innerHTML = `<h2>${q.question}</h2>`;
 
-  quizDiv.innerHTML = `
-    <h2>${q.question}</h2>
-    ${answers
-      .map(
-        (a) => `
-      <div class="answer">
-        <button data-answer="${a}">${a}</button>
-      </div>
-    `
-      )
-      .join("")}
-  `;
-
-  document.querySelectorAll(".answer button").forEach((btn) => {
-    btn.addEventListener("click", () => checkAnswer(btn.dataset.answer));
+  answers.forEach(answer => {
+    const btn = document.createElement("button");
+    btn.textContent = answer;
+    btn.className = "answer-btn";
+    btn.onclick = () => checkAnswer(answer);
+    quizDiv.appendChild(btn);
   });
 
   progressBar.style.width = `${(current / questions.length) * 100}%`;
-
   startTimer();
 }
 
@@ -123,7 +127,6 @@ function startTimer() {
   timer = setInterval(() => {
     timeLeft--;
     updateTimer();
-
     if (timeLeft <= 0) {
       clearInterval(timer);
       nextQuestion();
@@ -145,46 +148,35 @@ function checkAnswer(answer) {
 
   const correct = questions[current].correctAnswer;
 
-  document.querySelectorAll(".answer button").forEach((btn) => {
+  document.querySelectorAll(".answer-btn").forEach(btn => {
     btn.disabled = true;
-
-    if (btn.dataset.answer === correct) {
-      btn.classList.add("correct");
-    } else if (btn.dataset.answer === answer) {
-      btn.classList.add("wrong");
-    }
+    if (btn.textContent === correct) btn.classList.add("correct");
+    if (btn.textContent === answer && answer !== correct) btn.classList.add("wrong");
   });
 
-  if (answer === correct) {
-    score++;
-    correctSound.play();
-  } else {
-    wrongSound.play();
-  }
+  answer === correct ? correctSound.play() : wrongSound.play();
+  if (answer === correct) score++;
 
   setTimeout(nextQuestion, 1200);
 }
 
 /* ===============================
-   NEXT QUESTION / END
+   NEXT / END
 ================================ */
 
 function nextQuestion() {
   current++;
-
   if (current >= questions.length) {
-    clearInterval(timer);
     quizDiv.innerHTML = `
-      <h2>🎉 Quiz Finished!</h2>
-      <p>Your Score: <strong>${score}/${questions.length}</strong></p>
-      <button onclick="location.reload()">Restart Quiz</button>
+      <h2>🎉 Finished!</h2>
+      <p>Score: ${score}/${questions.length}</p>
+      <button onclick="location.reload()">Restart</button>
     `;
     lifelines.style.display = "none";
-    progressBar.style.width = "100%";
     startBtn.disabled = false;
+    progressBar.style.width = "100%";
     return;
   }
-
   showQuestion();
 }
 
@@ -197,19 +189,17 @@ function useFifty() {
   fiftyUsed = true;
   fiftyBtn.disabled = true;
 
-  const wrongButtons = Array.from(
-    document.querySelectorAll(".answer button")
-  ).filter((btn) => btn.dataset.answer !== questions[current].correctAnswer);
+  const correct = questions[current].correctAnswer;
+  const wrongs = [...document.querySelectorAll(".answer-btn")]
+    .filter(b => b.textContent !== correct)
+    .slice(0, 2);
 
-  wrongButtons.slice(0, 2).forEach((btn) => {
-    btn.style.visibility = "hidden";
-  });
+  wrongs.forEach(b => b.style.visibility = "hidden");
 }
 
 function useHint() {
   if (hintUsed) return;
   hintUsed = true;
   hintBtn.disabled = true;
-
-  alert("💡 Hint: Trust your first instinct!");
+  alert("💡 Think carefully — the answer is simpler than it looks.");
 }
