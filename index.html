@@ -1,66 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Neon Quiz Challenge</title>
-  <meta name="description" content="Fast-paced neon quiz game with timer, lifelines and multiple categories." />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Quiz App</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <div class="container">
-    <h1>🎯 Neon Quiz Challenge</h1>
 
-    <!-- Setup -->
-    <div id="categoryDiv">
-      <label for="categorySelect">Choose Category</label>
-      <select id="categorySelect">
-        <option value="general_knowledge">General Knowledge</option>
-        <option value="science">Science</option>
-        <option value="history">History</option>
-        <option value="geography">Geography</option>
-        <option value="music">Music</option>
-        <option value="film_and_tv">Film & TV</option>
-        <option value="sports">Sports</option>
-        <option value="food_and_drink">Food & Drink</option>
-      </select>
+<div class="container">
+  <h1>🎯 Neon Quiz Challenge</h1>
 
-      <label for="questionCount">Questions</label>
-      <select id="questionCount">
-        <option>20</option>
-        <option>25</option>
-        <option>30</option>
-      </select>
+  <!-- Category and number of questions selection -->
+  <div id="categoryDiv">
+    <label for="categorySelect">Choose Category:</label>
+    <select id="categorySelect">
+      <option value="science">Science</option>
+      <option value="history">History</option>
+      <option value="geography">Geography</option>
+      <option value="music">Music</option>
+      <option value="film_and_tv">Film & TV</option>
+      <option value="sports">Sports</option>
+      <option value="food_and_drink">Food & Drink</option>
+      <option value="general_knowledge">General Knowledge</option>
+    </select>
 
-      <button id="startBtn">Start Quiz</button>
-    </div>
+    <label for="questionCount">Number of Questions:</label>
+    <select id="questionCount">
+      <option value="20">20</option>
+      <option value="21">21</option>
+      <option value="22">22</option>
+      <option value="23">23</option>
+      <option value="24">24</option>
+      <option value="25">25</option>
+      <option value="26">26</option>
+      <option value="27">27</option>
+      <option value="28">28</option>
+      <option value="29">29</option>
+      <option value="30">30</option>
+    </select>
 
-    <!-- Lifelines -->
-    <div id="lifelines">
-      <button id="fiftyBtn">50:50 ✂️</button>
-      <button id="hintBtn">💡 Hint</button>
-    </div>
-
-    <!-- Progress -->
-    <div id="progress-container">
-      <div id="progress-bar"></div>
-    </div>
-
-    <!-- Timer -->
-    <div id="timer-container">
-      <div id="timer-bar"></div>
-      <span id="timer-text">25s</span>
-    </div>
-
-    <!-- Quiz -->
-    <div id="quiz"></div>
+    <button onclick="startQuiz()">Start Quiz</button>
   </div>
 
-  <!-- Sounds -->
-  <audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
-  <audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
+  <!-- Lifelines -->
+  <div id="lifelines">
+    <button id="fiftyBtn" onclick="useFifty()">50:50 ✂️</button>
+    <button id="hintBtn" onclick="useHint()">💡 Hint</button>
+  </div>
 
-  <script src="script.js" defer></script>
+  <!-- Progress bar -->
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+
+  <!-- Timer -->
+  <div id="timer-container">
+    <div id="timer-bar"></div>
+    <span id="timer-text">25s</span>
+  </div>
+
+  <!-- Quiz area -->
+  <div id="quiz"></div>
+</div>
+
+<!-- Sounds -->
+<audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
+<audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
+
+<script src="script.js"></script>
 </body>
 </html>
