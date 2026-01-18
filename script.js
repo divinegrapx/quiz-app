@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const wrongSound = document.getElementById("wrong-sound");
 
   let questions = [], current = 0, score = 0, timer, timeLeft = 20;
-  let fiftyUsed = false, hintUsed = false;
+  let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
 
   const fallbackQuestions = [
     { question: "What color is the sky?", correctAnswer: "Blue", incorrectAnswers: ["Red","Green","Yellow"], hint: "It's the same color as the ocean." },
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function buildMoneyLadder() {
     moneyList.innerHTML = "";
-    moneyLevels.slice(0, questionCount.value).reverse().forEach((amount, idx) => {
+    moneyLevels.slice(0, questionCount.value).reverse().forEach((amount) => {
       const li = document.createElement("li");
       li.textContent = amount;
       moneyList.appendChild(li);
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     hintBox.style.display = "none";
     quizDiv.innerHTML = "Loading...";
 
-    current = 0; score = 0; fiftyUsed = false; hintUsed = false;
+    current = 0; score = 0; fiftyUsed = false; hintUsed = false; ladderLevel = 0;
     fiftyBtn.disabled = false; hintBtn.disabled = false;
     progressBar.style.width = "0%";
 
@@ -92,7 +92,6 @@ document.addEventListener("DOMContentLoaded", () => {
       quizDiv.appendChild(btn);
     });
 
-    updateMoneyLadder();
     progressBar.style.width = `${(current / questions.length) * 100}%`;
     startTimer();
   }
@@ -104,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
       updateTimer();
       if (timeLeft <= 0) {
         clearInterval(timer);
-        nextQuestion();
+        nextQuestion(false); // false = timed out counts as wrong
       }
     }, 1000);
   }
@@ -127,6 +126,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (answer === correct) {
       score++;
+      ladderLevel++; // increase ladder only on correct
+      updateMoneyLadder();
       feedbackDiv.textContent = "✅ Correct!";
       feedbackDiv.style.color = "lime";
       correctSound.play();
@@ -136,13 +137,15 @@ document.addEventListener("DOMContentLoaded", () => {
       wrongSound.play();
     }
 
-    setTimeout(nextQuestion, 1000);
+    setTimeout(() => nextQuestion(answer === correct), 1000);
   }
 
-  function nextQuestion() {
-    current++;
+  function nextQuestion(correct) {
+    if (correct) current++; // only advance question on correct answer
+    else current++; // optional: you may also advance even on wrong, depends on game style
+
     if (current >= questions.length) {
-      quizDiv.innerHTML = `<h2>Finished</h2><p>Score: ${score}/${questions.length}</p>
+      quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>
         <button onclick="location.reload()">Restart</button>`;
       startBtn.disabled = false;
       lifelines.style.display = "none";
@@ -184,10 +187,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateMoneyLadder() {
     const lis = moneyList.querySelectorAll("li");
     lis.forEach(li => li.classList.remove("current"));
-    const idx = moneyLevels.length - current - 1;
+    const idx = moneyLevels.length - ladderLevel - 1;
     if (lis[idx]) lis[idx].classList.add("current");
   }
 
   buildMoneyLadder();
-
 });
