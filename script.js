@@ -21,6 +21,7 @@ let timeLeft = 20;
 let fiftyUsed = false;
 let hintUsed = false;
 
+// Fallback questions
 const fallbackQuestions = [
   {
     question: "What color is the sky?",
@@ -36,14 +37,16 @@ const fallbackQuestions = [
   }
 ];
 
+// Event listeners
 startBtn.addEventListener("click", startQuiz);
 fiftyBtn.addEventListener("click", useFifty);
 hintBtn.addEventListener("click", useHint);
 
+// Start quiz
 async function startQuiz() {
   startBtn.disabled = true;
   lifelines.style.display = "flex";
-  quizDiv.textContent = "Loading...";
+  quizDiv.innerHTML = "Loading...";
 
   current = 0;
   score = 0;
@@ -53,19 +56,15 @@ async function startQuiz() {
   hintBtn.disabled = false;
 
   try {
-    const res = await fetch(
-      `https://the-trivia-api.com/api/questions?limit=${questionCount.value}`
-    );
+    const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${questionCount.value}`);
     if (!res.ok) throw "API error";
     questions = await res.json();
     if (!questions.length) throw "Empty";
-    
-    // Add generic hint if missing
+
     questions = questions.map(q => ({
       ...q,
       hint: "Think carefully about the answer."
     }));
-    
   } catch {
     questions = fallbackQuestions;
   }
@@ -73,6 +72,7 @@ async function startQuiz() {
   showQuestion();
 }
 
+// Show question
 function showQuestion() {
   clearInterval(timer);
   timeLeft = 20;
@@ -95,82 +95,6 @@ function showQuestion() {
   startTimer();
 }
 
+// Timer
 function startTimer() {
-  timerText.style.display = "block";
-  timer = setInterval(() => {
-    timeLeft--;
-    updateTimer();
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      nextQuestion();
-    }
-  }, 1000);
-}
-
-function updateTimer() {
-  timerText.textContent = `${timeLeft}s`;
-  timerBar.style.width = `${(timeLeft / 20) * 100}%`;
-}
-
-function checkAnswer(answer) {
-  clearInterval(timer);
-  const correct = questions[current].correctAnswer;
-
-  const feedbackDiv = document.getElementById("feedback");
-
-  document.querySelectorAll(".answer-btn").forEach(b => {
-    b.disabled = true;
-    if (b.textContent === correct) b.classList.add("correct");
-    if (b.textContent === answer && answer !== correct) b.classList.add("wrong");
-  });
-
-  if (answer === correct) {
-    score++;
-    feedbackDiv.textContent = "✅ Correct!";
-    feedbackDiv.style.color = "lime";
-  } else {
-    feedbackDiv.textContent = "❌ Wrong!";
-    feedbackDiv.style.color = "red";
-  }
-
-  // Show the feedback for 1 second before moving to next question
-  setTimeout(nextQuestion, 1000);
-}
-
-function nextQuestion() {
-  current++;
-  if (current >= questions.length) {
-    quizDiv.innerHTML = `<h2>Finished</h2><p>Score: ${score}/${questions.length}</p>
-      <button onclick="location.reload()">Restart</button>`;
-    startBtn.disabled = false;
-    lifelines.style.display = "none";
-    progressBar.style.width = "100%";
-    return;
-  }
-  showQuestion();
-}
-
-function useFifty() {
-  if (fiftyUsed) return;
-  fiftyUsed = true;
-  fiftyBtn.disabled = true;
-
-  const correct = questions[current].correctAnswer;
-  document.querySelectorAll(".answer-btn")
-    .forEach(b => {
-      if (b.textContent !== correct && Math.random() > 0.5) {
-        b.style.display = "none";
-      }
-    });
-}
-
-function useHint() {
-  if (hintUsed) return;
-  hintUsed = true;
-  hintBtn.disabled = true;
-
-  const q = questions[current];
-  alert("💡 Hint: " + (q.hint || "Think carefully about the answer."));
-}
-
-});
+  timerText.st
