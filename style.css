@@ -24,11 +24,13 @@ body {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 0 10px #00bfff;
 }
 
 .answer-btn:active {
   background-color: #009acd;
+  box-shadow: 0 0 15px #009acd;
 }
 
 #lifelines {
@@ -49,6 +51,7 @@ body {
   height: 100%;
   width: 100%;
   background-color: lime;
+  transition: width 0.3s;
 }
 
 #timer-text {
@@ -73,10 +76,20 @@ body {
   height: 100%;
   width: 0%;
   background-color: #0ff;
+  transition: width 0.3s;
 }
 
 #feedback {
   font-size: 20px;
   font-weight: bold;
   margin: 10px 0;
+}
+
+#hint-box {
+  font-size: 16px;
+  font-weight: bold;
+  color: #0ff;
+  margin-top: 10px;
+  display: none;
+  text-shadow: 0 0 5px #0ff;
 }
