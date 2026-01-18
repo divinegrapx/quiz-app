@@ -1,30 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Quiz App</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Quiz App</title>
+  <link rel="stylesheet" href="style.css">
 
-<!-- Firebase (compat SDKs) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <!-- Firebase (compat SDKs) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
 <div class="container">
-  <h1 id="quiz-title">🎯 Neon Quiz Challenge</h1>
 
-  <!-- LOGIN -->
-  <div id="loginDiv">
-    <button id="googleBtn">Login with Google</button>
-    <button id="facebookBtn">Login with Facebook</button>
-    <h3>Or use email:</h3>
+  <!-- LOGIN / REGISTER -->
+  <div id="authDiv">
+    <h1>🎯 Neon Quiz Challenge</h1>
+    <button id="googleLoginBtn">Login with Google</button>
+    <button id="facebookLoginBtn">Login with Facebook</button>
+    <button id="emailRegisterBtn">Register / Login with Email</button>
+  </div>
+
+  <!-- EMAIL LOGIN FORM -->
+  <div id="emailDiv" style="display:none;">
     <input type="email" id="emailInput" placeholder="Email">
-    <input type="password" id="passInput" placeholder="Password">
-    <button id="emailRegisterBtn">Register</button>
+    <input type="password" id="passwordInput" placeholder="Password">
     <button id="emailLoginBtn">Login</button>
+    <button id="emailRegisterSubmitBtn">Register</button>
+    <button id="emailCancelBtn">Cancel</button>
   </div>
 
   <!-- CATEGORY SELECTION -->
@@ -53,30 +58,28 @@
     <button id="startBtn">Start Quiz</button>
   </div>
 
-  <!-- QUIZ AREA -->
-  <div class="quiz-area">
-    <div id="quiz"></div>
+  <!-- QUIZ + MONEY LADDER -->
+  <div id="quiz-container" style="display:none;">
+    <div id="quiz-and-ladder">
+      <div id="quiz"></div>
+      <ul id="money-list"></ul>
+    </div>
 
-    <!-- MONEY LADDER -->
-    <ul id="money-list"></ul>
+    <!-- Lifelines -->
+    <div id="lifelines" style="display:none;">
+      <button id="fiftyBtn">50:50 ✂️</button>
+      <button id="hintBtn">💡 Hint</button>
+    </div>
+
+    <!-- Progress & Timer -->
+    <div id="progress-container" style="display:none;"><div id="progress-bar"></div></div>
+    <div id="timer-container" style="display:none;">
+      <div id="timer-bar"></div>
+      <span id="timer-text">25s</span>
+    </div>
   </div>
 
-  <!-- LIFELINES -->
-  <div id="lifelines" style="display:none;">
-    <button id="fiftyBtn">50:50 ✂️</button>
-    <button id="hintBtn">💡 Hint</button>
-  </div>
-
-  <!-- TIMER -->
-  <div id="progress-container" style="display:none;">
-    <div id="progress-bar"></div>
-  </div>
-  <div id="timer-container" style="display:none;">
-    <div id="timer-bar"></div>
-    <span id="timer-text">25s</span>
-  </div>
-
-  <!-- LEADERBOARD -->
+  <!-- Leaderboard -->
   <h2>🏆 Leaderboard</h2>
   <ul id="leaderboard-list"></ul>
 
