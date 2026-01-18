@@ -3,18 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Millionaire Quiz App</title>
+  <title>Neon Quiz App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-
-  <h1>🧠 Millionaire Quiz</h1>
+  <h1>🎯 Neon Quiz Challenge</h1>
 
   <!-- Category selection -->
   <div id="categoryDiv">
-    <label for="categorySelect">Choose a category:</label>
+    <label for="categorySelect">Choose Category:</label>
     <select id="categorySelect">
       <option value="science">Science</option>
       <option value="history">History</option>
@@ -28,34 +27,28 @@
     <button onclick="startQuiz()">Start Quiz</button>
   </div>
 
-  <!-- Quiz card -->
-  <div id="quiz-card">
-
-    <!-- Progress bar -->
-    <div id="progress-container">
-      <div id="progress-bar"></div>
-    </div>
-
-    <!-- Timer -->
-    <div id="timer-container">
-      <div id="timer-bar"></div>
-      <p id="timer-text">25s</p>
-    </div>
-
-    <!-- Lifelines -->
-    <div id="lifelines">
-      <button id="fiftyBtn" onclick="useFifty()">🎯 50:50</button>
-      <button id="hintBtn" onclick="useHint()">💡 Hint</button>
-    </div>
-
-    <!-- Quiz content -->
-    <div id="quiz"></div>
-
+  <!-- Lifelines -->
+  <div id="lifelines">
+    <button id="fiftyBtn" onclick="useFifty()">50:50 ✂️</button>
+    <button id="hintBtn" onclick="useHint()">💡 Hint</button>
   </div>
 
+  <!-- Progress bar -->
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+
+  <!-- Timer -->
+  <div id="timer-container">
+    <div id="timer-bar"></div>
+    <span id="timer-text">25s</span>
+  </div>
+
+  <!-- Quiz area -->
+  <div id="quiz"></div>
 </div>
 
-<!-- Sounds: replace these URLs with your raw GitHub URLs -->
+<!-- Sounds -->
 <audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
 <audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
 
