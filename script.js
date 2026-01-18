@@ -1,4 +1,4 @@
-// DOM Elements
+// Get DOM elements
 const quizDiv = document.getElementById("quiz");
 const startBtn = document.getElementById("startBtn");
 const lifelines = document.getElementById("lifelines");
@@ -20,7 +20,7 @@ let timeLeft = 20;
 let fiftyUsed = false;
 let hintUsed = false;
 
-// Fallback questions with per-question hints
+// Fallback questions with hints
 const fallbackQuestions = [
   {
     question: "What color is the sky?",
@@ -47,7 +47,7 @@ startBtn.addEventListener("click", startQuiz);
 fiftyBtn.addEventListener("click", useFifty);
 hintBtn.addEventListener("click", useHint);
 
-// Start quiz
+// Start the quiz
 async function startQuiz() {
   startBtn.disabled = true;
   lifelines.style.display = "flex";
@@ -67,23 +67,21 @@ async function startQuiz() {
     
     if (!data.length) throw "Empty API";
     
-    // Add a hint property to each question
     questions = data.map(q => ({
       question: q.question,
       correctAnswer: q.correctAnswer,
       incorrectAnswers: q.incorrectAnswers,
-      hint: q.hint || "Think carefully about this question." // use API hint if available, else generic
+      hint: q.hint || "Think carefully about this question."
     }));
     
   } catch {
-    // fallback questions
     questions = fallbackQuestions;
   }
 
   showQuestion();
 }
 
-// Show question
+// Show a question
 function showQuestion() {
   clearInterval(timer);
   timeLeft = 20;
