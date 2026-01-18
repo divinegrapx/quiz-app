@@ -1,7 +1,7 @@
 // ==================== FIREBASE SETUP ====================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // 🔥 PASTE YOUR FIREBASE CONFIG BELOW
 const firebaseConfig = {
@@ -19,7 +19,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// ==================== CREATE USER PROFILE FUNCTION ====================
+// ==================== CREATE USER PROFILE ====================
 async function createUserProfile(user) {
   const userRef = doc(db, "users", user.uid);
   const snap = await getDoc(userRef);
@@ -35,20 +35,11 @@ async function createUserProfile(user) {
   }
 }
 
-// ==================== GOOGLE LOGIN BUTTON (optional) ====================
+// ==================== DOM CONTENT LOADED ====================
 document.addEventListener("DOMContentLoaded", () => {
-  const loginBtn = document.getElementById("loginBtn");
-  if (loginBtn) {
-    loginBtn.addEventListener("click", async () => {
-      const result = await signInWithPopup(auth, provider);
-      createUserProfile(result.user);
-      alert("Logged in as " + result.user.displayName);
-    });
-  }
-});
 
-// ==================== QUIZ LOGIC ====================
-document.addEventListener("DOMContentLoaded", () => {
+  // ===== DOM ELEMENTS =====
+  const loginBtn = document.getElementById("loginBtn");
   const quizDiv = document.getElementById("quiz");
   const startBtn = document.getElementById("startBtn");
   const lifelines = document.getElementById("lifelines");
@@ -65,7 +56,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const moneyList = document.getElementById("money-list");
   const correctSound = document.getElementById("correct-sound");
   const wrongSound = document.getElementById("wrong-sound");
+  const leaderboardList = document.getElementById("leaderboard-list");
 
+  // ===== QUIZ VARIABLES =====
   let questions = [], current = 0, score = 0, timer, timeLeft = 20;
   let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
 
@@ -77,6 +70,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const moneyLevels = ["$100","$200","$300","$500","$1,000","$2,000","$4,000","$8,000","$16,000","$32,000"];
 
+  // ==================== LOGIN HANDLER ====================
+  if (loginBtn) {
+    loginBtn.addEventListener("click", async () => {
+      const result = await signInWithPopup(auth, provider);
+      createUserProfile(result.user);
+      alert("Logged in as " + result.user.displayName);
+    });
+  }
+
+  // ==================== LEADERBOARD ====================
+  function loadLeaderboard() {
+    const q = query(
+      collection(db, "users"),
+      orderBy("bestScore", "desc"),
+      limit(10)
+    );
+
+    // Live updates
+    onSnapshot(q, (snapshot) => {
+      leaderboardList.innerHTML = "";
+      snapshot.forEach(doc => {
+        const user = doc.data();
+        const li = document.createElement("li");
+        li.textContent = `${user.name} — ${user.bestScore}`;
+        leaderboardList.appendChild(li);
+      });
+    });
+  }
+
+  // Load leaderboard immediately
+  loadLeaderboard();
+
+  // ==================== MONEY LADDER ====================
   function buildMoneyLadder() {
     moneyList.innerHTML = "";
     const levelsToUse = moneyLevels.slice(0, questionCount.value);
@@ -87,10 +113,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  buildMoneyLadder();
+
+  // ==================== QUIZ EVENT LISTENERS ====================
   startBtn.addEventListener("click", startQuiz);
   fiftyBtn.addEventListener("click", useFifty);
   hintBtn.addEventListener("click", useHint);
 
+  // ==================== START QUIZ ====================
   async function startQuiz() {
     startBtn.disabled = true;
     lifelines.style.display = "flex";
@@ -124,6 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showQuestion();
   }
 
+  // ==================== SHOW QUESTION ====================
   function showQuestion() {
     clearInterval(timer);
     timeLeft = 20;
@@ -147,6 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
     startTimer();
   }
 
+  // ==================== TIMER ====================
   function startTimer() {
     timerText.style.display = "block";
     timer = setInterval(() => {
@@ -164,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     timerBar.style.width = `${(timeLeft / 20) * 100}%`;
   }
 
+  // ==================== CHECK ANSWER ====================
   function checkAnswer(answer) {
     clearInterval(timer);
     const correct = questions[current].correctAnswer;
@@ -191,6 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // ==================== NEXT QUESTION ====================
   async function nextQuestion(correct) {
     current++;
     if (current >= questions.length) {
@@ -222,6 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showQuestion();
   }
 
+  // ==================== LIFELINES ====================
   function useFifty() {
     if (fiftyUsed) return;
     fiftyUsed = true;
@@ -248,6 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
     hintBox.style.display = "block";
   }
 
+  // ==================== MONEY LADDER UPDATE ====================
   function updateMoneyLadder() {
     const lis = moneyList.querySelectorAll("li");
     lis.forEach(li => li.classList.remove("current"));
@@ -255,5 +291,4 @@ document.addEventListener("DOMContentLoaded", () => {
     if (lis[idx]) lis[idx].classList.add("current");
   }
 
-  buildMoneyLadder();
 });
