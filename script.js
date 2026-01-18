@@ -18,16 +18,26 @@ function startQuiz() {
         const correctIndex = options.indexOf(q.correctAnswer);
         return {question:q.question,options,answer:correctIndex};
       });
-      currentQuestion=0;score=0;fiftyUsed=false;hintUsed=false;
-      document.getElementById("categoryDiv").style.display="none";
-      document.getElementById("fiftyBtn").disabled=false;
-      document.getElementById("hintBtn").disabled=false;
-      showQuestion();updateProgress();
+      initializeQuiz();
     })
     .catch(err=>{
-      document.getElementById("quiz").innerHTML="<p>Error loading quiz.</p>";
-      console.error(err);
+      console.error("API failed, using fallback questions:", err);
+      // fallback questions
+      questions = [
+        { question: "What is 2+2?", options: ["3","4","5","6"], answer: 1 },
+        { question: "Capital of France?", options: ["Berlin","London","Paris","Rome"], answer: 2 },
+        { question: "Which animal barks?", options: ["Cat","Dog","Cow","Horse"], answer: 1 }
+      ];
+      initializeQuiz();
     });
+}
+
+function initializeQuiz(){
+  currentQuestion=0; score=0; fiftyUsed=false; hintUsed=false;
+  document.getElementById("categoryDiv").style.display="none";
+  document.getElementById("fiftyBtn").disabled=false;
+  document.getElementById("hintBtn").disabled=false;
+  showQuestion(); updateProgress();
 }
 
 function showQuestion(){
@@ -63,7 +73,6 @@ function showQuestion(){
   startTimer();
 }
 
-// Answer check + sound
 function checkAnswer(selectedIndex,clickedButton){
   const correctIndex=questions[currentQuestion].answer;
   const buttons=document.querySelectorAll(".option-btn");
@@ -113,7 +122,6 @@ function restartQuiz(){
   updateProgress(true);
 }
 
-// Progress bar
 function updateProgress(finish=false){
   const progress=document.getElementById("progress-bar");
   if(!progress) return;
@@ -126,7 +134,6 @@ function updateProgress(finish=false){
   progress.style.background=`linear-gradient(90deg,${color},#ffffff,${color})`;
 }
 
-// Timer
 function startTimer(){
   const timerBar=document.getElementById("timer-bar");
   const timerText=document.getElementById("timer-text");
@@ -150,13 +157,11 @@ function startTimer(){
       document.getElementById("result").textContent="⏰ Time's up!";
       document.getElementById("result").style.color="#ff0";
       document.getElementById("nextBtn").disabled=false;
-      const wrongSound=document.getElementById("wrong-sound");
-      wrongSound.play();
+      document.getElementById("wrong-sound").play();
     }
   },1000);
 }
 
-// Lifelines
 function useFifty(){
   if(fiftyUsed) return;
   const correctIndex=questions[currentQuestion].answer;
