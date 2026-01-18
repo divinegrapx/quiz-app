@@ -8,16 +8,12 @@ const firebaseConfig = {
   appId: "1:891061147021:web:7b3d80020f642da7b699c4",
   measurementId: "G-7LKHH1EHQW"
 };
-
-// Initialize Firebase (compat)
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ---------------- DOM ELEMENTS ----------------
 const loginBtn = document.getElementById("loginBtn");
-const loginDiv = document.getElementById("loginDiv");
-const categoryDiv = document.getElementById("categoryDiv");
 const startBtn = document.getElementById("startBtn");
 const categorySelect = document.getElementById("categorySelect");
 const questionCount = document.getElementById("questionCount");
@@ -25,9 +21,7 @@ const quizDiv = document.getElementById("quiz");
 const lifelines = document.getElementById("lifelines");
 const fiftyBtn = document.getElementById("fiftyBtn");
 const hintBtn = document.getElementById("hintBtn");
-const progressContainer = document.getElementById("progress-container");
 const progressBar = document.getElementById("progress-bar");
-const timerContainer = document.getElementById("timer-container");
 const timerBar = document.getElementById("timer-bar");
 const timerText = document.getElementById("timer-text");
 const moneyList = document.getElementById("money-list");
@@ -35,21 +29,15 @@ const quizTitle = document.getElementById("quiz-title");
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
 let hintBox = document.getElementById("hint-box");
-if(!hintBox) {
+if (!hintBox) {
   hintBox = document.createElement("div");
   hintBox.id = "hint-box";
   quizDiv.parentNode.insertBefore(hintBox, quizDiv.nextSibling);
 }
 
 // ---------------- GLOBALS ----------------
-let questions = [];
-let current = 0;
-let score = 0;
-let timer;
-let timeLeft = 20;
-let fiftyUsed = false;
-let hintUsed = false;
-let ladderLevel = 0;
+let questions = [], current = 0, score = 0, timer;
+let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
 
 // ---------------- FALLBACK QUESTIONS ----------------
 const fallbackQuestions = [
@@ -63,15 +51,12 @@ loginBtn.addEventListener("click", () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider)
     .then(result => {
-      loginDiv.style.display = "none";
-      categoryDiv.style.display = "block";
+      document.getElementById("loginDiv").style.display = "none";
+      document.getElementById("categoryDiv").style.display = "block";
       quizTitle.textContent = `🎯 Welcome ${result.user.displayName}`;
       updateLeaderboard();
     })
-    .catch(error => {
-      console.error("Login error:", error);
-      alert("Login failed! Check console.");
-    });
+    .catch(error => alert("Login failed! Check console."));
 });
 
 // ---------------- START QUIZ ----------------
@@ -83,20 +68,12 @@ async function startQuiz() {
   startBtn.disabled = true;
   quizDiv.style.display = "flex";
   lifelines.style.display = "flex";
-  progressContainer.style.display = "block";
-  timerContainer.style.display = "block";
   moneyList.style.display = "block";
   hintBox.style.display = "none";
   quizDiv.innerHTML = "Loading...";
 
-  ladderLevel = 0;
-  current = 0;
-  score = 0;
-  fiftyUsed = false;
-  hintUsed = false;
-  fiftyBtn.disabled = false;
-  hintBtn.disabled = false;
-  progressBar.style.width = "0%";
+  ladderLevel = 0; current = 0; score = 0; fiftyUsed = false; hintUsed = false;
+  fiftyBtn.disabled = false; hintBtn.disabled = false;
 
   buildMoneyLadder();
 
@@ -105,9 +82,7 @@ async function startQuiz() {
   try {
     const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`);
     if (!res.ok) throw "API error";
-    let data = await res.json();
-    if (!data.length) throw "Empty API";
-
+    const data = await res.json();
     questions = data.map(q => ({
       question: q.question,
       correctAnswer: q.correctAnswer,
@@ -124,14 +99,14 @@ async function startQuiz() {
 // ---------------- SHOW QUESTION ----------------
 function showQuestion() {
   clearInterval(timer);
-  timeLeft = 20;
-  updateTimer();
+  let timeLeft = 20;
+  updateTimer(timeLeft);
   hintBox.style.display = "none";
 
   const q = questions[current];
-  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
-
   quizDiv.innerHTML = `<h2>${q.question}</h2><div id="feedback"></div>`;
+
+  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
   answers.forEach(a => {
     const btn = document.createElement("button");
     btn.textContent = a;
@@ -140,17 +115,9 @@ function showQuestion() {
     quizDiv.appendChild(btn);
   });
 
-  progressBar.style.width = `${(current / questions.length) * 100}%`;
-  startTimer();
-}
-
-// ---------------- TIMER ----------------
-function startTimer() {
-  clearInterval(timer);
-  timerText.style.display = "block";
   timer = setInterval(() => {
     timeLeft--;
-    updateTimer();
+    updateTimer(timeLeft);
     if (timeLeft <= 0) {
       clearInterval(timer);
       nextQuestion(false);
@@ -158,9 +125,10 @@ function startTimer() {
   }, 1000);
 }
 
-function updateTimer() {
+// ---------------- TIMER ----------------
+function updateTimer(timeLeft) {
   timerText.textContent = `${timeLeft}s`;
-  timerBar.style.width = `${(timeLeft / 20) * 100}%`;
+  timerBar.style.width = `${(timeLeft/20)*100}%`;
 }
 
 // ---------------- CHECK ANSWER ----------------
@@ -169,43 +137,33 @@ function checkAnswer(answer) {
   const correct = questions[current].correctAnswer;
   const feedbackDiv = document.getElementById("feedback");
 
-  document.querySelectorAll(".option-btn").forEach(b => {
-    b.disabled = true;
-    if (b.textContent === correct) b.classList.add("correct");
-    if (b.textContent === answer && answer !== correct) b.classList.add("wrong");
+  document.querySelectorAll(".option-btn").forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent === correct) btn.classList.add("correct");
+    if (btn.textContent === answer && answer !== correct) btn.classList.add("wrong");
   });
 
   if (answer === correct) {
-    score++;
-    ladderLevel++;
-    updateMoneyLadder();
+    score++; ladderLevel++; updateMoneyLadder();
     feedbackDiv.textContent = "✅ Correct!";
     feedbackDiv.style.color = "lime";
     correctSound.play();
-    setTimeout(nextQuestion, 1000);
   } else {
     feedbackDiv.textContent = "❌ Wrong!";
     feedbackDiv.style.color = "red";
     wrongSound.play();
-    setTimeout(nextQuestion, 1000);
   }
+
+  setTimeout(nextQuestion, 1000);
 }
 
 // ---------------- NEXT QUESTION ----------------
 function nextQuestion() {
   current++;
   if (current >= questions.length) {
-    quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>
-      <button onclick="location.reload()">Restart</button>`;
-    startBtn.disabled = false;
-    lifelines.style.display = "none";
-    timerContainer.style.display = "none";
-    progressContainer.style.display = "none";
-    moneyList.style.display = "none";
-    hintBox.style.display = "none";
-
-    const user = auth.currentUser;
-    saveScore(user, score);
+    quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p><button onclick="location.reload()">Restart</button>`;
+    lifelines.style.display = "none"; moneyList.style.display = "none"; hintBox.style.display = "none";
+    const user = auth.currentUser; saveScore(user, score);
     return;
   }
   showQuestion();
@@ -214,25 +172,19 @@ function nextQuestion() {
 // ---------------- LIFELINES ----------------
 function useFifty() {
   if (fiftyUsed) return;
-  fiftyUsed = true;
-  fiftyBtn.disabled = true;
+  fiftyUsed = true; fiftyBtn.disabled = true;
 
   const correct = questions[current].correctAnswer;
   const btns = Array.from(document.querySelectorAll(".option-btn"));
   let removed = 0;
   btns.forEach(b => {
-    if (b.textContent !== correct && removed < 2) {
-      b.style.display = "none";
-      removed++;
-    }
+    if (b.textContent !== correct && removed < 2) { b.style.display="none"; removed++; }
   });
 }
 
 function useHint() {
   if (hintUsed) return;
-  hintUsed = true;
-  hintBtn.disabled = true;
-
+  hintUsed = true; hintBtn.disabled = true;
   const q = questions[current];
   hintBox.textContent = "💡 Hint: " + q.hint;
   hintBox.style.display = "block";
@@ -241,75 +193,43 @@ function useHint() {
 // ---------------- MONEY LADDER ----------------
 function buildMoneyLadder() {
   moneyList.innerHTML = "";
-  const levelsToUse = Array.from({length: parseInt(questionCount.value)}, (_, i) => i+1)
-    .map(i => `$${i*100}`); // Example: $100, $200...
-  levelsToUse.reverse().forEach(amount => {
+  const numQuestions = parseInt(questionCount.value);
+  for (let i=numQuestions; i>0; i--) {
     const li = document.createElement("li");
-    li.textContent = amount;
-    li.style.listStyle = "none";
+    li.textContent = `$${i*100}`;
     moneyList.appendChild(li);
-  });
+  }
 }
 
 function updateMoneyLadder() {
   const lis = moneyList.querySelectorAll("li");
   lis.forEach(li => li.classList.remove("current"));
-  const idx = moneyList.children.length - ladderLevel - 1;
+  const idx = moneyList.children.length - ladderLevel -1;
   if (lis[idx]) lis[idx].classList.add("current");
 }
 
 // ---------------- LEADERBOARD ----------------
 async function saveScore(user, score) {
   if (!user) return;
-  const userData = {
-    uid: user.uid,
-    name: user.displayName,
-    avatar: user.photoURL,
-    score: score,
-    date: firebase.firestore.FieldValue.serverTimestamp()
-  };
-
-  try {
-    await db.collection("leaderboard").doc(user.uid).set(userData, { merge: true });
-    updateLeaderboard();
-  } catch (err) {
-    console.error("Error saving score:", err);
-  }
+  const userData = { uid:user.uid, name:user.displayName, avatar:user.photoURL, score, date: firebase.firestore.FieldValue.serverTimestamp() };
+  await db.collection("leaderboard").doc(user.uid).set(userData,{merge:true});
+  updateLeaderboard();
 }
 
 async function updateLeaderboard() {
   const list = document.getElementById("leaderboard-list");
   if(!list) return;
-  list.innerHTML = "Loading...";
-  try {
-    const snapshot = await db.collection("leaderboard")
-      .orderBy("score", "desc")
-      .limit(10)
-      .get();
-
-    list.innerHTML = "";
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const li = document.createElement("li");
-      li.style.display = "flex";
-      li.style.alignItems = "center";
-      li.style.gap = "8px";
-
-      const img = document.createElement("img");
-      img.src = data.avatar;
-      img.width = 30;
-      img.height = 30;
-      img.style.borderRadius = "50%";
-
-      li.appendChild(img);
-      li.appendChild(document.createTextNode(`${data.name} — ${data.score} pts`));
-      list.appendChild(li);
-    });
-  } catch (err) {
-    console.error("Error loading leaderboard:", err);
-    list.innerHTML = "Failed to load leaderboard.";
-  }
+  list.innerHTML = "";
+  const snapshot = await db.collection("leaderboard").orderBy("score","desc").limit(10).get();
+  snapshot.forEach(doc=>{
+    const data = doc.data();
+    const li=document.createElement("li");
+    const img=document.createElement("img");
+    img.src=data.avatar; img.width=30; img.height=30; img.style.borderRadius="50%";
+    li.appendChild(img);
+    li.appendChild(document.createTextNode(`${data.name} — ${data.score} pts`));
+    list.appendChild(li);
+  });
 }
 
-// Initialize leaderboard
 updateLeaderboard();
