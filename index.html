@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neon Quiz App</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Quiz App</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
   <h1>🎯 Neon Quiz Challenge</h1>
 
-  <!-- Category and number of questions selection -->
   <div id="categoryDiv">
     <label for="categorySelect">Choose Category:</label>
     <select id="categorySelect">
@@ -41,27 +40,24 @@
     </select>
 
     <br><br>
+    <!-- **This ID is critical** -->
     <button id="startBtn">START QUIZ</button>
   </div>
 
-  <!-- Lifelines -->
   <div id="lifelines">
     <button id="fiftyBtn">50:50 ✂️</button>
     <button id="hintBtn">💡 Hint</button>
   </div>
 
-  <!-- Timer -->
   <div id="timer-container">
     <span id="timer-text">20s</span>
     <div id="timer-bar"></div>
   </div>
 
-  <!-- Progress bar -->
   <div id="progress-container">
     <div id="progress-bar"></div>
   </div>
 
-  <!-- Quiz area -->
   <div id="quiz"></div>
 </div>
 
