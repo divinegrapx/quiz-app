@@ -139,14 +139,189 @@ async function startQuiz() {
 // ---------------- MONEY LADDER ----------------
 function buildMoneyLadder() {
   moneyList.innerHTML = "";
-  const levelsToUse = Array.from({length: parseInt(questionCount.value)}, (_, i) => `$${(i+1)*100}`);
-  levelsToUse.reverse().forEach(amount => {
+  const num = parseInt(questionCount.value);
+  for(let i = num; i >= 1; i--){
     const li = document.createElement("li");
-    li.textContent = amount;
+    li.textContent = `$${i*100}`;
     moneyList.appendChild(li);
+  }
+}
+
+// ---------------- SHOW QUESTION ----------------
+function showQuestion() {
+  clearInterval(timer);
+  timeLeft = 20;
+  updateTimer();
+  hintBox.style.display = "none";
+
+  const q = questions[current];
+  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
+
+  quizDiv.innerHTML = `<h2>${q.question}</h2><div id="feedback"></div>`;
+  answers.forEach(a => {
+    const btn = document.createElement("button");
+    btn.textContent = a;
+    btn.className = "option-btn";
+    btn.onclick = () => checkAnswer(a);
+    quizDiv.appendChild(btn);
+  });
+
+  progressBar.style.width = `${(current / questions.length) * 100}%`;
+  startTimer();
+}
+
+// ---------------- TIMER ----------------
+function startTimer() {
+  timerText.style.display = "block";
+  timer = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      nextQuestion(false);
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  timerText.textContent = `${timeLeft}s`;
+  timerBar.style.width = `${(timeLeft / 20) * 100}%`;
+}
+
+// ---------------- CHECK ANSWER ----------------
+function checkAnswer(answer) {
+  clearInterval(timer);
+  const correct = questions[current].correctAnswer;
+  const feedbackDiv = document.getElementById("feedback");
+
+  document.querySelectorAll(".option-btn").forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add("correct");
+    if (b.textContent === answer && answer !== correct) b.classList.add("wrong");
+  });
+
+  if (answer === correct) {
+    score++;
+    ladderLevel++;
+    updateMoneyLadder();
+    feedbackDiv.textContent = "✅ Correct!";
+    feedbackDiv.style.color = "lime";
+    correctSound.play();
+    setTimeout(() => nextQuestion(), 1000);
+  } else {
+    feedbackDiv.textContent = "❌ Wrong!";
+    feedbackDiv.style.color = "red";
+    wrongSound.play();
+    setTimeout(() => nextQuestion(), 1000);
+  }
+}
+
+// ---------------- NEXT QUESTION ----------------
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) {
+    quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>
+      <button onclick="location.reload()">Restart</button>`;
+    startBtn.disabled = false;
+    lifelines.style.display = "none";
+    timerContainer.style.display = "none";
+    progressContainer.style.display = "none";
+    moneyList.style.display = "none";
+    hintBox.style.display = "none";
+
+    const user = auth.currentUser;
+    saveScore(user, score);
+    return;
+  }
+  showQuestion();
+}
+
+// ---------------- LIFELINES ----------------
+function useFifty() {
+  if (fiftyUsed) return;
+  fiftyUsed = true;
+  fiftyBtn.disabled = true;
+
+  const correct = questions[current].correctAnswer;
+  const btns = Array.from(document.querySelectorAll(".option-btn"));
+  let removed = 0;
+  btns.forEach(b => {
+    if (b.textContent !== correct && removed < 2 && Math.random() > 0.3) {
+      b.style.display = "none";
+      removed++;
+    }
   });
 }
 
-// ---------------- rest of quiz functions (showQuestion, checkAnswer, nextQuestion, lifelines, leaderboard etc.) ----------------
-// Copy the previous showQuestion, checkAnswer, nextQuestion, useFifty, useHint, updateMoneyLadder, saveScore, updateLeaderboard from the last working script
+function useHint() {
+  if (hintUsed) return;
+  hintUsed = true;
+  hintBtn.disabled = true;
 
+  const q = questions[current];
+  hintBox.textContent = "💡 Hint: " + q.hint;
+  hintBox.style.display = "block";
+}
+
+// ---------------- MONEY LADDER ----------------
+function updateMoneyLadder() {
+  const lis = moneyList.querySelectorAll("li");
+  lis.forEach(li => li.classList.remove("current"));
+  const idx = moneyList.children.length - ladderLevel - 1;
+  if (lis[idx]) lis[idx].classList.add("current");
+}
+
+// ---------------- LEADERBOARD ----------------
+async function saveScore(user, score) {
+  if (!user) return;
+  const userData = {
+    uid: user.uid,
+    name: user.displayName || user.email,
+    avatar: user.photoURL || "",
+    score: score,
+    date: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  try {
+    await db.collection("leaderboard").doc(user.uid).set(userData, { merge: true });
+    updateLeaderboard();
+  } catch (err) {
+    console.error("Error saving score:", err);
+  }
+}
+
+async function updateLeaderboard() {
+  const list = document.getElementById("leaderboard-list");
+  list.innerHTML = "Loading...";
+  try {
+    const snapshot = await db.collection("leaderboard")
+      .orderBy("score", "desc")
+      .limit(10)
+      .get();
+
+    list.innerHTML = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const li = document.createElement("li");
+      li.style.display = "flex";
+      li.style.alignItems = "center";
+      li.style.gap = "8px";
+
+      const img = document.createElement("img");
+      img.src = data.avatar || "";
+      img.width = 30;
+      img.height = 30;
+      img.style.borderRadius = "50%";
+
+      li.appendChild(img);
+      li.appendChild(document.createTextNode(`${data.name} — ${data.score} pts`));
+      list.appendChild(li);
+    });
+  } catch (err) {
+    console.error("Error loading leaderboard:", err);
+    list.innerHTML = "Failed to load leaderboard.";
+  }
+}
+
+// ---------------- INIT ----------------
+updateLeaderboard();
