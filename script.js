@@ -53,11 +53,17 @@ const moneyLevels = ["$100","$200","$300","$500","$1,000","$2,000","$4,000","$8,
 // -------- LOGIN ----------
 loginBtn.addEventListener("click", () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).then(result => {
-    loginDiv.style.display = "none";
-    categoryDiv.style.display = "block";
-    quizTitle.textContent = `🎯 Welcome ${result.user.displayName}`;
-  });
+  auth.signInWithPopup(provider)
+    .then(result => {
+      loginDiv.style.display = "none";
+      categoryDiv.style.display = "block";
+      quizTitle.textContent = `🎯 Welcome ${result.user.displayName}`;
+      console.log("Logged in as:", result.user.displayName);
+    })
+    .catch(error => {
+      console.error("Login error:", error);
+      alert("Login failed! Check console.");
+    });
 });
 
 // -------- BUILD MONEY LADDER ----------
