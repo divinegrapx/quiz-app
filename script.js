@@ -29,7 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function buildMoneyLadder() {
     moneyList.innerHTML = "";
-    moneyLevels.slice(0, questionCount.value).reverse().forEach((amount) => {
+    const levelsToUse = moneyLevels.slice(0, questionCount.value); // dynamic
+    levelsToUse.reverse().forEach((amount) => {
       const li = document.createElement("li");
       li.textContent = amount;
       moneyList.appendChild(li);
@@ -103,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
       updateTimer();
       if (timeLeft <= 0) {
         clearInterval(timer);
-        nextQuestion(false); // false = timed out counts as wrong
+        nextQuestion(false); // timed out
       }
     }, 1000);
   }
@@ -126,24 +127,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (answer === correct) {
       score++;
-      ladderLevel++; // increase ladder only on correct
+      ladderLevel++;
       updateMoneyLadder();
       feedbackDiv.textContent = "✅ Correct!";
       feedbackDiv.style.color = "lime";
       correctSound.play();
+      setTimeout(() => nextQuestion(true), 1000);
     } else {
       feedbackDiv.textContent = "❌ Wrong!";
       feedbackDiv.style.color = "red";
       wrongSound.play();
+      setTimeout(() => nextQuestion(false), 1000);
     }
-
-    setTimeout(() => nextQuestion(answer === correct), 1000);
   }
 
   function nextQuestion(correct) {
-    if (correct) current++; // only advance question on correct answer
-    else current++; // optional: you may also advance even on wrong, depends on game style
-
+    current++;
     if (current >= questions.length) {
       quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>
         <button onclick="location.reload()">Restart</button>`;
@@ -187,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateMoneyLadder() {
     const lis = moneyList.querySelectorAll("li");
     lis.forEach(li => li.classList.remove("current"));
-    const idx = moneyLevels.length - ladderLevel - 1;
+    const idx = moneyList.children.length - ladderLevel - 1;
     if (lis[idx]) lis[idx].classList.add("current");
   }
 
