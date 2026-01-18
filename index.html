@@ -11,9 +11,6 @@
 <div class="container">
   <h1 id="quiz-title">🎯 Neon Quiz Challenge</h1>
 
-  <!-- LOGIN -->
-  <button id="loginBtn">Login with Google</button>
-
   <!-- Category and number of questions selection -->
   <div id="categoryDiv">
     <label for="categorySelect">Choose Category:</label>
@@ -47,18 +44,18 @@
   </div>
 
   <!-- Lifelines -->
-  <div id="lifelines" style="display:none;">
+  <div id="lifelines">
     <button id="fiftyBtn">50:50 ✂️</button>
     <button id="hintBtn">💡 Hint</button>
   </div>
 
   <!-- Progress bar -->
-  <div id="progress-container" style="display:none;">
+  <div id="progress-container">
     <div id="progress-bar"></div>
   </div>
 
   <!-- Timer -->
-  <div id="timer-container" style="display:none;">
+  <div id="timer-container">
     <div id="timer-bar"></div>
     <span id="timer-text">25s</span>
   </div>
@@ -69,17 +66,12 @@
   <!-- Money ladder -->
   <ol id="money-list"></ol>
 
-  <!-- Leaderboard -->
-  <div id="leaderboard-container">
-    <h2>🏆 Leaderboard</h2>
-    <ol id="leaderboard-list"></ol>
-  </div>
 </div>
 
 <!-- Sounds -->
 <audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
 <audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
 
-<script type="module" src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
