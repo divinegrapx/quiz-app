@@ -1,33 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quiz App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h2>Select Quiz Category</h2>
+  <div class="container">
 
-  <select id="categorySelect">
-    <option value="science">Science</option>
-    <option value="history">History</option>
-    <option value="geography">Geography</option>
-    <option value="music">Music</option>
-    <option value="film_and_tv">Film & TV</option>
-    <option value="sports">Sports</option>
-    <option value="food_and_drink">Food & Drink</option>
-    <option value="general_knowledge">General Knowledge</option>
-  </select>
+    <h1>🧠 Quiz App</h1>
 
-  <br><br>
-  <button onclick="startQuiz()">Start Quiz</button>
+    <!-- Category selection -->
+    <div id="categoryDiv">
+      <label for="categorySelect">Choose a category:</label>
+      <select id="categorySelect">
+        <option value="science">Science</option>
+        <option value="history">History</option>
+        <option value="geography">Geography</option>
+        <option value="music">Music</option>
+        <option value="film_and_tv">Film & TV</option>
+        <option value="sports">Sports</option>
+        <option value="food_and_drink">Food & Drink</option>
+        <option value="general_knowledge">General Knowledge</option>
+      </select>
+      <button onclick="startQuiz()">Start Quiz</button>
+    </div>
 
-  <hr>
+    <!-- Quiz area -->
+    <div id="quiz"></div>
 
-  <div id="quiz"></div>
-<button id="nextBtn" onclick="nextQuestion()">Next</button>
+    <!-- Progress bar -->
+    <div id="progress-container">
+      <div id="progress-bar"></div>
+    </div>
 
+  </div>
 
   <script src="script.js"></script>
 </body>
