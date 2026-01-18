@@ -50,14 +50,15 @@ h1 {
   margin: 4px 0;
   border-radius: 8px;
   background: #222;
-  transition: all 0.2s;
+  transition: all 0.3s;
 }
 
 #money-list li.current {
   background: #0ff;
   color: #000;
   font-weight: bold;
-  box-shadow: 0 0 15px #0ff;
+  box-shadow: 0 0 15px #0ff, 0 0 30px #00ffff;
+  text-shadow: 0 0 10px #fff;
 }
 
 .answer-btn {
