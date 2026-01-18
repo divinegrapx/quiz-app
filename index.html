@@ -1,29 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neon Quiz App</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Quiz App</title>
+<link rel="stylesheet" href="style.css">
 
-  <!-- Firebase SDKs (compat version for easier migration) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<!-- Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
 <div class="container">
   <h1 id="quiz-title">🎯 Neon Quiz Challenge</h1>
 
-  <!-- LOGIN / REGISTER -->
-  <div id="authDiv">
-    <input type="email" id="email" placeholder="Email" /><br>
-    <input type="password" id="password" placeholder="Password" /><br>
-    <button id="loginEmailBtn">Login with Email</button>
-    <button id="registerBtn">Register</button><br><br>
+  <!-- LOGIN & REGISTER -->
+  <div id="loginDiv">
     <button id="loginGoogleBtn">Login with Google</button>
-    <button id="loginFacebookBtn">Login with Facebook</button>
+    <h3>Or Email</h3>
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passInput" placeholder="Password">
+    <button id="loginEmailBtn">Login</button>
+    <button id="registerEmailBtn">Register</button>
+    <div id="loginError" style="color:red;"></div>
   </div>
 
   <!-- CATEGORY SELECTION -->
@@ -44,7 +45,6 @@
     <select id="questionCount">
       <option value="10">10</option>
       <option value="20">20</option>
-      <option value="25">25</option>
       <option value="30">30</option>
     </select>
 
@@ -57,7 +57,7 @@
     <button id="hintBtn">💡 Hint</button>
   </div>
 
-  <!-- PROGRESS BAR -->
+  <!-- PROGRESS -->
   <div id="progress-container" style="display:none;">
     <div id="progress-bar"></div>
   </div>
@@ -70,9 +70,6 @@
 
   <!-- QUIZ -->
   <div id="quiz"></div>
-
-  <!-- HINT -->
-  <div id="hint-box" style="display:none;"></div>
 
   <!-- MONEY LADDER -->
   <ul id="money-list" style="display:none;"></ul>
