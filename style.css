@@ -1,275 +1,241 @@
-/* ================= BODY & CONTAINER ================= */
+/* ---------------- GENERAL ---------------- */
 body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  font-family: 'Arial', sans-serif;
+  background: #111;
   color: #fff;
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  padding: 20px;
 }
 
 .container {
-  width: 95%;
-  max-width: 500px;
+  width: 100%;
+  max-width: 800px;
+  background: #1a1a1a;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 0 20px #00ffff;
+}
+
+/* ---------------- HEADINGS ---------------- */
+h1, h2 {
   text-align: center;
-  padding: 20px;
-  border-radius: 20px;
-  background: rgba(0, 0, 0, 0.4);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  color: #00ffff;
+  text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
 }
 
-h1 {
-  font-size: 2.2rem;
-  margin-bottom: 20px;
-  text-shadow: 0 0 15px #00f2fe, 0 0 30px #00f2fe;
+/* ---------------- LOGIN / REGISTER ---------------- */
+#loginDiv input {
+  display: block;
+  width: 80%;
+  margin: 10px auto;
+  padding: 10px;
+  border: 2px solid #00ffff;
+  border-radius: 5px;
+  background: #111;
+  color: #fff;
 }
 
-/* ================= SELECT & BUTTONS ================= */
-select, button {
-  padding: 12px 20px;
-  margin: 10px 0;
-  border-radius: 12px;
+#loginDiv button {
+  display: block;
+  margin: 10px auto;
+  padding: 10px 20px;
   border: none;
-  font-size: 16px;
-  transition: 0.3s;
-}
-
-button {
+  border-radius: 8px;
+  background: #00ffff;
+  color: #111;
   font-weight: bold;
   cursor: pointer;
+  box-shadow: 0 0 10px #00ffff;
+  transition: 0.2s;
 }
 
-button:hover:not(:disabled) {
-  opacity: 0.85;
+#loginDiv button:hover {
+  background: #00cccc;
+  box-shadow: 0 0 20px #00ffff;
 }
 
-/* ================= QUIZ CARD ================= */
-#quiz {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 25px;
-  margin-top: 20px;
-  border-radius: 20px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-  min-height: 300px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
+/* ---------------- CATEGORY & START ---------------- */
+#categoryDiv select, #categoryDiv button {
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 6px;
+  border: 2px solid #00ffff;
+  background: #111;
+  color: #fff;
+  width: 100%;
+  font-size: 16px;
 }
 
+#categoryDiv button {
+  background: #00ffff;
+  color: #111;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00ffff;
+}
+
+#categoryDiv button:hover {
+  background: #00cccc;
+  box-shadow: 0 0 20px #00ffff;
+}
+
+/* ---------------- QUIZ OPTIONS ---------------- */
 #quiz h2 {
-  font-size: 1.3rem; 
-  margin-bottom: 15px;
-  text-shadow: 0 0 10px #00f2fe;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #0ff;
+  text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
 }
 
 .option-btn {
-  display: block; width: 90%; max-width: 320px;
-  margin: 10px auto; padding: 14px;
-  font-size:16px; font-weight:600;
-  cursor:pointer; border-radius:12px; border:none;
-  background: linear-gradient(135deg,#00f2fe,#00c6ff);
-  color:#fff; transition:0.3s, transform 0.2s;
-  box-shadow: 0 0 5px #00f2fe,0 0 15px #00c6ff inset;
+  display: block;
+  width: 80%;
+  margin: 10px auto;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 2px solid #00ffff;
+  background: #111;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00ffff;
+  transition: 0.2s;
 }
 
-.option-btn:hover:not(:disabled) {
-  transform: scale(1.05);
-  background: linear-gradient(135deg,#00c6ff,#00f2fe);
+.option-btn:hover {
+  background: #00cccc;
+  box-shadow: 0 0 20px #00ffff;
 }
 
-.option-btn:disabled {
-  cursor:not-allowed;
-  opacity:0.7;
+.option-btn.correct {
+  background: #0f0;
+  border-color: #0f0;
+  box-shadow: 0 0 20px #0f0;
 }
 
-/* Feedback */
-#feedback {
-  margin-top: 12px;
-  font-size: 1.2rem;
+.option-btn.wrong {
+  background: #f00;
+  border-color: #f00;
+  box-shadow: 0 0 20px #f00;
+}
+
+/* ---------------- LIFELINES ---------------- */
+#lifelines {
+  text-align: center;
+  margin: 20px 0;
+}
+
+#lifelines button {
+  margin: 0 10px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  background: #00ffff;
+  color: #111;
   font-weight: bold;
-  min-height: 24px;
-  text-shadow: 0 0 10px #fff;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00ffff;
 }
 
-/* ================= PROGRESS BAR ================= */
-#progress-container {
-  background: rgba(255,255,255,0.2);
-  border-radius: 15px;
-  width: 100%;
-  height: 25px;
-  margin-bottom: 10px;
-  overflow: hidden;
-  box-shadow: 0 0 8px #00f2fe inset, 0 0 15px #00f2fe inset;
+#lifelines button:hover {
+  background: #00cccc;
+  box-shadow: 0 0 20px #00ffff;
 }
 
-#progress-bar {
-  height: 100%;
-  width: 0%;
-  border-radius: 15px;
-  background: linear-gradient(90deg,#00f2fe,#00c6ff,#00f2fe);
-  background-size: 200% 200%;
-  animation: progressGlow 2s linear infinite;
-  transition: width 0.4s ease-in-out, background 0.5s ease;
-}
-
-@keyframes progressGlow {
-  0% { background-position: 0% 50%; box-shadow:0 0 5px #00f2fe,0 0 15px #00f2fe; }
-  50% { background-position: 100% 50%; box-shadow:0 0 10px #00f2fe,0 0 25px #00f2fe; }
-  100% { background-position: 0% 50%; box-shadow:0 0 5px #00f2fe,0 0 15px #00f2fe; }
-}
-
-/* ================= TIMER ================= */
+/* ---------------- TIMER ---------------- */
 #timer-container {
-  width: 100%;
-  height: 25px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 15px;
-  margin-bottom: 15px;
-  position: relative;
+  margin: 20px 0;
+  background: #222;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 0 5px #ff6a00 inset;
+  height: 25px;
+  position: relative;
 }
 
 #timer-bar {
   height: 100%;
+  background: #0ff;
   width: 100%;
-  background: linear-gradient(90deg,#ff6a00,#ffb347);
-  border-radius: 15px;
   transition: width 1s linear;
-  box-shadow: 0 0 10px #ff6a00, 0 0 20px #ffb347 inset;
 }
 
 #timer-text {
   position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  margin: 0; font-weight: bold;
-  color: #fff; text-shadow:0 0 5px #000;
-  pointer-events: none;
-}
-
-/* ================= LIFELINES ================= */
-#lifelines {
-  margin-bottom: 15px;
-  display: flex; justify-content: center; gap: 12px;
-}
-
-#lifelines button {
-  padding: 10px 18px;
-  font-size: 16px;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
   font-weight: bold;
-  border-radius: 15px;
-  border: none;
-  cursor: pointer;
-  background: linear-gradient(135deg, #ff416c, #ff4b2b);
-  color:#fff;
-  display:flex; align-items:center; gap:6px;
-  transition: 0.3s;
-  box-shadow: 0 0 10px #ff416c, 0 0 20px #ff4b2b inset;
 }
 
-#lifelines button:hover:not(:disabled) {
-  transform: scale(1.05);
-  opacity: 0.9;
-}
-
-#lifelines button:disabled { 
-  opacity: 0.5; cursor:not-allowed; box-shadow:none; 
-}
-
-/* ================= MONEY LADDER ================= */
-#money-list {
-  list-style:none;
-  padding:0;
+/* ---------------- PROGRESS BAR ---------------- */
+#progress-container {
+  background: #222;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 20px;
   margin: 20px 0;
-  display:flex;
-  flex-direction: column-reverse;
-  gap:4px;
+}
+
+#progress-bar {
+  height: 100%;
+  background: #0ff;
+  width: 0%;
+  transition: width 0.5s;
+}
+
+/* ---------------- MONEY LADDER ---------------- */
+#money-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 #money-list li {
-  padding:6px 10px;
-  border-radius:8px;
-  background: rgba(255,255,255,0.05);
-  text-align:right;
-  box-shadow:0 0 5px #00f2fe inset;
-  transition:0.3s, transform 0.2s;
+  margin: 5px;
+  padding: 5px 12px;
+  border: 1px solid #0ff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px #0ff;
 }
 
 #money-list li.current {
-  background: linear-gradient(135deg,#00f2fe,#00c6ff);
-  color:#fff;
-  font-weight:bold;
-  transform: scale(1.05);
-  box-shadow: 0 0 10px #00c6ff,0 0 20px #00f2fe inset;
+  background: #0ff;
+  color: #111;
+  box-shadow: 0 0 20px #0ff;
 }
 
-/* ================= LEADERBOARD ================= */
-#leaderboard-container {
-  margin-top: 20px;
-  background: rgba(255,255,255,0.05);
-  padding: 15px;
-  border-radius: 15px;
-  box-shadow:0 0 10px #00f2fe inset;
+/* ---------------- HINT ---------------- */
+#hint-box {
+  text-align: center;
+  margin: 10px 0;
+  padding: 10px;
+  background: #222;
+  border: 1px solid #0ff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #0ff;
+  color: #0ff;
 }
 
-#leaderboard-container h2 {
-  margin-bottom: 10px;
-  text-shadow:0 0 10px #00f2fe;
-}
-
+/* ---------------- LEADERBOARD ---------------- */
 #leaderboard-list {
-  list-style:none;
-  padding:0;
-  margin:0;
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
 }
 
 #leaderboard-list li {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:6px 10px;
-  border-radius:8px;
-  background: rgba(255,255,255,0.05);
-  margin-bottom:6px;
-  transition:0.3s;
-}
-
-#leaderboard-list li img {
-  border-radius:50%;
-  width:30px;
-  height:30px;
-  object-fit:cover;
-  border:1px solid #fff;
-}
-
-#leaderboard-list li:first-child {
-  background: linear-gradient(135deg,#ffd200,#f7971e);
-  font-weight:bold;
-}
-
-/* ================= BUTTON STYLES ================= */
-#startBtn {
-  background: linear-gradient(135deg,#00f2fe,#00c6ff);
-  color:#fff;
-  font-weight:bold;
-  border-radius:12px;
-  box-shadow:0 0 10px #00c6ff inset;
-  transition:0.3s, transform 0.2s;
-}
-
-#startBtn:hover:not(:disabled) {
-  transform: scale(1.05);
-}
-
-/* ================= CORRECT & WRONG ================= */
-.correct {
-  background: linear-gradient(135deg,#28a745,#85e085)!important;
-}
-
-.wrong {
-  background: linear-gradient(135deg,#dc3545,#ff7f7f)!important;
+  padding: 5px 10px;
+  margin: 5px 0;
+  background: #111;
+  border: 1px solid #0ff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 0 10px #0ff;
 }
