@@ -1,9 +1,10 @@
+console.log("script.js loaded ✅");
+
 /* ===============================
    DOM ELEMENTS
 ================================ */
 
 const quizDiv = document.getElementById("quiz");
-const startBtn = document.getElementById("startBtn");
 const lifelines = document.getElementById("lifelines");
 const progressBar = document.getElementById("progress-bar");
 const timerBar = document.getElementById("timer-bar");
@@ -31,15 +32,7 @@ let fiftyUsed = false;
 let hintUsed = false;
 
 /* ===============================
-   EVENTS
-================================ */
-
-startBtn.onclick = startQuiz;
-fiftyBtn.onclick = useFifty;
-hintBtn.onclick = useHint;
-
-/* ===============================
-   FALLBACK QUESTIONS (CRITICAL)
+   FALLBACK QUESTIONS
 ================================ */
 
 const fallbackQuestions = [
@@ -56,13 +49,15 @@ const fallbackQuestions = [
 ];
 
 /* ===============================
-   START QUIZ
+   REQUIRED GLOBAL FUNCTIONS
+   (because HTML uses onclick)
 ================================ */
 
-async function startQuiz() {
-  startBtn.disabled = true;
+function startQuiz() {
+  console.log("Start Quiz clicked ✅");
+
+  document.getElementById("categoryDiv").style.display = "none";
   lifelines.style.display = "flex";
-  quizDiv.innerHTML = "<p>Loading questions…</p>";
 
   fiftyUsed = false;
   hintUsed = false;
@@ -73,28 +68,29 @@ async function startQuiz() {
   score = 0;
   progressBar.style.width = "0%";
 
+  loadQuestions();
+}
+
+async function loadQuestions() {
+  quizDiv.innerHTML = "<p>Loading questions…</p>";
+
   try {
     const res = await fetch(
       `https://the-trivia-api.com/api/questions?categories=${categorySelect.value}&limit=${questionCount.value}`
     );
 
-    if (!res.ok) throw new Error("API failed");
+    if (!res.ok) throw new Error("API error");
 
     questions = await res.json();
+    if (!questions.length) throw new Error("Empty");
 
-    if (!questions.length) throw new Error("Empty API");
-
-  } catch (err) {
-    console.warn("Using fallback questions:", err);
+  } catch (e) {
+    console.warn("Using fallback questions");
     questions = fallbackQuestions;
   }
 
   showQuestion();
 }
-
-/* ===============================
-   SHOW QUESTION
-================================ */
 
 function showQuestion() {
   clearInterval(timer);
@@ -140,7 +136,7 @@ function updateTimer() {
 }
 
 /* ===============================
-   ANSWER CHECK
+   ANSWERS
 ================================ */
 
 function checkAnswer(answer) {
@@ -160,10 +156,6 @@ function checkAnswer(answer) {
   setTimeout(nextQuestion, 1200);
 }
 
-/* ===============================
-   NEXT / END
-================================ */
-
 function nextQuestion() {
   current++;
   if (current >= questions.length) {
@@ -173,7 +165,6 @@ function nextQuestion() {
       <button onclick="location.reload()">Restart</button>
     `;
     lifelines.style.display = "none";
-    startBtn.disabled = false;
     progressBar.style.width = "100%";
     return;
   }
@@ -203,3 +194,11 @@ function useHint() {
   hintBtn.disabled = true;
   alert("💡 Think carefully — the answer is simpler than it looks.");
 }
+
+/* ===============================
+   EXPOSE TO GLOBAL (CRITICAL)
+================================ */
+
+window.startQuiz = startQuiz;
+window.useFifty = useFifty;
+window.useHint = useHint;
