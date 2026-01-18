@@ -9,11 +9,12 @@ const firebaseConfig = {
   measurementId: "G-7LKHH1EHQW"
 };
 
+// Initialize Firebase (compat)
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ---------------- DOM ----------------
+// ---------------- DOM ELEMENTS ----------------
 const loginBtn = document.getElementById("loginBtn");
 const loginDiv = document.getElementById("loginDiv");
 const categoryDiv = document.getElementById("categoryDiv");
@@ -33,11 +34,29 @@ const moneyList = document.getElementById("money-list");
 const quizTitle = document.getElementById("quiz-title");
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
-const hintBox = document.getElementById("hint-box");
+let hintBox = document.getElementById("hint-box");
+if(!hintBox) {
+  hintBox = document.createElement("div");
+  hintBox.id = "hint-box";
+  quizDiv.parentNode.insertBefore(hintBox, quizDiv.nextSibling);
+}
 
 // ---------------- GLOBALS ----------------
-let questions = [], current = 0, score = 0, timer, timeLeft = 20;
-let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
+let questions = [];
+let current = 0;
+let score = 0;
+let timer;
+let timeLeft = 20;
+let fiftyUsed = false;
+let hintUsed = false;
+let ladderLevel = 0;
+
+// ---------------- FALLBACK QUESTIONS ----------------
+const fallbackQuestions = [
+  { question: "What color is the sky?", correctAnswer: "Blue", incorrectAnswers: ["Red","Green","Yellow"], hint: "It's the same color as the ocean." },
+  { question: "How many days are in a week?", correctAnswer: "7", incorrectAnswers: ["5","6","8"], hint: "Think Monday to Sunday." },
+  { question: "Which planet is known as the Red Planet?", correctAnswer: "Mars", incorrectAnswers: ["Venus","Jupiter","Saturn"], hint: "Named after Roman god of war." }
+];
 
 // ---------------- LOGIN ----------------
 loginBtn.addEventListener("click", () => {
@@ -102,48 +121,22 @@ async function startQuiz() {
   showQuestion();
 }
 
-// ---------------- MONEY LADDER ----------------
-function buildMoneyLadder() {
-  moneyList.innerHTML = "";
-  const total = parseInt(questionCount.value);
-  for (let i = total; i >= 1; i--) {
-    const li = document.createElement("li");
-    li.textContent = `$${i*100}`;
-    moneyList.appendChild(li);
-  }
-}
-
-function updateMoneyLadder() {
-  const lis = moneyList.querySelectorAll("li");
-  lis.forEach(li => li.classList.remove("current"));
-  const idx = moneyList.children.length - ladderLevel;
-  if (lis[idx]) lis[idx].classList.add("current");
-}
-
 // ---------------- SHOW QUESTION ----------------
 function showQuestion() {
-  if (current >= questions.length) return endQuiz();
   clearInterval(timer);
   timeLeft = 20;
   updateTimer();
   hintBox.style.display = "none";
 
   const q = questions[current];
-  quizDiv.innerHTML = "";
-  const questionEl = document.createElement("h2");
-  questionEl.textContent = q.question;
-  quizDiv.appendChild(questionEl);
-
-  const feedbackDiv = document.createElement("div");
-  feedbackDiv.id = "feedback";
-  quizDiv.appendChild(feedbackDiv);
-
   const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
-  answers.forEach(ans => {
+
+  quizDiv.innerHTML = `<h2>${q.question}</h2><div id="feedback"></div>`;
+  answers.forEach(a => {
     const btn = document.createElement("button");
+    btn.textContent = a;
     btn.className = "option-btn";
-    btn.textContent = ans;
-    btn.addEventListener("click", () => checkAnswer(ans));
+    btn.addEventListener("click", () => checkAnswer(a));
     quizDiv.appendChild(btn);
   });
 
@@ -153,6 +146,7 @@ function showQuestion() {
 
 // ---------------- TIMER ----------------
 function startTimer() {
+  clearInterval(timer);
   timerText.style.display = "block";
   timer = setInterval(() => {
     timeLeft--;
@@ -166,7 +160,7 @@ function startTimer() {
 
 function updateTimer() {
   timerText.textContent = `${timeLeft}s`;
-  timerBar.style.width = `${(timeLeft/20)*100}%`;
+  timerBar.style.width = `${(timeLeft / 20) * 100}%`;
 }
 
 // ---------------- CHECK ANSWER ----------------
@@ -174,12 +168,11 @@ function checkAnswer(answer) {
   clearInterval(timer);
   const correct = questions[current].correctAnswer;
   const feedbackDiv = document.getElementById("feedback");
-  const buttons = document.querySelectorAll(".option-btn");
 
-  buttons.forEach(btn => {
-    btn.disabled = true;
-    if (btn.textContent === correct) btn.classList.add("correct");
-    if (btn.textContent === answer && answer !== correct) btn.classList.add("wrong");
+  document.querySelectorAll(".option-btn").forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add("correct");
+    if (b.textContent === answer && answer !== correct) b.classList.add("wrong");
   });
 
   if (answer === correct) {
@@ -189,32 +182,33 @@ function checkAnswer(answer) {
     feedbackDiv.textContent = "✅ Correct!";
     feedbackDiv.style.color = "lime";
     correctSound.play();
+    setTimeout(nextQuestion, 1000);
   } else {
     feedbackDiv.textContent = "❌ Wrong!";
     feedbackDiv.style.color = "red";
     wrongSound.play();
+    setTimeout(nextQuestion, 1000);
   }
-
-  setTimeout(nextQuestion, 1000);
 }
 
 // ---------------- NEXT QUESTION ----------------
 function nextQuestion() {
   current++;
-  if (current >= questions.length) return endQuiz();
+  if (current >= questions.length) {
+    quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>
+      <button onclick="location.reload()">Restart</button>`;
+    startBtn.disabled = false;
+    lifelines.style.display = "none";
+    timerContainer.style.display = "none";
+    progressContainer.style.display = "none";
+    moneyList.style.display = "none";
+    hintBox.style.display = "none";
+
+    const user = auth.currentUser;
+    saveScore(user, score);
+    return;
+  }
   showQuestion();
-}
-
-function endQuiz() {
-  quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p><button onclick="location.reload()">Restart</button>`;
-  startBtn.disabled = false;
-  lifelines.style.display = "none";
-  timerContainer.style.display = "none";
-  progressContainer.style.display = "none";
-  moneyList.style.display = "block";
-  hintBox.style.display = "none";
-
-  if (auth.currentUser) saveScore(auth.currentUser, score);
 }
 
 // ---------------- LIFELINES ----------------
@@ -224,10 +218,11 @@ function useFifty() {
   fiftyBtn.disabled = true;
 
   const correct = questions[current].correctAnswer;
+  const btns = Array.from(document.querySelectorAll(".option-btn"));
   let removed = 0;
-  document.querySelectorAll(".option-btn").forEach(btn => {
-    if (btn.textContent !== correct && removed < 2) {
-      btn.style.display = "none";
+  btns.forEach(b => {
+    if (b.textContent !== correct && removed < 2) {
+      b.style.display = "none";
       removed++;
     }
   });
@@ -238,46 +233,83 @@ function useHint() {
   hintUsed = true;
   hintBtn.disabled = true;
 
-  hintBox.textContent = "💡 Hint: " + questions[current].hint;
+  const q = questions[current];
+  hintBox.textContent = "💡 Hint: " + q.hint;
   hintBox.style.display = "block";
+}
+
+// ---------------- MONEY LADDER ----------------
+function buildMoneyLadder() {
+  moneyList.innerHTML = "";
+  const levelsToUse = Array.from({length: parseInt(questionCount.value)}, (_, i) => i+1)
+    .map(i => `$${i*100}`); // Example: $100, $200...
+  levelsToUse.reverse().forEach(amount => {
+    const li = document.createElement("li");
+    li.textContent = amount;
+    li.style.listStyle = "none";
+    moneyList.appendChild(li);
+  });
+}
+
+function updateMoneyLadder() {
+  const lis = moneyList.querySelectorAll("li");
+  lis.forEach(li => li.classList.remove("current"));
+  const idx = moneyList.children.length - ladderLevel - 1;
+  if (lis[idx]) lis[idx].classList.add("current");
 }
 
 // ---------------- LEADERBOARD ----------------
 async function saveScore(user, score) {
   if (!user) return;
-  const data = {
+  const userData = {
     uid: user.uid,
     name: user.displayName,
     avatar: user.photoURL,
-    score,
+    score: score,
     date: firebase.firestore.FieldValue.serverTimestamp()
   };
-  await db.collection("leaderboard").doc(user.uid).set(data, {merge:true});
-  updateLeaderboard();
+
+  try {
+    await db.collection("leaderboard").doc(user.uid).set(userData, { merge: true });
+    updateLeaderboard();
+  } catch (err) {
+    console.error("Error saving score:", err);
+  }
 }
 
 async function updateLeaderboard() {
   const list = document.getElementById("leaderboard-list");
+  if(!list) return;
   list.innerHTML = "Loading...";
   try {
-    const snapshot = await db.collection("leaderboard").orderBy("score","desc").limit(10).get();
+    const snapshot = await db.collection("leaderboard")
+      .orderBy("score", "desc")
+      .limit(10)
+      .get();
+
     list.innerHTML = "";
     snapshot.forEach(doc => {
-      const d = doc.data();
+      const data = doc.data();
       const li = document.createElement("li");
-      li.style.display = "flex"; li.style.alignItems = "center"; li.style.gap = "8px";
+      li.style.display = "flex";
+      li.style.alignItems = "center";
+      li.style.gap = "8px";
 
       const img = document.createElement("img");
-      img.src = d.avatar; img.width = 30; img.height = 30; img.style.borderRadius="50%";
+      img.src = data.avatar;
+      img.width = 30;
+      img.height = 30;
+      img.style.borderRadius = "50%";
 
       li.appendChild(img);
-      li.appendChild(document.createTextNode(`${d.name} — ${d.score} pts`));
+      li.appendChild(document.createTextNode(`${data.name} — ${data.score} pts`));
       list.appendChild(li);
     });
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error("Error loading leaderboard:", err);
     list.innerHTML = "Failed to load leaderboard.";
   }
 }
 
+// Initialize leaderboard
 updateLeaderboard();
