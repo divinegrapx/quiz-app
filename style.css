@@ -1,218 +1,212 @@
 /* ==================== GENERAL ==================== */
 body {
+  font-family: Arial, sans-serif;
   background-color: #111;
   color: #fff;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  margin: 0;
-}
-
-h2 {
-  margin-bottom: 15px;
-}
-
-/* ==================== QUIZ CONTAINER ==================== */
-#quiz {
-  width: 100%;
-  max-width: 600px;
-  padding: 20px;
-  border: 2px solid #fff;
-  border-radius: 10px;
-  background-color: #222;
-  margin-bottom: 20px;
   text-align: center;
+  margin: 0;
+  padding: 20px;
 }
 
-/* ==================== ANSWER BUTTONS ==================== */
-.answer-btn {
-  display: block;
-  width: 80%;
-  max-width: 400px;
-  margin: 10px auto;
-  padding: 12px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background-color: #333;
-  color: #fff;
-  transition: 0.3s;
+h1, h2 {
+  margin: 10px 0;
 }
 
-.answer-btn:hover {
-  background-color: #555;
+/* ==================== QUIZ CONTROLS ==================== */
+#quiz-controls {
+  margin: 15px 0;
 }
 
-.answer-btn.correct {
-  background-color: lime !important;
-  color: #000;
-}
-
-.answer-btn.wrong {
-  background-color: red !important;
-  color: #fff;
-}
-
-/* ==================== START BUTTON ==================== */
-#startBtn, #loginBtn {
-  padding: 12px 25px;
-  font-size: 1rem;
-  margin: 10px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  background-color: #f0c000;
-  color: #111;
-  font-weight: bold;
-  transition: 0.3s;
-}
-
-#startBtn:hover, #loginBtn:hover {
-  background-color: #e6b800;
+#categorySelect, #questionCount, #startBtn, #loginBtn {
+  margin: 5px;
+  padding: 5px 10px;
+  font-size: 16px;
 }
 
 /* ==================== LIFELINES ==================== */
 #lifelines {
-  display: none;
-  margin-bottom: 10px;
+  margin: 10px 0;
 }
 
-#fiftyBtn, #hintBtn {
-  padding: 8px 20px;
-  font-size: 0.9rem;
+#lifelines button {
+  padding: 5px 10px;
   margin: 0 5px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background-color: #444;
+  background-color: #222;
   color: #fff;
-  transition: 0.3s;
+  border: 1px solid #555;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.2s;
 }
 
-#fiftyBtn:hover, #hintBtn:hover {
-  background-color: #666;
+#lifelines button:hover:enabled {
+  background-color: #444;
+}
+
+/* ==================== QUIZ QUESTIONS ==================== */
+#quiz h2 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.answer-btn {
+  display: block;
+  margin: 8px auto;
+  padding: 10px 20px;
+  width: 200px;
+  background-color: #222;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.answer-btn:hover:enabled {
+  background-color: #444;
+}
+
+.answer-btn.correct {
+  background-color: green;
+}
+
+.answer-btn.wrong {
+  background-color: red;
+}
+
+#feedback {
+  margin: 10px 0;
+  font-weight: bold;
 }
 
 /* ==================== TIMER ==================== */
 #timer-container {
-  display: none;
-  width: 100%;
-  max-width: 600px;
-  margin-bottom: 15px;
+  margin: 10px 0;
+  width: 300px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #timer-bar {
   height: 15px;
-  background-color: lime;
-  width: 100%;
-  transition: 1s linear;
-  border-radius: 8px;
+  background-color: #444;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 5px;
 }
 
 #timer-text {
-  text-align: right;
-  margin-top: 5px;
+  font-size: 16px;
 }
 
 /* ==================== PROGRESS BAR ==================== */
 #progress-container {
-  display: none;
-  width: 100%;
-  max-width: 600px;
-  background-color: #333;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  height: 15px;
+  width: 300px;
+  height: 10px;
+  background-color: #222;
+  border-radius: 5px;
+  margin: 10px auto;
 }
 
 #progress-bar {
-  height: 100%;
   width: 0%;
-  background-color: #f0c000;
-  border-radius: 10px;
-  transition: 0.5s;
+  height: 100%;
+  background-color: #0f0;
+  border-radius: 5px;
+  transition: 0.3s;
 }
 
 /* ==================== HINT BOX ==================== */
 #hint-box {
-  display: none;
+  background-color: #222;
+  color: #ff0;
+  padding: 8px 10px;
   margin: 10px auto;
-  padding: 10px;
-  background-color: #333;
-  border-radius: 8px;
-  max-width: 500px;
-  text-align: center;
-  font-style: italic;
-  color: #f0c000;
+  width: fit-content;
+  border-radius: 5px;
 }
 
 /* ==================== MONEY LADDER ==================== */
 #money-list {
   list-style: none;
   padding: 0;
-  margin: 10px auto;
-  max-width: 200px;
-  text-align: center;
+  width: 120px;
+  margin: 20px auto;
 }
 
 #money-list li {
-  padding: 5px 0;
-  border-bottom: 1px solid #444;
+  padding: 5px 10px;
+  margin-bottom: 3px;
+  background-color: #222;
+  border-radius: 5px;
+  transition: 0.3s;
 }
 
 #money-list li.current {
-  color: lime;
+  background-color: #f0c000;
+  color: #000;
   font-weight: bold;
-  font-size: 1.1rem;
 }
 
 /* ==================== LEADERBOARD ==================== */
 #leaderboard-container {
   margin-top: 30px;
-  padding: 15px;
-  border: 2px solid #fff;
-  border-radius: 10px;
-  background: #111;
-  color: #fff;
-  width: 250px;
-  text-align: center;
-}
-
-#leaderboard-container h2 {
-  margin-top: 0;
-  font-size: 1.5rem;
-  color: #f0c000;
 }
 
 #leaderboard-list {
-  list-style: decimal;
-  padding-left: 20px;
+  list-style: none;
+  padding: 0;
+  max-width: 300px;
+  margin: 10px auto;
 }
 
 #leaderboard-list li {
-  padding: 5px 0;
-  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px;
+  border-radius: 5px;
+  background-color: #222;
   transition: 0.3s;
 }
 
 #leaderboard-list li:hover {
-  color: #f0c000;
+  background-color: #333;
+  cursor: pointer;
 }
 
-/* ==================== RESPONSIVE ==================== */
-@media (max-width: 650px) {
-  #quiz, #timer-container, #progress-container {
-    width: 90%;
-  }
+#leaderboard-list li img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
 
-  .answer-btn {
-    width: 90%;
-  }
+#leaderboard-list li span {
+  flex: 1;
+  text-align: left;
+}
 
-  #money-list, #leaderboard-container {
-    width: 90%;
-  }
+/* Highlight current user */
+#leaderboard-list li.current-user {
+  background-color: #333;
+  color: #f0c000;
+  font-weight: bold;
+}
+
+/* Crown for top user */
+#leaderboard-list li span::before {
+  content: "";
+}
+
+#leaderboard-list li:first-child span::before {
+  content: "👑 ";
+}
+
+/* ==================== BUTTON DISABLED ==================== */
+button:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+  color: #aaa;
 }
