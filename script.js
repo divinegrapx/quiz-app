@@ -9,7 +9,8 @@ let timeLeft = 25;
 // Start Quiz
 function startQuiz() {
   const category = document.getElementById("categorySelect").value;
-  const API_URL = `https://the-trivia-api.com/api/questions?categories=${category}&limit=10`;
+  const questionCount = document.getElementById("questionCount").value;
+  const API_URL = `https://the-trivia-api.com/api/questions?categories=${category}&limit=${questionCount}`;
 
   fetch(API_URL)
     .then(res => res.json())
@@ -23,11 +24,15 @@ function startQuiz() {
     })
     .catch(err => {
       console.error("API failed, using fallback questions:", err);
-      questions = [
+      const fallbackQuestions = [
         { question: "What is 2+2?", options: ["3","4","5","6"], answer: 1 },
         { question: "Capital of France?", options: ["Berlin","London","Paris","Rome"], answer: 2 },
         { question: "Which animal barks?", options: ["Cat","Dog","Cow","Horse"], answer: 1 }
       ];
+      questions = [];
+      for (let i = 0; i < questionCount; i++) {
+        questions.push(fallbackQuestions[i % fallbackQuestions.length]);
+      }
       initializeQuiz();
     });
 }
@@ -52,7 +57,6 @@ function showQuestion() {
   clearInterval(timer);
   timeLeft = 25;
 
-  // Disable lifelines if already used
   document.getElementById("fiftyBtn").disabled = fiftyUsed;
   document.getElementById("hintBtn").disabled = hintUsed;
 
@@ -199,37 +203,4 @@ function startTimer() {
       document.getElementById("fiftyBtn").disabled = true;
       document.getElementById("hintBtn").disabled = true;
     }
-  }, 1000);
-}
-
-// 50:50 lifeline
-function useFifty() {
-  if (fiftyUsed) return;
-  const correctIndex = questions[currentQuestion].answer;
-  const buttons = document.querySelectorAll(".option-btn");
-  let removed = 0;
-  for (let i = 0; i < buttons.length; i++) {
-    if (i !== correctIndex && removed < 2) {
-      buttons[i].style.opacity = "0.3";
-      buttons[i].style.pointerEvents = "none";
-      buttons[i].style.boxShadow = "0 0 5px #ff416c,0 0 10px #ff4b2b inset";
-      removed++;
-    }
-  }
-  fiftyUsed = true;
-  document.getElementById("fiftyBtn").disabled = true;
-}
-
-// Hint lifeline
-function useHint() {
-  if (hintUsed) return;
-  const correctIndex = questions[currentQuestion].answer;
-  const buttons = document.querySelectorAll(".option-btn");
-  const hintText = "💡 Hint: starts with '" + buttons[correctIndex].textContent[0] + "'";
-  const result = document.getElementById("result");
-  result.textContent = hintText;
-  result.style.color = "#ffea00";
-  result.style.textShadow = "0 0 10px #ffea00, 0 0 20px #ffd700";
-  hintUsed = true;
-  document.getElementById("hintBtn").disabled = true;
-}
+  },
