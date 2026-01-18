@@ -2,7 +2,7 @@ let questions = [];
 let currentQuestion = 0;
 let score = 0;
 
-// Start quiz when user selects category and clicks Start
+// Start quiz
 function startQuiz() {
   const category = document.getElementById("categorySelect").value;
   const API_URL = `https://the-trivia-api.com/api/questions?categories=${category}&limit=10`;
@@ -21,7 +21,9 @@ function startQuiz() {
       });
       currentQuestion = 0;
       score = 0;
+      document.getElementById("categoryDiv").style.display = "none";
       showQuestion();
+      updateProgress();
     })
     .catch(err => {
       document.getElementById("quiz").innerHTML = "<p>Error loading quiz.</p>";
@@ -29,54 +31,46 @@ function startQuiz() {
     });
 }
 
-// Display the current question and options
+// Show question
 function showQuestion() {
   const quizDiv = document.getElementById("quiz");
   quizDiv.innerHTML = "";
 
   const q = questions[currentQuestion];
 
-  // Question text
   const questionEl = document.createElement("h2");
   questionEl.innerHTML = q.question;
   quizDiv.appendChild(questionEl);
 
-  // Options as buttons
   q.options.forEach((option, index) => {
     const btn = document.createElement("button");
     btn.textContent = option;
     btn.className = "option-btn";
-
-    // Call checkAnswer when clicked
     btn.onclick = () => checkAnswer(index, btn);
-
     quizDiv.appendChild(btn);
   });
 
-  // Result text
   const result = document.createElement("p");
   result.id = "result";
   quizDiv.appendChild(result);
 
-  // Show Next button (disabled initially)
   const nextBtn = document.createElement("button");
   nextBtn.id = "nextBtn";
   nextBtn.textContent = "Next";
   nextBtn.disabled = true;
   nextBtn.onclick = nextQuestion;
   quizDiv.appendChild(nextBtn);
+
+  updateProgress();
 }
 
-// Check if selected answer is correct
+// Check answer
 function checkAnswer(selectedIndex, clickedButton) {
   const correctIndex = questions[currentQuestion].answer;
   const buttons = document.querySelectorAll(".option-btn");
   const result = document.getElementById("result");
 
-  // Disable all option buttons
   buttons.forEach(btn => btn.disabled = true);
-
-  // Enable Next button
   document.getElementById("nextBtn").disabled = false;
 
   if (selectedIndex === correctIndex) {
@@ -88,13 +82,11 @@ function checkAnswer(selectedIndex, clickedButton) {
     clickedButton.style.backgroundColor = "red";
     result.textContent = "❌ Wrong!";
     result.style.color = "red";
-
-    // Highlight the correct answer
     buttons[correctIndex].style.backgroundColor = "green";
   }
 }
 
-// Go to next question
+// Next question
 function nextQuestion() {
   currentQuestion++;
   if (currentQuestion < questions.length) {
@@ -103,6 +95,27 @@ function nextQuestion() {
     document.getElementById("quiz").innerHTML =
       `<h2>🎉 Quiz Finished!</h2>
        <p>Score: ${score}/${questions.length}</p>
-       <button onclick="startQuiz()">Restart Quiz</button>`;
+       <button onclick="restartQuiz()">Restart Quiz</button>`;
+    updateProgress(true);
+  }
+}
+
+// Restart quiz
+function restartQuiz() {
+  document.getElementById("categoryDiv").style.display = "block";
+  document.getElementById("quiz").innerHTML = "";
+  currentQuestion = 0;
+  score = 0;
+  updateProgress(true);
+}
+
+// Update progress bar
+function updateProgress(finish = false) {
+  const progress = document.getElementById("progress-bar");
+  if (finish) {
+    progress.style.width = "100%";
+  } else {
+    const percent = ((currentQuestion) / questions.length) * 100;
+    progress.style.width = percent + "%";
   }
 }
