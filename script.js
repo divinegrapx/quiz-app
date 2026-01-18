@@ -4,9 +4,9 @@ import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWith
 import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
-// -------------------- Your Firebase Config --------------------
+// -------------------- Firebase Config --------------------
 const firebaseConfig = {
-  apiKey: "AIza....",
+  apiKey: "AIza....", // <-- Replace with your Firebase API key
   authDomain: "neon-quiz-app.firebaseapp.com",
   projectId: "neon-quiz-app",
   storageBucket: "neon-quiz-app.appspot.com",
@@ -14,7 +14,6 @@ const firebaseConfig = {
   appId: "1:1234567890:web:abcdef123456"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
@@ -132,25 +131,46 @@ async function showLeaderboard() {
   });
 }
 
-// -------------------- Quiz Functions --------------------
-startQuizBtn?.addEventListener("click", () => {
-  score = 0;
-  questionIndex = 0;
-  usedHints = 0;
-  usedFifty = false;
+// -------------------- Fetch Questions from Open Trivia DB --------------------
+async function loadQuestions(amount = 20) {
+  const response = await fetch(`https://opentdb.com/api.php?amount=${amount}&type=multiple`);
+  const data = await response.json();
+
+  return data.results.map(q => {
+    const choices = shuffleArray([...q.incorrect_answers, q.correct_answer].map(decodeHTML));
+    return {
+      question: decodeHTML(q.question),
+      choices: choices,
+      answer: choices.indexOf(decodeHTML(q.correct_answer)),
+      hint: "Think carefully!"
+    };
+  });
+}
+
+function decodeHTML(html) {
+  const txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
+}
+
+// -------------------- Start Quiz --------------------
+startQuizBtn?.addEventListener("click", async () => {
+  score = 0; questionIndex = 0; usedHints = 0; usedFifty = false;
 
   const selectedCount = parseInt(questionCountSelect.value) || 20;
-  questions = shuffleArray([...allQuestions]).slice(0, selectedCount);
+  questions = await loadQuestions(selectedCount);
 
   quizContainer.style.display = "block";
   showQuestion();
 });
 
+// -------------------- Show Question --------------------
 function showQuestion() {
   if (questionIndex >= questions.length) return endQuiz();
   const q = questions[questionIndex];
   questionEl.textContent = q.question;
   choicesEl.innerHTML = "";
+
   q.choices.forEach((choice, i) => {
     const btn = document.createElement("button");
     btn.textContent = choice;
@@ -174,9 +194,10 @@ function showQuestion() {
   }, 1000);
 }
 
+// -------------------- Check Answer --------------------
 function checkAnswer(selected) {
   const correctIndex = questions[questionIndex].answer;
-  if (selected === correctIndex) { score++; correctSound.play(); } 
+  if (selected === correctIndex) { score++; correctSound.play(); }
   else { wrongSound.play(); }
   questionIndex++;
   showQuestion();
@@ -219,18 +240,3 @@ async function endQuiz() {
 
 // -------------------- Utility --------------------
 function shuffleArray(arr) { return arr.sort(() => Math.random() - 0.5); }
-
-// -------------------- Trivia Questions --------------------
-const allQuestions = [
-  { question: "What is the capital of France?", choices: ["Paris","Berlin","Rome","Madrid"], answer: 0, hint: "It's known as the city of lights." },
-  { question: "Which planet is known as the Red Planet?", choices: ["Earth","Mars","Jupiter","Venus"], answer: 1, hint: "It's the 4th planet from the Sun." },
-  { question: "What is 5 + 7?", choices: ["10","12","11","13"], answer: 1, hint: "Think basic arithmetic." },
-  { question: "Who wrote 'Romeo and Juliet'?", choices: ["Shakespeare","Hemingway","Tolkien","Dickens"], answer: 0, hint: "Famous English playwright." },
-  { question: "Which element has the chemical symbol 'O'?", choices: ["Gold","Oxygen","Iron","Silver"], answer: 1, hint: "Essential for breathing." },
-  { question: "How many continents are there on Earth?", choices: ["5","6","7","8"], answer: 2, hint: "Think about Asia, Africa, Europe…"},
-  { question: "Which ocean is the largest?", choices: ["Atlantic","Indian","Pacific","Arctic"], answer: 2, hint: "It covers more than 30% of Earth's surface." },
-  { question: "Who painted the Mona Lisa?", choices: ["Van Gogh","Leonardo da Vinci","Picasso","Michelangelo"], answer: 1, hint: "Renaissance artist." },
-  { question: "What gas do plants absorb from the atmosphere?", choices: ["Oxygen","Nitrogen","Carbon Dioxide","Hydrogen"], answer: 2, hint: "Used in photosynthesis." },
-  { question: "Which country hosted the 2016 Summer Olympics?", choices: ["China","Brazil","UK","Russia"], answer: 1, hint: "Think Rio de Janeiro." }
-  // Add remaining questions to reach 20–30 total
-];
