@@ -139,6 +139,7 @@ function showQuestion() {
   timeLeft = 20;
   updateTimer();
   hintBtn.disabled = false;
+  const hintBox = document.getElementById("hint-box");
   hintBox.style.display = "none";
 
   const q = questions[current];
