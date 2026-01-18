@@ -15,27 +15,40 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ---------------- DOM ELEMENTS ----------------
-const loginBtn = document.getElementById("loginBtn");
 const loginDiv = document.getElementById("loginDiv");
+const loginGoogleBtn = document.getElementById("loginGoogleBtn");
+const loginEmailBtn = document.getElementById("loginEmailBtn");
+const registerEmailBtn = document.getElementById("registerEmailBtn");
+const emailInput = document.getElementById("emailInput");
+const passInput = document.getElementById("passInput");
+const loginError = document.getElementById("loginError");
+
 const categoryDiv = document.getElementById("categoryDiv");
-const startBtn = document.getElementById("startBtn");
 const categorySelect = document.getElementById("categorySelect");
 const questionCount = document.getElementById("questionCount");
+const startBtn = document.getElementById("startBtn");
+
 const quizDiv = document.getElementById("quiz");
+const quizTitle = document.getElementById("quiz-title");
+
 const lifelines = document.getElementById("lifelines");
 const fiftyBtn = document.getElementById("fiftyBtn");
 const hintBtn = document.getElementById("hintBtn");
+
 const progressContainer = document.getElementById("progress-container");
 const progressBar = document.getElementById("progress-bar");
+
 const timerContainer = document.getElementById("timer-container");
 const timerBar = document.getElementById("timer-bar");
 const timerText = document.getElementById("timer-text");
+
 const moneyList = document.getElementById("money-list");
-const quizTitle = document.getElementById("quiz-title");
+
+const leaderboardList = document.getElementById("leaderboard-list");
+
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
 
-// Create hint box
 const hintBox = document.createElement("div");
 hintBox.id = "hint-box";
 quizDiv.parentNode.insertBefore(hintBox, quizDiv.nextSibling);
@@ -52,37 +65,50 @@ const fallbackQuestions = [
 ];
 
 // ---------------- MONEY LEVELS ----------------
-const baseMoneyLevels = ["$100","$200","$300","$500","$1,000","$2,000","$4,000","$8,000","$16,000","$32,000",
-                         "$64,000","$125,000","$250,000","$500,000","$1,000,000","$2,000,000","$4,000,000",
-                         "$8,000,000","$16,000,000","$32,000,000","$64,000,000","$125,000,000","$250,000,000",
-                         "$500,000,000","$1,000,000,000","$2,000,000,000","$4,000,000,000","$8,000,000,000",
-                         "$16,000,000,000","$32,000,000,000"]; // up to 30+ questions
+const baseMoneyLevels = ["$100","$200","$300","$500","$1,000","$2,000","$4,000","$8,000","$16,000","$32,000","$64,000","$125,000","$250,000","$500,000","$1,000,000"];
 
 // ---------------- LOGIN ----------------
-loginBtn.addEventListener("click", () => {
+loginGoogleBtn.addEventListener("click", () => {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider)
     .then(result => {
-      loginDiv.style.display = "none";
-      categoryDiv.style.display = "block";
-      quizTitle.textContent = `🎯 Welcome ${result.user.displayName}`;
-      updateLeaderboard();
+      onLoginSuccess(result.user);
     })
     .catch(error => {
-      console.error("Login error:", error);
-      alert("Login failed! Check console.");
+      console.error("Google login failed:", error);
+      loginError.textContent = "Google login failed. Check console.";
     });
 });
 
-// ---------------- MONEY LADDER ----------------
-function buildMoneyLadder() {
-  moneyList.innerHTML = "";
-  const levelsToUse = baseMoneyLevels.slice(0, parseInt(questionCount.value));
-  levelsToUse.reverse().forEach(amount => {
-    const li = document.createElement("li");
-    li.textContent = amount;
-    moneyList.appendChild(li);
-  });
+loginEmailBtn.addEventListener("click", () => {
+  const email = emailInput.value.trim();
+  const pass = passInput.value;
+  if(!email || !pass) { loginError.textContent="Email and password required"; return; }
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(result => onLoginSuccess(result.user))
+    .catch(err => {
+      console.error(err);
+      loginError.textContent = "Email login failed: "+err.message;
+    });
+});
+
+registerEmailBtn.addEventListener("click", () => {
+  const email = emailInput.value.trim();
+  const pass = passInput.value;
+  if(!email || !pass) { loginError.textContent="Email and password required"; return; }
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(result => onLoginSuccess(result.user))
+    .catch(err => {
+      console.error(err);
+      loginError.textContent = "Registration failed: "+err.message;
+    });
+});
+
+function onLoginSuccess(user) {
+  loginDiv.style.display = "none";
+  categoryDiv.style.display = "block";
+  quizTitle.textContent = `🎯 Welcome ${user.displayName || user.email}`;
+  updateLeaderboard();
 }
 
 // ---------------- START QUIZ ----------------
@@ -161,159 +187,131 @@ function startTimer() {
   timer = setInterval(() => {
     timeLeft--;
     updateTimer();
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      nextQuestion();
-    }
-  }, 1000);
+    if(timeLeft<=0){ clearInterval(timer); nextQuestion(); }
+  },1000);
 }
-
-function updateTimer() {
+function updateTimer(){
   timerText.textContent = `${timeLeft}s`;
-  timerBar.style.width = `${(timeLeft / 20) * 100}%`;
+  timerBar.style.width = `${(timeLeft/20)*100}%`;
 }
 
 // ---------------- CHECK ANSWER ----------------
-function checkAnswer(answer) {
+function checkAnswer(answer){
   clearInterval(timer);
   const correct = questions[current].correctAnswer;
   const feedbackDiv = document.getElementById("feedback");
-
-  document.querySelectorAll(".option-btn").forEach(b => {
-    b.disabled = true;
-    if (b.textContent === correct) b.classList.add("correct");
-    if (b.textContent === answer && answer !== correct) b.classList.add("wrong");
+  document.querySelectorAll(".option-btn").forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===correct) b.classList.add("correct");
+    if(b.textContent===answer && answer!==correct) b.classList.add("wrong");
   });
 
-  if (answer === correct) {
-    score++;
-    ladderLevel++;
-    updateMoneyLadder();
-    feedbackDiv.textContent = "✅ Correct!";
-    feedbackDiv.style.color = "lime";
+  if(answer===correct){
+    score++; ladderLevel++; updateMoneyLadder();
+    feedbackDiv.textContent="✅ Correct!"; feedbackDiv.style.color="lime";
     correctSound.play();
-    setTimeout(() => nextQuestion(), 1000);
+    setTimeout(nextQuestion,1000);
   } else {
-    feedbackDiv.textContent = "❌ Wrong!";
-    feedbackDiv.style.color = "red";
+    feedbackDiv.textContent="❌ Wrong!"; feedbackDiv.style.color="red";
     wrongSound.play();
-    setTimeout(() => nextQuestion(), 1000);
+    setTimeout(nextQuestion,1000);
   }
 }
 
 // ---------------- NEXT QUESTION ----------------
-function nextQuestion() {
+function nextQuestion(){
   current++;
-  if (current >= questions.length) {
-    quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>
-      <button onclick="location.reload()">Restart</button>`;
-    startBtn.disabled = false;
-    lifelines.style.display = "none";
-    timerContainer.style.display = "none";
-    progressContainer.style.display = "none";
-    moneyList.style.display = "none";
-    hintBox.style.display = "none";
+  if(current>=questions.length){
+    quizDiv.innerHTML=`<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>
+    <button onclick="location.reload()">Restart</button>`;
+    startBtn.disabled=false; lifelines.style.display="none";
+    timerContainer.style.display="none"; progressContainer.style.display="none";
+    moneyList.style.display="none"; hintBox.style.display="none";
 
     const user = auth.currentUser;
-    saveScore(user, score);
-
+    saveScore(user,score);
     return;
   }
   showQuestion();
 }
 
 // ---------------- LIFELINES ----------------
-function useFifty() {
-  if (fiftyUsed) return;
-  fiftyUsed = true;
-  fiftyBtn.disabled = true;
-
+function useFifty(){
+  if(fiftyUsed) return;
+  fiftyUsed=true; fiftyBtn.disabled=true;
   const correct = questions[current].correctAnswer;
   const btns = Array.from(document.querySelectorAll(".option-btn"));
-  let removed = 0;
-  btns.forEach(b => {
-    if (b.textContent !== correct && removed < 2 && Math.random() > 0.3) {
-      b.style.display = "none";
-      removed++;
-    }
+  let removed=0;
+  btns.forEach(b=>{
+    if(b.textContent!==correct && removed<2){ b.style.display="none"; removed++; }
   });
 }
-
-function useHint() {
-  if (hintUsed) return;
-  hintUsed = true;
-  hintBtn.disabled = true;
-
+function useHint(){
+  if(hintUsed) return;
+  hintUsed=true; hintBtn.disabled=true;
   const q = questions[current];
-  hintBox.textContent = "💡 Hint: " + q.hint;
-  hintBox.style.display = "block";
+  hintBox.textContent="💡 Hint: "+q.hint;
+  hintBox.style.display="block";
 }
 
 // ---------------- MONEY LADDER ----------------
-function updateMoneyLadder() {
+function buildMoneyLadder(){
+  moneyList.innerHTML="";
+  const n = parseInt(questionCount.value);
+  const levels = baseMoneyLevels.slice(0,n);
+  levels.reverse().forEach(amount=>{
+    const li = document.createElement("li");
+    li.textContent=amount;
+    moneyList.appendChild(li);
+  });
+}
+function updateMoneyLadder(){
   const lis = moneyList.querySelectorAll("li");
-  lis.forEach(li => li.classList.remove("current"));
-  const idx = moneyList.children.length - ladderLevel - 1;
-  if (lis[idx]) lis[idx].classList.add("current");
+  lis.forEach(li=>li.classList.remove("current"));
+  const idx = moneyList.children.length - ladderLevel -1;
+  if(lis[idx]) lis[idx].classList.add("current");
 }
 
 // ---------------- LEADERBOARD ----------------
-async function saveScore(user, score) {
-  if (!user) return;
-  const userData = {
-    uid: user.uid,
-    name: user.displayName,
-    avatar: user.photoURL,
-    score: score,
-    date: firebase.firestore.FieldValue.serverTimestamp()
-  };
-
-  try {
-    await db.collection("leaderboard").doc(user.uid).set(userData, { merge: true });
+async function saveScore(user,score){
+  if(!user) return;
+  try{
+    await db.collection("leaderboard").doc(user.uid).set({
+      uid:user.uid,
+      name:user.displayName || user.email,
+      avatar:user.photoURL || "",
+      score:score,
+      date:firebase.firestore.FieldValue.serverTimestamp()
+    },{merge:true});
     updateLeaderboard();
-  } catch (err) {
-    console.error("Error saving score:", err);
-  }
+  }catch(err){ console.error(err); }
 }
 
-async function updateLeaderboard() {
-  const list = document.getElementById("leaderboard-list");
-  list.innerHTML = "Loading...";
-  try {
-    const snapshot = await db.collection("leaderboard")
-      .orderBy("score", "desc")
-      .limit(10)
-      .get();
-
-    list.innerHTML = "";
-    snapshot.forEach(doc => {
+async function updateLeaderboard(){
+  leaderboardList.innerHTML="Loading...";
+  try{
+    const snapshot = await db.collection("leaderboard").orderBy("score","desc").limit(10).get();
+    leaderboardList.innerHTML="";
+    snapshot.forEach(doc=>{
       const data = doc.data();
       const li = document.createElement("li");
-      li.style.display = "flex";
-      li.style.alignItems = "center";
-      li.style.gap = "8px";
+      li.style.display="flex"; li.style.alignItems="center"; li.style.gap="8px";
 
       const img = document.createElement("img");
-      img.src = data.avatar;
-      img.width = 30;
-      img.height = 30;
-      img.style.borderRadius = "50%";
+      img.src = data.avatar || "https://via.placeholder.com/30";
+      img.width=30; img.height=30; img.style.borderRadius="50%";
 
       li.appendChild(img);
       li.appendChild(document.createTextNode(`${data.name} — ${data.score} pts`));
-      list.appendChild(li);
+      leaderboardList.appendChild(li);
     });
-  } catch (err) {
-    console.error("Error loading leaderboard:", err);
-    list.innerHTML = "Failed to load leaderboard.";
+  }catch(err){
+    console.error(err);
+    leaderboardList.innerHTML="Failed to load leaderboard.";
   }
 }
 
-// ---------------- MAKE FUNCTIONS GLOBAL ----------------
-window.updateLeaderboard = updateLeaderboard;
-window.startQuiz = startQuiz;
-window.useFifty = useFifty;
-window.useHint = useHint;
-
-// ---------------- INIT ----------------
-updateLeaderboard();
+// Initialize leaderboard if user is already logged in
+auth.onAuthStateChanged(user=>{
+  if(user) onLoginSuccess(user);
+});
