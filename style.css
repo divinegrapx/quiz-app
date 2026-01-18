@@ -1,56 +1,96 @@
+/* General page */
 body {
-  font-family: Arial, sans-serif;
-  background: #111;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: radial-gradient(circle at top, #0a0a0a, #111);
   color: #fff;
   text-align: center;
   margin: 0;
   padding: 0;
 }
 
+/* Container */
 .container {
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 10px;
+  max-width: 700px;
+  margin: 30px auto;
+  padding: 20px;
+  background: rgba(20, 20, 20, 0.8);
+  border-radius: 15px;
+  box-shadow: 0 0 40px #00bfff;
 }
 
+/* Header */
+h1 {
+  font-size: 32px;
+  text-shadow: 0 0 15px #0ff, 0 0 30px #00bfff;
+  margin-bottom: 20px;
+}
+
+/* Buttons */
 .answer-btn {
   display: block;
-  width: 60%;
-  margin: 8px auto;
-  padding: 10px;
-  font-size: 16px;
+  width: 70%;
+  margin: 10px auto;
+  padding: 15px;
+  font-size: 18px;
   color: #fff;
-  background-color: #00bfff;
+  background-color: #1e90ff;
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 0 10px #00bfff;
+  box-shadow: 0 0 10px #1e90ff;
+  text-shadow: 0 0 5px #fff;
+}
+
+.answer-btn:hover {
+  box-shadow: 0 0 20px #00ffff, 0 0 30px #00bfff;
 }
 
 .answer-btn:active {
+  background-color: #0d3f66;
+  box-shadow: 0 0 15px #009acd;
+}
+
+/* Lifelines */
+#lifelines {
+  display: none;
+  margin: 20px 0;
+}
+
+#lifelines button {
+  margin: 0 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #00bfff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  box-shadow: 0 0 10px #00bfff;
+  transition: all 0.2s;
+}
+
+#lifelines button:active {
   background-color: #009acd;
   box-shadow: 0 0 15px #009acd;
 }
 
-#lifelines {
-  display: none;
-  margin: 10px 0;
-}
-
+/* Timer */
 #timer-container {
   width: 80%;
-  margin: 10px auto;
-  background: #333;
-  height: 20px;
+  margin: 20px auto;
+  background: #222;
+  height: 25px;
   position: relative;
+  border-radius: 12px;
   display: none;
 }
 
 #timer-bar {
   height: 100%;
   width: 100%;
-  background-color: lime;
+  background-color: #00ff00;
+  border-radius: 12px;
   transition: width 0.3s;
 }
 
@@ -61,14 +101,17 @@ body {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  top: -30px;
+  top: -35px;
+  text-shadow: 0 0 10px #ff0;
 }
 
+/* Progress bar */
 #progress-container {
   width: 80%;
-  margin: 10px auto;
+  margin: 20px auto;
   background: #333;
-  height: 10px;
+  height: 15px;
+  border-radius: 12px;
   display: none;
 }
 
@@ -76,20 +119,52 @@ body {
   height: 100%;
   width: 0%;
   background-color: #0ff;
+  border-radius: 12px;
   transition: width 0.3s;
+  box-shadow: 0 0 10px #0ff;
 }
 
+/* Feedback text */
 #feedback {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
   margin: 10px 0;
+  text-shadow: 0 0 10px #0ff;
 }
 
+/* Hint box */
 #hint-box {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   color: #0ff;
-  margin-top: 10px;
+  margin-top: 15px;
   display: none;
-  text-shadow: 0 0 5px #0ff;
+  text-shadow: 0 0 10px #0ff;
+}
+
+/* Category and start button */
+#categoryDiv {
+  margin-bottom: 20px;
+}
+
+#categoryDiv select, #categoryDiv button {
+  font-size: 16px;
+  padding: 8px 12px;
+  margin: 5px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+#categoryDiv button {
+  background-color: #00bfff;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00bfff;
+  transition: all 0.2s;
+}
+
+#categoryDiv button:active {
+  background-color: #009acd;
+  box-shadow: 0 0 15px #009acd;
 }
