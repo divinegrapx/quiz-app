@@ -1,5 +1,5 @@
 let questions = [];
-let current = 0;
+let currentQuestion = 0;
 let score = 0;
 
 function startQuiz() {
@@ -13,14 +13,9 @@ function startQuiz() {
       questions = data.map(q => {
         const options = [...q.incorrectAnswers, q.correctAnswer];
         const correctIndex = options.indexOf(q.correctAnswer);
-
-        return {
-          question: q.question,
-          options: options,
-          answer: correctIndex
-        };
+        return { question: q.question, options: options, answer: correctIndex };
       });
-      current = 0;
+      currentQuestion = 0;
       score = 0;
       showQuestion();
     });
@@ -41,6 +36,7 @@ function showQuestion() {
     btn.textContent = option;
     btn.className = "option-btn";
 
+    // ✅ THIS LINE CALLS checkAnswer
     btn.onclick = () => checkAnswer(index, btn);
 
     quizDiv.appendChild(btn);
@@ -49,4 +45,36 @@ function showQuestion() {
   const result = document.createElement("p");
   result.id = "result";
   quizDiv.appendChild(result);
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < questions.length) {
+    showQuestion();
+  } else {
+    document.getElementById("quiz").innerHTML =
+      `<h2>🎉 Quiz Finished!</h2><p>Score: ${score}/${questions.length}</p>`;
+}
+}
+
+// 🔹 STEP 3: ADD checkAnswer() HERE
+function checkAnswer(selectedIndex, clickedButton) {
+  const correctIndex = questions[currentQuestion].answer;
+  const buttons = document.querySelectorAll(".option-btn");
+  const result = document.getElementById("result");
+
+  buttons.forEach(btn => btn.disabled = true);
+
+  if (selectedIndex === correctIndex) {
+    clickedButton.style.backgroundColor = "green";
+    result.textContent = "✅ Correct!";
+    result.style.color = "green";
+    score++;
+  } else {
+    clickedButton.style.backgroundColor = "red";
+    result.textContent = "❌ Wrong!";
+    result.style.color = "red";
+
+    buttons[correctIndex].style.backgroundColor = "green";
+  }
 }
