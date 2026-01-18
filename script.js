@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-
   const quizDiv = document.getElementById("quiz");
   const startBtn = document.getElementById("startBtn");
   const lifelines = document.getElementById("lifelines");
@@ -14,25 +13,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const hintBtn = document.getElementById("hintBtn");
   const hintBox = document.getElementById("hint-box");
   const moneyList = document.getElementById("money-list");
+  const correctSound = document.getElementById("correct-sound");
+  const wrongSound = document.getElementById("wrong-sound");
 
   let questions = [], current = 0, score = 0, timer, timeLeft = 20;
   let fiftyUsed = false, hintUsed = false;
 
   const fallbackQuestions = [
-    { question: "What color is the sky?", correctAnswer: "Blue", incorrectAnswers: ["Red","Green","Yellow"], hint: "It's the same color as the ocean on a clear day." },
-    { question: "How many days are in a week?", correctAnswer: "7", incorrectAnswers: ["5","6","8"], hint: "Think about Monday to Sunday." },
-    { question: "Which planet is known as the Red Planet?", correctAnswer: "Mars", incorrectAnswers: ["Venus","Jupiter","Saturn"], hint: "It's named after the Roman god of war." }
+    { question: "What color is the sky?", correctAnswer: "Blue", incorrectAnswers: ["Red","Green","Yellow"], hint: "It's the same color as the ocean." },
+    { question: "How many days are in a week?", correctAnswer: "7", incorrectAnswers: ["5","6","8"], hint: "Think Monday to Sunday." },
+    { question: "Which planet is known as the Red Planet?", correctAnswer: "Mars", incorrectAnswers: ["Venus","Jupiter","Saturn"], hint: "Named after Roman god of war." }
   ];
 
-  // Money ladder (example for 10 questions)
   const moneyLevels = ["$100","$200","$300","$500","$1,000","$2,000","$4,000","$8,000","$16,000","$32,000"];
-  
+
   function buildMoneyLadder() {
     moneyList.innerHTML = "";
     moneyLevels.slice(0, questionCount.value).reverse().forEach((amount, idx) => {
       const li = document.createElement("li");
       li.textContent = amount;
-      if (idx === moneyLevels.length - current -1) li.classList.add("current");
       moneyList.appendChild(li);
     });
   }
@@ -65,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
         question: q.question,
         correctAnswer: q.correctAnswer,
         incorrectAnswers: q.incorrectAnswers,
-        hint: q.hint || "Think carefully about this question."
+        hint: q.hint || "Think carefully."
       }));
     } catch {
       questions = fallbackQuestions;
@@ -126,8 +125,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (b.textContent === answer && answer !== correct) b.classList.add("wrong");
     });
 
-    if (answer === correct) { score++; feedbackDiv.textContent = "✅ Correct!"; feedbackDiv.style.color = "lime"; }
-    else { feedbackDiv.textContent = "❌ Wrong!"; feedbackDiv.style.color = "red"; }
+    if (answer === correct) {
+      score++;
+      feedbackDiv.textContent = "✅ Correct!";
+      feedbackDiv.style.color = "lime";
+      correctSound.play();
+    } else {
+      feedbackDiv.textContent = "❌ Wrong!";
+      feedbackDiv.style.color = "red";
+      wrongSound.play();
+    }
 
     setTimeout(nextQuestion, 1000);
   }
