@@ -27,36 +27,26 @@ function startQuiz() {
 }
 
 function showQuestion() {
-  const q = questions[current];
-  let html = `<h3>${q.question}</h3>`;
+  const quizDiv = document.getElementById("quiz");
+  quizDiv.innerHTML = "";
 
-  q.options.forEach((opt, i) => {
-    html += `
-      <label>
-        <input type="radio" name="option" value="${i}">
-        ${opt}
-      </label><br>
-    `;
+  const q = questions[currentQuestion];
+
+  const questionEl = document.createElement("h2");
+  questionEl.textContent = q.question;
+  quizDiv.appendChild(questionEl);
+
+  q.options.forEach((option, index) => {
+    const btn = document.createElement("button");
+    btn.textContent = option;
+    btn.className = "option-btn";
+
+    btn.onclick = () => checkAnswer(index, btn);
+
+    quizDiv.appendChild(btn);
   });
 
-  html += `<br><button onclick="nextQuestion()">Next</button>`;
-  document.getElementById("quiz").innerHTML = html;
-}
-
-function nextQuestion() {
-  const selected = document.querySelector('input[name="option"]:checked');
-  if (!selected) return;
-
-  if (parseInt(selected.value) === questions[current].answer) {
-    score++;
-  }
-
-  current++;
-  if (current < questions.length) {
-    showQuestion();
-  } else {
-    document.getElementById("quiz").innerHTML =
-      `<h2>Quiz Finished!</h2>
-       <p>Score: ${score}/${questions.length}</p>`;
-  }
+  const result = document.createElement("p");
+  result.id = "result";
+  quizDiv.appendChild(result);
 }
