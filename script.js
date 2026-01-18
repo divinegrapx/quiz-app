@@ -41,9 +41,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const timerBar = document.getElementById("timer-bar");
   const timerText = document.getElementById("timer-text");
   const moneyList = document.getElementById("money-list");
-  const quizContainer = document.getElementById("quiz-container");
   const correctSound = document.getElementById("correct-sound");
   const wrongSound = document.getElementById("wrong-sound");
+
+  const hintBox = document.createElement("div");
+  hintBox.id = "hint-box";
+  quizDiv.parentNode.insertBefore(hintBox, quizDiv.nextSibling);
 
   // ---------------- GLOBALS ----------------
   let questions = [], current=0, score=0, timer, timeLeft=20;
@@ -109,11 +112,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function startQuiz(){
     startBtn.disabled=true;
-    quizContainer.style.display="block";
+    quizDiv.style.display="flex";
     lifelines.style.display="flex";
     progressContainer.style.display="block";
     timerContainer.style.display="block";
     moneyList.style.display="block";
+    hintBox.style.display="none";
+
     ladderLevel=current=score=0;
     fiftyUsed=hintUsed=false;
     fiftyBtn.disabled=hintBtn.disabled=false;
@@ -137,29 +142,34 @@ document.addEventListener("DOMContentLoaded", () => {
   function buildMoneyLadder(){
     moneyList.innerHTML="";
     const totalQ=parseInt(questionCount.value);
-    const levels = moneyLevels.slice(0,totalQ).reverse();
-    levels.forEach(l=>{
+    for(let i=0;i<totalQ;i++){
       const li=document.createElement("li");
-      li.textContent=l;
+      li.textContent=moneyLevels[i%moneyLevels.length];
+      li.id="money-"+i;
       moneyList.appendChild(li);
-    });
+    }
   }
 
   function showQuestion(){
     clearInterval(timer);
     timeLeft=20;
     updateTimer();
+    hintBox.style.display="none";
+
     const q=questions[current];
     const answers=[...q.incorrectAnswers,q.correctAnswer].sort(()=>Math.random()-0.5);
+
     quizDiv.innerHTML=`<h2>${q.question}</h2><div id="feedback"></div>`;
     answers.forEach(a=>{
       const btn=document.createElement("button");
       btn.textContent=a;
       btn.className="option-btn";
+      btn.disabled=false;
       btn.onclick=()=>checkAnswer(a);
       quizDiv.appendChild(btn);
     });
-    progressBar.style.width=`${(current/questions.length)*100}%`;
+
+    updateMoneyLadder();
     startTimer();
   }
 
@@ -168,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
     timer=setInterval(()=>{
       timeLeft--;
       updateTimer();
-      if(timeLeft<=0){ clearInterval(timer); nextQuestion(); }
+      if(timeLeft<=0){ clearInterval(timer); nextQuestion(false); }
     },1000);
   }
 
@@ -181,20 +191,35 @@ document.addEventListener("DOMContentLoaded", () => {
     clearInterval(timer);
     const correct=questions[current].correctAnswer;
     const fb=document.getElementById("feedback");
+
     document.querySelectorAll(".option-btn").forEach(b=>{
       b.disabled=true;
       if(b.textContent===correct)b.classList.add("correct");
       if(b.textContent===answer && answer!==correct)b.classList.add("wrong");
     });
-    if(answer===correct){ score++; ladderLevel++; updateMoneyLadder(); fb.textContent="✅ Correct!"; correctSound.play(); setTimeout(nextQuestion,1000);}
-    else{ fb.textContent="❌ Wrong!"; wrongSound.play(); setTimeout(nextQuestion,1000);}
+
+    if(answer===correct){
+      score++;
+      ladderLevel++;
+      fb.textContent="✅ Correct!";
+      fb.style.color="lime";
+      correctSound.play();
+      updateMoneyLadder();
+      setTimeout(()=>nextQuestion(true),1000);
+    } else {
+      fb.textContent="❌ Wrong!";
+      fb.style.color="red";
+      wrongSound.play();
+      setTimeout(()=>nextQuestion(false),1000);
+    }
   }
 
-  function nextQuestion(){
+  function nextQuestion(correct){
     current++;
     if(current>=questions.length){
       quizDiv.innerHTML=`<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p><button onclick="location.reload()">Restart</button>`;
       lifelines.style.display=timerContainer.style.display=progressContainer.style.display=moneyList.style.display="none";
+      hintBox.style.display="none";
       return;
     }
     showQuestion();
@@ -205,13 +230,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const correct=questions[current].correctAnswer;
     let removed=0;
     document.querySelectorAll(".option-btn").forEach(b=>{
-      if(b.textContent!==correct && removed<2 && Math.random()>0.3){ b.style.display="none"; removed++; }
+      if(b.textContent!==correct && removed<2){ b.style.display="none"; removed++; }
     });
   }
 
   function useHint(){
     if(hintUsed)return; hintUsed=true; hintBtn.disabled=true;
-    const q=questions[current]; quizDiv.innerHTML+=`<div id="hint-box">💡 Hint: ${q.hint}</div>`;
+    hintBox.textContent="💡 Hint: "+questions[current].hint;
+    hintBox.style.display="block";
+  }
+
+  function updateMoneyLadder(){
+    const lis=moneyList.querySelectorAll("li");
+    lis.forEach(li=>li.classList.remove("current"));
+    const idx=current-1;
+    if(idx>=0 && lis[idx]) lis[idx].classList.add("current");
   }
 
 });
