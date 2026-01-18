@@ -6,7 +6,7 @@ import {
   collection, query, orderBy, limit, onSnapshot 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 🔥 PASTE YOUR FIREBASE CONFIG BELOW
+// 🔥 Replace with your Firebase config
 const firebaseConfig = {
   apiKey: "PASTE_HERE",
   authDomain: "PASTE_HERE",
@@ -26,7 +26,6 @@ const provider = new GoogleAuthProvider();
 async function createUserProfile(user) {
   const userRef = doc(db, "users", user.uid);
   const snap = await getDoc(userRef);
-
   if (!snap.exists()) {
     await setDoc(userRef, {
       name: user.displayName || "Anonymous",
@@ -41,7 +40,6 @@ async function createUserProfile(user) {
 // ==================== DOM CONTENT LOADED ====================
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ===== DOM ELEMENTS =====
   const loginBtn = document.getElementById("loginBtn");
   const quizDiv = document.getElementById("quiz");
   const startBtn = document.getElementById("startBtn");
@@ -61,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const wrongSound = document.getElementById("wrong-sound");
   const leaderboardList = document.getElementById("leaderboard-list");
 
-  // ===== QUIZ VARIABLES =====
   let questions = [], current = 0, score = 0, timer, timeLeft = 20;
   let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
 
@@ -73,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const moneyLevels = ["$100","$200","$300","$500","$1,000","$2,000","$4,000","$8,000","$16,000","$32,000"];
 
-  // ==================== LOGIN HANDLER ====================
+  // ===== LOGIN HANDLER =====
   if (loginBtn) {
     loginBtn.addEventListener("click", async () => {
       const result = await signInWithPopup(auth, provider);
@@ -82,20 +79,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ==================== LEADERBOARD WITH AVATARS + LAST SCORE ====================
+  // ===== LEADERBOARD =====
   async function loadLeaderboard() {
     const q = query(
       collection(db, "users"),
       orderBy("bestScore", "desc"),
       limit(10)
     );
-
     onSnapshot(q, (snapshot) => {
       leaderboardList.innerHTML = "";
       let first = true;
       snapshot.forEach(doc => {
         const user = doc.data();
-
         const li = document.createElement("li");
         li.style.display = "flex";
         li.style.alignItems = "center";
@@ -103,7 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
         li.style.padding = "5px";
         li.style.borderRadius = "5px";
 
-        // Avatar image
         const img = document.createElement("img");
         img.src = user.avatar || "https://via.placeholder.com/30?text=?";
         img.alt = user.name;
@@ -112,20 +106,17 @@ document.addEventListener("DOMContentLoaded", () => {
         img.style.borderRadius = "50%";
         img.style.objectFit = "cover";
 
-        // Username + bestScore + lastScore
         const span = document.createElement("span");
         span.textContent = `${user.name} — Best: ${user.bestScore} | Last: ${user.lastScore}`;
 
         li.appendChild(img);
         li.appendChild(span);
 
-        // Crown for top user
         if (first) {
           span.textContent = `👑 ${span.textContent}`;
           first = false;
         }
 
-        // Highlight current user
         if (auth.currentUser && doc.id === auth.currentUser.uid) {
           li.style.backgroundColor = "#333";
           li.style.color = "#f0c000";
@@ -139,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadLeaderboard();
 
-  // ==================== MONEY LADDER ====================
+  // ===== MONEY LADDER =====
   function buildMoneyLadder() {
     moneyList.innerHTML = "";
     const levelsToUse = moneyLevels.slice(0, questionCount.value);
@@ -152,12 +143,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   buildMoneyLadder();
 
-  // ==================== QUIZ EVENT LISTENERS ====================
+  // ===== EVENT LISTENERS =====
   startBtn.addEventListener("click", startQuiz);
   fiftyBtn.addEventListener("click", useFifty);
   hintBtn.addEventListener("click", useHint);
 
-  // ==================== START QUIZ ====================
+  // ===== START QUIZ =====
   async function startQuiz() {
     startBtn.disabled = true;
     lifelines.style.display = "flex";
@@ -172,26 +163,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     buildMoneyLadder();
 
-    try {
-      const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`);
-      if (!res.ok) throw "API error";
-      let data = await res.json();
-      if (!data.length) throw "Empty API";
-
-      questions = data.map(q => ({
-        question: q.question,
-        correctAnswer: q.correctAnswer,
-        incorrectAnswers: q.incorrectAnswers,
-        hint: q.hint || "Think carefully."
-      }));
-    } catch {
-      questions = fallbackQuestions;
-    }
+    // Use fallback questions for simplicity
+    questions = fallbackQuestions;
 
     showQuestion();
   }
 
-  // ==================== SHOW QUESTION ====================
+  // ===== SHOW QUESTION =====
   function showQuestion() {
     clearInterval(timer);
     timeLeft = 20;
@@ -215,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
     startTimer();
   }
 
-  // ==================== TIMER ====================
+  // ===== TIMER =====
   function startTimer() {
     timerText.style.display = "block";
     timer = setInterval(() => {
@@ -223,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
       updateTimer();
       if (timeLeft <= 0) {
         clearInterval(timer);
-        nextQuestion(false); // timed out
+        nextQuestion(false);
       }
     }, 1000);
   }
@@ -233,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
     timerBar.style.width = `${(timeLeft / 20) * 100}%`;
   }
 
-  // ==================== CHECK ANSWER ====================
+  // ===== CHECK ANSWER =====
   function checkAnswer(answer) {
     clearInterval(timer);
     const correct = questions[current].correctAnswer;
@@ -261,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ==================== NEXT QUESTION ====================
+  // ===== NEXT QUESTION =====
   async function nextQuestion(correct) {
     current++;
     if (current >= questions.length) {
@@ -274,9 +252,9 @@ document.addEventListener("DOMContentLoaded", () => {
       progressBar.style.width = "100%";
       hintBox.style.display = "none";
 
-      // 🔥 SAVE SCORE TO FIRESTORE
+      // SAVE SCORE
       if (auth.currentUser) {
-        const userRef = doc(db, auth.currentUser.uid);
+        const userRef = doc(db, "users", auth.currentUser.uid);
         const snap = await getDoc(userRef);
         if (snap.exists()) {
           const data = snap.data();
@@ -293,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showQuestion();
   }
 
-  // ==================== LIFELINES ====================
+  // ===== LIFELINES =====
   function useFifty() {
     if (fiftyUsed) return;
     fiftyUsed = true;
@@ -320,7 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
     hintBox.style.display = "block";
   }
 
-  // ==================== MONEY LADDER UPDATE ====================
+  // ===== MONEY LADDER UPDATE =====
   function updateMoneyLadder() {
     const lis = moneyList.querySelectorAll("li");
     lis.forEach(li => li.classList.remove("current"));
