@@ -16,9 +16,21 @@
 <div class="container">
   <h1 id="quiz-title">🎯 Neon Quiz Challenge</h1>
 
-  <!-- LOGIN -->
+  <!-- LOGIN / REGISTER -->
   <div id="loginDiv">
-    <button id="loginBtn">Login with Google</button>
+    <h2>Login or Register</h2>
+
+    <button id="loginGoogleBtn">Login with Google</button>
+    <button id="loginFacebookBtn">Login with Facebook</button>
+
+    <hr>
+
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button id="loginEmailBtn">Login</button>
+    <button id="registerEmailBtn">Register</button>
+
+    <p id="login-error" style="color:red;"></p>
   </div>
 
   <!-- CATEGORY SELECTION -->
@@ -77,8 +89,6 @@
   <audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
 </div>
 
-<!-- Your script -->
 <script src="script.js"></script>
-
 </body>
 </html>
