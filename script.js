@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* ================= FIREBASE ================= */
+  /* ================= FIREBASE CONFIG ================= */
   const firebaseConfig = {
     apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
     authDomain: "neon-quiz-app.firebaseapp.com",
@@ -9,20 +9,16 @@ document.addEventListener("DOMContentLoaded", () => {
     messagingSenderId: "891061147021",
     appId: "1:891061147021:web:7b3d80020f642da7b699c4"
   };
-
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
   /* ================= DOM ================= */
   const authDiv = document.getElementById("authDiv");
-  const emailDiv = document.getElementById("emailDiv");
   const categoryDiv = document.getElementById("categoryDiv");
   const quizContainer = document.getElementById("quiz-container");
 
   const googleLoginBtn = document.getElementById("googleLoginBtn");
-  const emailRegisterBtn = document.getElementById("emailRegisterBtn");
-
   const startBtn = document.getElementById("startBtn");
   const categorySelect = document.getElementById("categorySelect");
   const questionCount = document.getElementById("questionCount");
@@ -44,6 +40,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const correctSound = document.getElementById("correct-sound");
   const wrongSound = document.getElementById("wrong-sound");
 
+  let hintBox = document.getElementById("hint-box");
+  if (!hintBox) {
+    hintBox = document.createElement("div");
+    hintBox.id = "hint-box";
+    quizDiv.after(hintBox);
+  }
+
   /* ================= STATE ================= */
   let questions = [];
   let current = 0;
@@ -54,14 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let fiftyUsed = false;
   let hintUsed = false;
   let ladderLevel = 0;
-
-  /* ================= HINT BOX ================= */
-  let hintBox = document.getElementById("hint-box");
-  if (!hintBox) {
-    hintBox = document.createElement("div");
-    hintBox.id = "hint-box";
-    quizDiv.after(hintBox);
-  }
 
   /* ================= FALLBACK QUESTIONS ================= */
   const fallbackQuestions = [
@@ -93,11 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
       categoryDiv.style.display = "block";
       updateLeaderboard();
     });
-  };
-
-  emailRegisterBtn.onclick = () => {
-    authDiv.style.display = "none";
-    emailDiv.style.display = "block";
   };
 
   /* ================= START QUIZ ================= */
@@ -150,11 +140,11 @@ document.addEventListener("DOMContentLoaded", () => {
     timerPaused = false;
     updateTimerUI();
     updateProgress();
-
     hintBox.style.display = "none";
-    quizDiv.innerHTML = "";
 
+    quizDiv.innerHTML = "";
     const q = questions[current];
+
     const questionBlock = document.createElement("div");
     questionBlock.className = "question-block fade-in";
     questionBlock.innerHTML = `<h2>${q.question}</h2><div id="feedback"></div>`;
@@ -174,7 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (timerPaused) return;
       timeLeft--;
       updateTimerUI();
-      playTick();
       if (timeLeft <= 0) {
         clearInterval(timer);
         nextQuestion();
@@ -192,28 +181,23 @@ document.addEventListener("DOMContentLoaded", () => {
     else timerBar.style.background = "red";
   }
 
-  function playTick() {
-    if (timeLeft <= 6) {
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      osc.frequency.value = 800;
-      osc.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.05);
-    }
-  }
-
   /* ================= CHECK ANSWER ================= */
   function checkAnswer(answer) {
     clearInterval(timer);
     const correct = questions[current].correctAnswer;
     const feedback = document.getElementById("feedback");
+    const buttons = document.querySelectorAll(".option-btn");
 
-    document.querySelectorAll(".option-btn").forEach(btn => {
+    buttons.forEach(btn => {
       btn.disabled = true;
 
       if (btn.textContent === correct) btn.classList.add("correct");
-      if (btn.textContent === answer && answer !== correct) btn.classList.add("wrong");
+
+      if (btn.textContent === answer && answer !== correct) {
+        btn.classList.add("wrong");
+        btn.classList.add("shake");
+        setTimeout(() => btn.classList.remove("shake"), 500);
+      }
     });
 
     if (answer === correct) {
@@ -226,8 +210,6 @@ document.addEventListener("DOMContentLoaded", () => {
       feedback.innerHTML = `❌ <b>Wrong!</b><br>
         <span class="correct-answer">Correct answer: <b>${correct}</b></span>`;
       wrongSound.play();
-      quizDiv.classList.add("shake");
-      setTimeout(() => quizDiv.classList.remove("shake"), 500);
     }
 
     setTimeout(nextQuestion, 1800);
@@ -339,4 +321,5 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   updateLeaderboard();
+
 });
