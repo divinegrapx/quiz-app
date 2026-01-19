@@ -1,97 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Neon Quiz App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
-
 <body>
-  <div class="container">
 
-    <!-- AUTH -->
-    <div id="authDiv">
-      <h1>⚡ Neon Quiz App</h1>
-      <p class="subtitle">Test your knowledge & climb the money ladder</p>
+<div class="container">
 
-      <button id="googleLoginBtn">Login with Google</button>
-      <button id="facebookLoginBtn">Login with Facebook</button>
-      <button id="emailRegisterBtn">Login / Register with Email</button>
-    </div>
-
-    <!-- EMAIL LOGIN -->
-    <div id="emailDiv" style="display:none;">
-      <h2>Email Access</h2>
-      <input id="emailInput" type="email" placeholder="Email">
-      <input id="passwordInput" type="password" placeholder="Password">
-
-      <button id="emailLoginBtn">Login</button>
-      <button id="emailRegisterSubmitBtn">Register</button>
-      <button id="emailCancelBtn" class="secondary">Cancel</button>
-    </div>
-
-    <!-- CATEGORY -->
-    <div id="categoryDiv" style="display:none;">
-      <h2>Start Quiz</h2>
-
-      <select id="categorySelect">
-        <option value="general_knowledge">General Knowledge</option>
-        <option value="science">Science</option>
-        <option value="history">History</option>
-        <option value="music">Music</option>
-      </select>
-
-      <select id="questionCount">
-        <option value="5">5 Questions</option>
-        <option value="10" selected>10 Questions</option>
-        <option value="15">15 Questions</option>
-      </select>
-
-      <button id="startBtn">Start Quiz</button>
-    </div>
-
-    <!-- QUIZ -->
-    <div id="quiz-and-ladder" style="display:none;">
-      <div id="quiz"></div>
-
-      <ul id="money-list"></ul>
-    </div>
-
-    <!-- TIMER -->
-    <div id="timer-container">
-      <div id="timer-bar"></div>
-      <span id="timer-text">30s</span>
-    </div>
-
-    <!-- LIFELINES -->
-    <div id="lifelines">
-      <button id="fiftyBtn">50 / 50</button>
-      <button id="hintBtn">Hint</button>
-    </div>
-
-    <div id="hint-box"></div>
-
-    <!-- LEADERBOARD -->
-    <ul id="leaderboard-list"></ul>
-
+  <!-- AUTH -->
+  <div id="auth-section">
+    <h1>Neon Quiz</h1>
+    <button id="loginGoogle">Login with Google</button>
+    <button id="loginEmail">Login with Email</button>
   </div>
 
-  <!-- Sounds -->
-  <audio id="correct-sound" src="correct.mp3"></audio>
-  <audio id="wrong-sound" src="wrong.mp3"></audio>
+  <!-- QUIZ -->
+  <div id="quiz-section" style="display:none;">
+    <button id="logoutBtn">Logout</button>
 
-  <!-- SCRIPT -->
-  <script src="script.js"></script>
+    <div id="timer-container">
+      <div id="timer-bar"></div>
+      <div id="timer-text">30</div>
+    </div>
+
+    <h2 id="question" class="question-text"></h2>
+
+    <div id="options"></div>
+
+    <div id="lifelines">
+      <button id="hintBtn">Hint</button>
+      <button id="fiftyBtn">50/50</button>
+    </div>
+
+    <div id="feedback"></div>
+  </div>
+
+</div>
+
+<!-- Firebase (ONLINE COMPAT) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<script>
+  firebase.initializeApp({
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT"
+  });
+</script>
+
+<script src="script.js"></script>
 </body>
 </html>
