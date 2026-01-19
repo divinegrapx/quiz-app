@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showQuestion();
   }
 
-  /* ================= QUIZ ================= */
+  /* ================= SHOW QUESTION ================= */
   function showQuestion() {
     clearInterval(timer);
     timeLeft = 20;
@@ -152,16 +152,19 @@ document.addEventListener("DOMContentLoaded", () => {
     updateProgress();
 
     hintBox.style.display = "none";
+    quizDiv.innerHTML = "";
 
     const q = questions[current];
-    quizDiv.innerHTML = `<h2>${q.question}</h2><div id="feedback"></div>`;
+    const questionBlock = document.createElement("div");
+    questionBlock.className = "question-block fade-in";
+    questionBlock.innerHTML = `<h2>${q.question}</h2><div id="feedback"></div>`;
+    quizDiv.appendChild(questionBlock);
 
-    const answers = [...q.incorrectAnswers, q.correctAnswer]
-      .sort(() => Math.random() - 0.5);
+    const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
 
     answers.forEach(a => {
       const btn = document.createElement("button");
-      btn.className = "option-btn";
+      btn.className = "option-btn fade-in";
       btn.textContent = a;
       btn.onclick = () => checkAnswer(a);
       quizDiv.appendChild(btn);
@@ -179,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   }
 
-  /* ================= TIMER POLISH ================= */
+  /* ================= TIMER ================= */
   function updateTimerUI() {
     timerText.textContent = `${timeLeft}s`;
     timerBar.style.width = `${(timeLeft / 20) * 100}%`;
@@ -200,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /* ================= ANSWERS ================= */
+  /* ================= CHECK ANSWER ================= */
   function checkAnswer(answer) {
     clearInterval(timer);
     const correct = questions[current].correctAnswer;
@@ -208,25 +211,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll(".option-btn").forEach(btn => {
       btn.disabled = true;
+
       if (btn.textContent === correct) btn.classList.add("correct");
-      if (btn.textContent === answer && answer !== correct)
-        btn.classList.add("wrong");
+      if (btn.textContent === answer && answer !== correct) btn.classList.add("wrong");
     });
 
     if (answer === correct) {
       score++;
       ladderLevel++;
       updateMoneyLadder();
-      feedback.textContent = "✅ Correct!";
+      feedback.innerHTML = "✅ <b>Correct!</b>";
       correctSound.play();
     } else {
-      feedback.textContent = "❌ Wrong!";
+      feedback.innerHTML = `❌ <b>Wrong!</b><br>
+        <span class="correct-answer">Correct answer: <b>${correct}</b></span>`;
       wrongSound.play();
+      quizDiv.classList.add("shake");
+      setTimeout(() => quizDiv.classList.remove("shake"), 500);
     }
 
-    setTimeout(nextQuestion, 1200);
+    setTimeout(nextQuestion, 1800);
   }
 
+  /* ================= NEXT QUESTION ================= */
   function nextQuestion() {
     current++;
     if (current >= questions.length) {
@@ -253,7 +260,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const correct = questions[current].correctAnswer;
     let removed = 0;
-
     document.querySelectorAll(".option-btn").forEach(btn => {
       if (btn.textContent !== correct && removed < 2) {
         btn.style.display = "none";
