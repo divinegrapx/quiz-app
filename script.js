@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  /* ================= DOM ================= */
+  /* ================= DOM ELEMENTS ================= */
   const authDiv = document.getElementById("authDiv");
   const categoryDiv = document.getElementById("categoryDiv");
   const quizContainer = document.getElementById("quiz-container");
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     quizDiv.after(hintBox);
   }
 
-  /* ================= STATE ================= */
+  /* ================= GLOBAL STATE ================= */
   let questions = [];
   let current = 0;
   let score = 0;
@@ -60,27 +60,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ================= FALLBACK QUESTIONS ================= */
   const fallbackQuestions = [
-    {
-      question: "What color is the sky?",
-      correctAnswer: "Blue",
-      incorrectAnswers: ["Red", "Green", "Yellow"],
-      hint: "Same color as the ocean."
-    },
-    {
-      question: "How many days are in a week?",
-      correctAnswer: "7",
-      incorrectAnswers: ["5", "6", "8"],
-      hint: "Monday to Sunday."
-    },
-    {
-      question: "Which planet is known as the Red Planet?",
-      correctAnswer: "Mars",
-      incorrectAnswers: ["Venus", "Jupiter", "Saturn"],
-      hint: "Roman god of war."
-    }
+    { question: "What color is the sky?", correctAnswer: "Blue", incorrectAnswers: ["Red", "Green", "Yellow"], hint: "Same color as the ocean." },
+    { question: "How many days are in a week?", correctAnswer: "7", incorrectAnswers: ["5", "6", "8"], hint: "Monday to Sunday." },
+    { question: "Which planet is known as the Red Planet?", correctAnswer: "Mars", incorrectAnswers: ["Venus", "Jupiter", "Saturn"], hint: "Roman god of war." }
   ];
 
-  /* ================= AUTH ================= */
+  /* ================= LOGIN ================= */
   googleLoginBtn.onclick = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).then(() => {
@@ -191,9 +176,13 @@ document.addEventListener("DOMContentLoaded", () => {
     buttons.forEach(btn => {
       btn.disabled = true;
 
-      if (btn.textContent === correct) btn.classList.add("correct");
+      if (btn.textContent === correct) {
+        // Always highlight correct answer green
+        btn.classList.add("correct");
+      }
 
       if (btn.textContent === answer && answer !== correct) {
+        // Wrong button: red + shake
         btn.classList.add("wrong");
         btn.classList.add("shake");
         setTimeout(() => btn.classList.remove("shake"), 500);
