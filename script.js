@@ -32,8 +32,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const fiftyBtn = document.getElementById("fiftyBtn");
   const hintBtn = document.getElementById("hintBtn");
 
+  const timerContainer = document.getElementById("timer-container");
   const timerBar = document.getElementById("timer-bar");
   const timerText = document.getElementById("timer-text");
+
+  const progressContainer = document.getElementById("progress-container");
+  const progressBar = document.getElementById("progress-bar");
+
   const moneyList = document.getElementById("money-list");
 
   const correctSound = document.getElementById("correct-sound");
@@ -44,6 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let current = 0;
   let score = 0;
   let timer;
+  let timeLeft = 20;
+  let timerPaused = false;
   let fiftyUsed = false;
   let hintUsed = false;
   let ladderLevel = 0;
@@ -81,16 +88,11 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ================= AUTH ================= */
   googleLoginBtn.onclick = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-      .then(() => {
-        authDiv.style.display = "none";
-        categoryDiv.style.display = "block";
-        updateLeaderboard();
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Google login failed");
-      });
+    auth.signInWithPopup(provider).then(() => {
+      authDiv.style.display = "none";
+      categoryDiv.style.display = "block";
+      updateLeaderboard();
+    });
   };
 
   emailRegisterBtn.onclick = () => {
@@ -104,16 +106,12 @@ document.addEventListener("DOMContentLoaded", () => {
   hintBtn.onclick = useHint;
 
   async function startQuiz() {
-    console.log("START QUIZ CLICKED");
-
-    // SHOW / HIDE SECTIONS (THIS WAS THE MAIN BUG)
     categoryDiv.style.display = "none";
     quizContainer.style.display = "block";
-
-    quizDiv.style.display = "flex";
+    timerContainer.style.display = "flex";
+    progressContainer.style.display = "block";
     lifelines.style.display = "flex";
     moneyList.style.display = "block";
-    hintBox.style.display = "none";
 
     current = 0;
     score = 0;
@@ -130,8 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch(
         `https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`
       );
-      if (!res.ok) throw new Error("API error");
-
+      if (!res.ok) throw "API error";
       const data = await res.json();
       questions = data.map(q => ({
         question: q.question,
@@ -140,7 +137,6 @@ document.addEventListener("DOMContentLoaded", () => {
         hint: q.hint || "Think carefully."
       }));
     } catch {
-      console.warn("Using fallback questions");
       questions = fallbackQuestions;
     }
 
@@ -150,8 +146,11 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ================= QUIZ ================= */
   function showQuestion() {
     clearInterval(timer);
-    let timeLeft = 20;
-    updateTimer(timeLeft);
+    timeLeft = 20;
+    timerPaused = false;
+    updateTimerUI();
+    updateProgress();
+
     hintBox.style.display = "none";
 
     const q = questions[current];
@@ -169,8 +168,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     timer = setInterval(() => {
+      if (timerPaused) return;
       timeLeft--;
-      updateTimer(timeLeft);
+      updateTimerUI();
+      playTick();
       if (timeLeft <= 0) {
         clearInterval(timer);
         nextQuestion();
@@ -178,11 +179,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   }
 
-  function updateTimer(t) {
-    timerText.textContent = `${t}s`;
-    timerBar.style.width = `${(t / 20) * 100}%`;
+  /* ================= TIMER POLISH ================= */
+  function updateTimerUI() {
+    timerText.textContent = `${timeLeft}s`;
+    timerBar.style.width = `${(timeLeft / 20) * 100}%`;
+
+    if (timeLeft > 12) timerBar.style.background = "lime";
+    else if (timeLeft > 6) timerBar.style.background = "orange";
+    else timerBar.style.background = "red";
   }
 
+  function playTick() {
+    if (timeLeft <= 6) {
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      osc.frequency.value = 800;
+      osc.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.05);
+    }
+  }
+
+  /* ================= ANSWERS ================= */
   function checkAnswer(answer) {
     clearInterval(timer);
     const correct = questions[current].correctAnswer;
@@ -219,6 +237,8 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       lifelines.style.display = "none";
       moneyList.style.display = "none";
+      timerContainer.style.display = "none";
+      progressContainer.style.display = "none";
       saveScore(auth.currentUser, score);
       return;
     }
@@ -246,8 +266,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (hintUsed) return;
     hintUsed = true;
     hintBtn.disabled = true;
+    timerPaused = true;
     hintBox.textContent = "💡 " + questions[current].hint;
     hintBox.style.display = "block";
+  }
+
+  /* ================= PROGRESS ================= */
+  function updateProgress() {
+    const percent = ((current + 1) / questions.length) * 100;
+    progressBar.style.width = percent + "%";
   }
 
   /* ================= MONEY LADDER ================= */
