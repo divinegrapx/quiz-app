@@ -57,7 +57,7 @@ const fallbackQuestions = [
 googleLoginBtn.addEventListener("click", async ()=>{
   try{
     const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await auth.signInWithPopup(provider);
+    await auth.signInWithPopup(provider);
     authDiv.style.display="none";
     categoryDiv.style.display="block";
     document.getElementById("logoutDiv").style.display="block";
@@ -131,13 +131,14 @@ function showQuestion(){
   timerBar.parentElement.style.display="block";
 
   const q = questions[current];
-  quizDiv.innerHTML=`<h2 style="color:black">${q.question}</h2><div id="feedback"></div>`;
+  quizDiv.innerHTML=`<h2>${q.question}</h2><div id="feedback"></div>`;
 
   const answers = [...q.incorrectAnswers, q.correctAnswer].sort(()=>Math.random()-0.5);
   answers.forEach(a=>{
     const btn = document.createElement("button");
     btn.textContent=a;
     btn.className="option-btn";
+    btn.style.color = "black"; // <-- black text for answers
     btn.addEventListener("click", ()=>checkAnswer(a));
     quizDiv.appendChild(btn);
   });
