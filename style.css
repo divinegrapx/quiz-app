@@ -175,3 +175,10 @@ button.secondary {
   75%{transform:translateX(-6px)}
   100%{transform:translateX(0)}
 }
+/* ---------- INITIAL VISIBILITY FIX ---------- */
+#quiz-and-ladder,
+#lifelines,
+#timer-container,
+#hint-box {
+  display: none;
+}
