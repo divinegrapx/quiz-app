@@ -1,74 +1,93 @@
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #050510;
-  color: #fff;
-  text-align: center;
+  margin:0;
+  font-family:Poppins,sans-serif;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  padding:40px;
+}
+
+.container {
+  max-width:700px;
+  width:100%;
+  background:rgba(0,0,0,0.6);
+  padding:30px;
+  border-radius:20px;
+  box-shadow:0 0 30px #00f2fe;
+  text-align:center;
 }
 
 button {
-  padding: 10px 18px;
-  background: #0ff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
+  padding:14px 28px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,#00f2fe,#00c6ff);
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+  margin:10px;
 }
 
 button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  opacity:0.4;
 }
 
-/* LOGIN */
-#authDiv {
-  margin-top: 100px;
-}
-
-/* QUIZ LAYOUT */
-#quiz-and-ladder {
-  display: none;
-  justify-content: space-between;
-  padding: 20px;
-}
-
-#quiz {
-  width: 65%;
-}
-
-#ladder {
-  width: 30%;
-}
-
-/* LIFELINES */
-#lifelines {
-  display: none;
-  margin-top: 10px;
-}
-
-/* TIMER */
 #timer-container {
-  display: none;
-  width: 80%;
-  margin: 10px auto;
+  position:relative;
+  height:25px;
+  background:rgba(255,255,255,0.2);
+  border-radius:15px;
+  margin-bottom:20px;
 }
 
-#time-bar {
-  height: 10px;
-  background: #0ff;
-  width: 100%;
+#timer-bar {
+  height:100%;
+  width:100%;
+  background:linear-gradient(90deg,#00ffcc,#00c6ff);
+  border-radius:15px;
+  transition:width 1s linear, background 0.3s;
 }
 
-/* HINT */
-#hint-box {
-  display: none;
-  margin-top: 10px;
-  color: #0ff;
-  font-style: italic;
+#timer-text {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-weight:bold;
 }
 
-/* CATEGORY */
-#categoryDiv {
-  display: none;
-  margin-top: 50px;
+.question-text {
+  color:#000;
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+}
+
+.option-btn {
+  display:block;
+  width:90%;
+  margin:10px auto;
+  padding:14px;
+  border-radius:12px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.option-btn.correct {
+  background:#00ff99 !important;
+  color:#000;
+}
+
+.option-btn.wrong {
+  background:#ff4d4d !important;
+  animation:shake 0.4s;
+}
+
+@keyframes shake {
+  0%{transform:translateX(0)}
+  25%{transform:translateX(-5px)}
+  50%{transform:translateX(5px)}
+  75%{transform:translateX(-5px)}
+  100%{transform:translateX(0)}
 }
