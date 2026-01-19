@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Quiz App</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Quiz App</title>
+  <link rel="stylesheet" href="style.css">
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <!-- Firebase (compat SDKs) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
 <div class="container">
 
   <!-- LOGIN / REGISTER -->
@@ -72,11 +71,14 @@
     </div>
 
     <!-- Progress & Timer -->
-    <div id="progress-container" style="display:none;"><div id="progress-bar"></div></div>
+    <div id="progress-container" style="display:none;">
+      <div id="progress-bar"></div>
+    </div>
     <div id="timer-container" style="display:none;">
       <div id="timer-bar"></div>
       <span id="timer-text">20s</span>
     </div>
+
     <div id="hint-box"></div>
   </div>
 
@@ -87,6 +89,7 @@
   <!-- Sounds -->
   <audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
   <audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
+
 </div>
 
 <script src="script.js"></script>
