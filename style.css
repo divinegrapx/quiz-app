@@ -8,9 +8,9 @@ body {
   align-items: flex-start;
   min-height: 100vh;
   padding: 20px;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  background-size: 600% 600%;
-  animation: gradientMove 20s ease infinite;
+  background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a3a);
+  background-size: 400% 400%;
+  animation: gradientMove 30s ease infinite;
 }
 
 @keyframes gradientMove {
@@ -43,7 +43,7 @@ button {
 #authDiv button, #emailDiv button, #restartBtn, #logoutBtn {
   margin: 10px;
   padding: 14px 28px;
-  background: linear-gradient(135deg,#00f2fe,#00c6ff);
+  background: linear-gradient(135deg,#00c6ff,#00f2fe);
   color: #000;
   box-shadow: 0 0 5px #00f2fe, 0 0 20px #00c6ff inset;
 }
