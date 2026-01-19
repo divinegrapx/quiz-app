@@ -11,7 +11,6 @@ body {
   padding: 20px;
 }
 
-/* Main container */
 .container {
   width: 100%;
   max-width: 900px;
@@ -41,12 +40,21 @@ body {
   background: linear-gradient(135deg,#00f2fe,#00c6ff);
   color: #fff;
   box-shadow: 0 0 5px #00f2fe, 0 0 15px #00c6ff inset;
-  transition: transform 0.2s, box-shadow 0.3s;
+  transition: transform 0.2s, box-shadow 0.3s, opacity 0.3s;
 }
 
 #authDiv button:hover {
   transform: scale(1.05);
   box-shadow: 0 0 10px #00f2fe, 0 0 25px #00c6ff inset;
+}
+
+#authDiv input {
+  width: 220px;
+  padding: 12px;
+  margin: 6px auto;
+  border-radius: 12px;
+  border: none;
+  text-align: center;
 }
 
 /* ---------------- Quiz + Ladder Layout ---------------- */
@@ -93,7 +101,7 @@ body {
   color: #fff;
   box-shadow: 0 0 5px #00f2fe, 0 0 15px #00c6ff inset;
   cursor: pointer;
-  transition: transform 0.2s, background-color 0.3s;
+  transition: transform 0.2s, background-color 0.3s, opacity 0.3s;
 }
 
 .option-btn:hover:not(:disabled) {
@@ -200,7 +208,12 @@ body {
   cursor: pointer;
   background: linear-gradient(135deg,#ff6a00,#ffb347);
   color: #fff;
-  transition: transform 0.2s;
+  transition: transform 0.2s, opacity 0.3s;
+}
+
+#lifelines button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 #lifelines button:hover:not(:disabled) {
@@ -212,6 +225,7 @@ body {
   margin: 10px 0;
   color: #00ffff;
   font-size: 1rem;
+  transition: opacity 0.3s;
 }
 
 .correct-answer {
