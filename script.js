@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ---------------- FIREBASE CONFIG ----------------
+  /* ================= FIREBASE ================= */
   const firebaseConfig = {
     apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
     authDomain: "neon-quiz-app.firebaseapp.com",
@@ -14,14 +14,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // ---------------- DOM ELEMENTS ----------------
-  const googleLoginBtn = document.getElementById("googleLoginBtn");
-  const facebookLoginBtn = document.getElementById("facebookLoginBtn");
-  const emailRegisterBtn = document.getElementById("emailRegisterBtn");
-
+  /* ================= DOM ================= */
   const authDiv = document.getElementById("authDiv");
   const emailDiv = document.getElementById("emailDiv");
   const categoryDiv = document.getElementById("categoryDiv");
+  const quizContainer = document.getElementById("quiz-container");
+
+  const googleLoginBtn = document.getElementById("googleLoginBtn");
+  const emailRegisterBtn = document.getElementById("emailRegisterBtn");
 
   const startBtn = document.getElementById("startBtn");
   const categorySelect = document.getElementById("categorySelect");
@@ -32,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const fiftyBtn = document.getElementById("fiftyBtn");
   const hintBtn = document.getElementById("hintBtn");
 
-  const progressBar = document.getElementById("progress-bar");
   const timerBar = document.getElementById("timer-bar");
   const timerText = document.getElementById("timer-text");
   const moneyList = document.getElementById("money-list");
@@ -40,19 +39,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const correctSound = document.getElementById("correct-sound");
   const wrongSound = document.getElementById("wrong-sound");
 
-  // ---------------- HINT BOX ----------------
+  /* ================= STATE ================= */
+  let questions = [];
+  let current = 0;
+  let score = 0;
+  let timer;
+  let fiftyUsed = false;
+  let hintUsed = false;
+  let ladderLevel = 0;
+
+  /* ================= HINT BOX ================= */
   let hintBox = document.getElementById("hint-box");
   if (!hintBox) {
     hintBox = document.createElement("div");
     hintBox.id = "hint-box";
-    quizDiv.parentNode.insertBefore(hintBox, quizDiv.nextSibling);
+    quizDiv.after(hintBox);
   }
 
-  // ---------------- GLOBALS ----------------
-  let questions = [], current = 0, score = 0, timer;
-  let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
-
-  // ---------------- FALLBACK QUESTIONS ----------------
+  /* ================= FALLBACK QUESTIONS ================= */
   const fallbackQuestions = [
     {
       question: "What color is the sky?",
@@ -74,8 +78,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   ];
 
-  // ---------------- AUTH ----------------
-  googleLoginBtn.addEventListener("click", () => {
+  /* ================= AUTH ================= */
+  googleLoginBtn.onclick = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
       .then(() => {
@@ -87,19 +91,25 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error(err);
         alert("Google login failed");
       });
-  });
+  };
 
-  emailRegisterBtn.addEventListener("click", () => {
+  emailRegisterBtn.onclick = () => {
     authDiv.style.display = "none";
     emailDiv.style.display = "block";
-  });
+  };
 
-  // ---------------- START QUIZ ----------------
-  startBtn.addEventListener("click", startQuiz);
-  fiftyBtn.addEventListener("click", useFifty);
-  hintBtn.addEventListener("click", useHint);
+  /* ================= START QUIZ ================= */
+  startBtn.onclick = startQuiz;
+  fiftyBtn.onclick = useFifty;
+  hintBtn.onclick = useHint;
 
   async function startQuiz() {
+    console.log("START QUIZ CLICKED");
+
+    // SHOW / HIDE SECTIONS (THIS WAS THE MAIN BUG)
+    categoryDiv.style.display = "none";
+    quizContainer.style.display = "block";
+
     quizDiv.style.display = "flex";
     lifelines.style.display = "flex";
     moneyList.style.display = "block";
@@ -114,13 +124,14 @@ document.addEventListener("DOMContentLoaded", () => {
     hintBtn.disabled = false;
 
     buildMoneyLadder();
-    quizDiv.innerHTML = "Loading...";
+    quizDiv.innerHTML = "<h2>Loading questions…</h2>";
 
     try {
       const res = await fetch(
         `https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`
       );
-      if (!res.ok) throw "API error";
+      if (!res.ok) throw new Error("API error");
+
       const data = await res.json();
       questions = data.map(q => ({
         question: q.question,
@@ -129,13 +140,14 @@ document.addEventListener("DOMContentLoaded", () => {
         hint: q.hint || "Think carefully."
       }));
     } catch {
+      console.warn("Using fallback questions");
       questions = fallbackQuestions;
     }
 
     showQuestion();
   }
 
-  // ---------------- SHOW QUESTION ----------------
+  /* ================= QUIZ ================= */
   function showQuestion() {
     clearInterval(timer);
     let timeLeft = 20;
@@ -148,11 +160,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const answers = [...q.incorrectAnswers, q.correctAnswer]
       .sort(() => Math.random() - 0.5);
 
-    answers.forEach(ans => {
+    answers.forEach(a => {
       const btn = document.createElement("button");
-      btn.textContent = ans;
       btn.className = "option-btn";
-      btn.onclick = () => checkAnswer(ans);
+      btn.textContent = a;
+      btn.onclick = () => checkAnswer(a);
       quizDiv.appendChild(btn);
     });
 
@@ -171,7 +183,6 @@ document.addEventListener("DOMContentLoaded", () => {
     timerBar.style.width = `${(t / 20) * 100}%`;
   }
 
-  // ---------------- ANSWERS ----------------
   function checkAnswer(answer) {
     clearInterval(timer);
     const correct = questions[current].correctAnswer;
@@ -195,13 +206,17 @@ document.addEventListener("DOMContentLoaded", () => {
       wrongSound.play();
     }
 
-    setTimeout(nextQuestion, 1000);
+    setTimeout(nextQuestion, 1200);
   }
 
   function nextQuestion() {
     current++;
     if (current >= questions.length) {
-      quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>`;
+      quizDiv.innerHTML = `
+        <h2>Quiz Finished!</h2>
+        <p>Score: ${score}/${questions.length}</p>
+        <button onclick="location.reload()">Restart</button>
+      `;
       lifelines.style.display = "none";
       moneyList.style.display = "none";
       saveScore(auth.currentUser, score);
@@ -210,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showQuestion();
   }
 
-  // ---------------- LIFELINES ----------------
+  /* ================= LIFELINES ================= */
   function useFifty() {
     if (fiftyUsed) return;
     fiftyUsed = true;
@@ -218,6 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const correct = questions[current].correctAnswer;
     let removed = 0;
+
     document.querySelectorAll(".option-btn").forEach(btn => {
       if (btn.textContent !== correct && removed < 2) {
         btn.style.display = "none";
@@ -234,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
     hintBox.style.display = "block";
   }
 
-  // ---------------- MONEY LADDER ----------------
+  /* ================= MONEY LADDER ================= */
   function buildMoneyLadder() {
     moneyList.innerHTML = "";
     for (let i = questionCount.value; i > 0; i--) {
@@ -251,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (items[idx]) items[idx].classList.add("current");
   }
 
-  // ---------------- LEADERBOARD ----------------
+  /* ================= LEADERBOARD ================= */
   async function saveScore(user, score) {
     if (!user) return;
     await db.collection("leaderboard").doc(user.uid).set({
@@ -267,6 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function updateLeaderboard() {
     const list = document.getElementById("leaderboard-list");
     if (!list) return;
+
     list.innerHTML = "";
     const snap = await db.collection("leaderboard")
       .orderBy("score", "desc")
