@@ -20,8 +20,6 @@ const emailDiv = document.getElementById("emailDiv");
 const emailLoginBtn = document.getElementById("emailLoginBtn");
 const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
 const emailCancelBtn = document.getElementById("emailCancelBtn");
-const logoutDiv = document.getElementById("logoutDiv");
-const logoutBtn = document.getElementById("logoutBtn");
 
 const startBtn = document.getElementById("startBtn");
 const categorySelect = document.getElementById("categorySelect");
@@ -41,13 +39,12 @@ const categoryDiv = document.getElementById("categoryDiv");
 const authDiv = document.getElementById("authDiv");
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
-
-// Tick sound
-const tickSound = new Audio("https://raw.githubusercontent.com/divinegrapx/quiz-app/main/tick.mp3");
+const tickSound = document.getElementById("tick-sound");
 
 // ---------------- GLOBALS ----------------
 let questions=[], current=0, score=0, timer;
 let fiftyUsed=false, hintUsed=false, ladderLevel=0;
+let totalTime = 30;
 
 // ---------------- FALLBACK QUESTIONS ----------------
 const fallbackQuestions = [
@@ -63,27 +60,34 @@ googleLoginBtn.addEventListener("click", async ()=>{
     const result = await auth.signInWithPopup(provider);
     authDiv.style.display="none";
     categoryDiv.style.display="block";
-    logoutDiv.style.display="block";
+    document.getElementById("logoutDiv").style.display="block";
     updateLeaderboard();
   }catch(e){ alert("Login failed!"); console.error(e);}
 });
+
 emailRegisterBtn.addEventListener("click", ()=>{ emailDiv.style.display="block"; authDiv.style.display="none"; });
 emailCancelBtn.addEventListener("click", ()=>{ emailDiv.style.display="none"; authDiv.style.display="block"; });
+
 emailLoginBtn.addEventListener("click", async ()=>{
   const email = document.getElementById("emailInput").value;
   const password = document.getElementById("passwordInput").value;
-  try{ await auth.signInWithEmailAndPassword(email,password); emailDiv.style.display="none"; categoryDiv.style.display="block"; logoutDiv.style.display="block"; updateLeaderboard(); }
+  try{ await auth.signInWithEmailAndPassword(email,password); emailDiv.style.display="none"; categoryDiv.style.display="block"; document.getElementById("logoutDiv").style.display="block"; updateLeaderboard(); }
   catch(e){ alert("Login failed: "+e.message);}
 });
 emailRegisterSubmitBtn.addEventListener("click", async ()=>{
   const email = document.getElementById("emailInput").value;
   const password = document.getElementById("passwordInput").value;
-  try{ await auth.createUserWithEmailAndPassword(email,password); emailDiv.style.display="none"; categoryDiv.style.display="block"; logoutDiv.style.display="block"; updateLeaderboard(); }
+  try{ await auth.createUserWithEmailAndPassword(email,password); emailDiv.style.display="none"; categoryDiv.style.display="block"; document.getElementById("logoutDiv").style.display="block"; updateLeaderboard(); }
   catch(e){ alert("Register failed: "+e.message);}
 });
-logoutBtn.addEventListener("click", ()=>{
+
+// ---------------- LOGOUT ----------------
+document.getElementById("logoutBtn").addEventListener("click", ()=>{
   auth.signOut();
-  location.reload();
+  authDiv.style.display="block";
+  categoryDiv.style.display="none";
+  quizContainer.style.display="none";
+  document.getElementById("logoutDiv").style.display="none";
 });
 
 // ---------------- START QUIZ ----------------
@@ -121,12 +125,13 @@ async function startQuiz(){
 // ---------------- SHOW QUESTION ----------------
 function showQuestion(){
   clearInterval(timer);
-  let timeLeft = 30; // 30s timer
+  let timeLeft = totalTime;
   updateTimer(timeLeft);
   hintBox.style.display="none";
+  timerBar.parentElement.style.display="block";
 
   const q = questions[current];
-  quizDiv.innerHTML=`<h2>${q.question}</h2><div id="feedback"></div>`;
+  quizDiv.innerHTML=`<h2 style="color:black">${q.question}</h2><div id="feedback"></div>`;
 
   const answers = [...q.incorrectAnswers, q.correctAnswer].sort(()=>Math.random()-0.5);
   answers.forEach(a=>{
@@ -150,9 +155,9 @@ function showQuestion(){
 // ---------------- TIMER ----------------
 function updateTimer(timeLeft){
   timerText.textContent = `${timeLeft}s`;
-  timerBar.style.width = (timeLeft/30*100) + "%";
-  if(timeLeft>20){ timerBar.style.background="#00ff00"; timerText.style.color="#00ff00";}
-  else if(timeLeft>10){ timerBar.style.background="#ffcc00"; timerText.style.color="#ffcc00";}
+  timerBar.style.width = (timeLeft/totalTime*100) + "%";
+  if(timeLeft>10){ timerBar.style.background="#00ff00"; timerText.style.color="#00ff00";}
+  else if(timeLeft>5){ timerBar.style.background="#ffcc00"; timerText.style.color="#ffcc00";}
   else{ timerBar.style.background="#ff4d4d"; timerText.style.color="#ff4d4d";}
 }
 
@@ -169,14 +174,13 @@ function checkAnswer(answer){
       btn.classList.add("correct");
     }
     if(btn.textContent===answer && answer!==correct){
-      btn.classList.add("wrong");
-      btn.classList.add("shake");
+      btn.classList.add("wrong","shake");
       setTimeout(()=>btn.classList.remove("shake"),500);
     }
   });
 
   if(answer===correct){ score++; ladderLevel++; updateMoneyLadder(); feedback.innerHTML="✅ <b>Correct!</b>"; correctSound.play();}
-  else{ feedback.innerHTML=`❌ <b>Wrong!</b><br><span class="correct-answer">Correct: <b>${correct}</b></span>`; wrongSound.play();}
+  else{ feedback.innerHTML=`❌ <b>Wrong!</b><br><span class="correct-answer">Correct: <b>${correct}</b></span>`; ladderLevel++; updateMoneyLadder(); wrongSound.play();}
 
   setTimeout(nextQuestion,1800);
 }
@@ -186,7 +190,7 @@ function nextQuestion(){
   current++;
   if(current>=questions.length){
     quizDiv.innerHTML=`<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p><button onclick="location.reload()">Restart</button>`;
-    lifelines.style.display="none"; moneyList.style.display="none"; hintBox.style.display="none";
+    lifelines.style.display="none"; moneyList.style.display="none"; hintBox.style.display="none"; timerBar.parentElement.style.display="none";
     const user = auth.currentUser; if(user) saveScore(user, score);
     return;
   }
