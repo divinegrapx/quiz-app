@@ -39,13 +39,14 @@ const categoryDiv = document.getElementById("categoryDiv");
 const authDiv = document.getElementById("authDiv");
 const logoutDiv = document.getElementById("logoutDiv");
 const logoutBtn = document.getElementById("logoutBtn");
+
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
 const tickSound = document.getElementById("tick-sound");
 
 // ---------------- GLOBALS ----------------
-let questions=[], current=0, score=0, timer, timeLeft;
-let fiftyUsed=false, hintUsed=false, ladderLevel=0;
+let questions = [], current = 0, score = 0, timer;
+let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
 
 // ---------------- FALLBACK QUESTIONS ----------------
 const fallbackQuestions = [
@@ -59,44 +60,43 @@ googleLoginBtn.addEventListener("click", async ()=>{
   try{
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await auth.signInWithPopup(provider);
-    authDiv.style.display="none";
-    categoryDiv.style.display="block";
-    logoutDiv.style.display="block";
-    updateLeaderboard();
+    showLoggedInUI();
   }catch(e){ alert("Login failed!"); console.error(e);}
 });
 
+// ---------------- EMAIL LOGIN ----------------
 emailRegisterBtn.addEventListener("click", ()=>{ emailDiv.style.display="block"; authDiv.style.display="none"; });
 emailCancelBtn.addEventListener("click", ()=>{ emailDiv.style.display="none"; authDiv.style.display="block"; });
 
 emailLoginBtn.addEventListener("click", async ()=>{
   const email = document.getElementById("emailInput").value;
   const password = document.getElementById("passwordInput").value;
-  try{
-    await auth.signInWithEmailAndPassword(email,password);
-    emailDiv.style.display="none";
-    categoryDiv.style.display="block";
-    logoutDiv.style.display="block";
-    updateLeaderboard();
-  }catch(e){ alert("Login failed: "+e.message);}
+  try{ 
+    await auth.signInWithEmailAndPassword(email,password); 
+    showLoggedInUI(); 
+  } catch(e){ alert("Login failed: "+e.message);}
 });
 emailRegisterSubmitBtn.addEventListener("click", async ()=>{
   const email = document.getElementById("emailInput").value;
   const password = document.getElementById("passwordInput").value;
-  try{
-    await auth.createUserWithEmailAndPassword(email,password);
-    emailDiv.style.display="none";
-    categoryDiv.style.display="block";
-    logoutDiv.style.display="block";
-    updateLeaderboard();
-  }catch(e){ alert("Register failed: "+e.message);}
+  try{ 
+    await auth.createUserWithEmailAndPassword(email,password); 
+    showLoggedInUI(); 
+  } catch(e){ alert("Register failed: "+e.message);}
 });
 
-// ---------------- LOGOUT ----------------
 logoutBtn.addEventListener("click", async ()=>{
   await auth.signOut();
   location.reload();
 });
+
+function showLoggedInUI(){
+  authDiv.style.display="none";
+  emailDiv.style.display="none";
+  categoryDiv.style.display="block";
+  logoutDiv.style.display="block";
+  updateLeaderboard();
+}
 
 // ---------------- START QUIZ ----------------
 startBtn.addEventListener("click", startQuiz);
@@ -104,28 +104,31 @@ fiftyBtn.addEventListener("click", useFifty);
 hintBtn.addEventListener("click", useHint);
 
 async function startQuiz(){
-  startBtn.disabled=true;
-  quizDiv.innerHTML="Loading...";
+  startBtn.disabled = true;
+  quizDiv.innerHTML = "Loading...";
   quizDiv.classList.add("fade-in");
-  quizContainer.style.display="block";
-  lifelines.style.display="flex";
-  moneyList.style.display="block";
-  hintBox.style.display="none";
-  ladderLevel=current=score=0; fiftyUsed=hintUsed=false;
-  fiftyBtn.disabled=false; hintBtn.disabled=false;
+  quizContainer.style.display = "block";
+  lifelines.style.display = "flex";
+  moneyList.style.display = "block";
+  hintBox.style.display = "none";
+  ladderLevel = current = score = 0;
+  fiftyUsed = hintUsed = false;
+  fiftyBtn.disabled = false; hintBtn.disabled = false;
   buildMoneyLadder();
 
   try{
     const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`);
     if(!res.ok) throw "API error";
     const data = await res.json();
-    questions = data.map(q=>({
+    questions = data.map((q, i)=>({
       question: q.question,
       correctAnswer: q.correctAnswer,
       incorrectAnswers: q.incorrectAnswers,
       hint: q.hint || "Think carefully."
     }));
-  }catch{ questions = fallbackQuestions; }
+  }catch{
+    questions = fallbackQuestions;
+  }
 
   showQuestion();
 }
@@ -133,45 +136,41 @@ async function startQuiz(){
 // ---------------- SHOW QUESTION ----------------
 function showQuestion(){
   clearInterval(timer);
-  timeLeft = 30; // 30 seconds per question
+  let timeLeft = 30; // 30 seconds
   updateTimer(timeLeft);
-  hintBox.style.display="none";
+  hintBox.style.display = "none";
 
   const q = questions[current];
-  quizDiv.innerHTML=`<h2>Question ${current+1}/${questions.length}: ${q.question}</h2><div id="feedback"></div>`;
+  quizDiv.innerHTML = `<h2>Question ${current+1} of ${questions.length}</h2><p>${q.question}</p><div id="feedback"></div>`;
 
   const answers = [...q.incorrectAnswers, q.correctAnswer].sort(()=>Math.random()-0.5);
   answers.forEach(a=>{
     const btn = document.createElement("button");
-    btn.textContent=a;
-    btn.className="option-btn";
-    btn.style.color="#000"; // answer font black
+    btn.textContent = a;
+    btn.className = "option-btn";
     btn.addEventListener("click", ()=>checkAnswer(a));
     quizDiv.appendChild(btn);
   });
 
   // TIMER
-  timerBar.style.width="100%";
-  timerBar.style.background="#00ff00";
-  timerText.textContent = `${timeLeft}s`;
-  timerText.style.color="#00ff00";
+  timerBar.style.width = "100%";
   timer = setInterval(()=>{
     timeLeft--;
     updateTimer(timeLeft);
-    if(timeLeft<=0){ clearInterval(timer); nextQuestion(false);}
+    if(timeLeft <= 0){ clearInterval(timer); nextQuestion(false); }
   },1000);
 }
 
 // ---------------- TIMER ----------------
-function updateTimer(time){
-  timerText.textContent = `${time}s`;
-  timerBar.style.width = (time/30*100) + "%";
-  if(time>10){ timerBar.style.background="#00ff00"; timerText.style.color="#00ff00";}
-  else if(time>5){ timerBar.style.background="#ffcc00"; timerText.style.color="#ffcc00";}
-  else{ 
-    timerBar.style.background="#ff4d4d"; 
-    timerText.style.color="#ff4d4d";
-    tickSound.play(); // play tick in last 5 sec
+function updateTimer(timeLeft){
+  timerText.textContent = `${timeLeft}s`;
+  timerBar.style.width = (timeLeft/30*100) + "%";
+
+  if(timeLeft>10){ timerBar.style.background="#00ff00"; timerText.style.color="#00ff00";}
+  else if(timeLeft>5){ timerBar.style.background="#ffcc00"; timerText.style.color="#ffcc00";}
+  else{
+    timerBar.style.background="#ff4d4d"; timerText.style.color="#ff4d4d";
+    tickSound.play();
   }
 }
 
@@ -183,28 +182,21 @@ function checkAnswer(answer){
   const buttons = document.querySelectorAll(".option-btn");
 
   buttons.forEach(btn=>{
-    btn.disabled=true;
-    btn.classList.remove("correct","wrong");
-    if(btn.textContent===correct){
-      btn.style.backgroundColor="#00ff00";
-      btn.style.color="#000";
-      btn.style.boxShadow="0 0 15px #00ff00 inset";
+    btn.disabled = true;
+    if(btn.textContent === correct){
+      btn.classList.add("correct");
     }
-    if(btn.textContent===answer && answer!==correct){
-      btn.style.backgroundColor="#ff4d4d";
-      btn.style.color="#000";
-      btn.style.boxShadow="0 0 15px #ff0000 inset";
+    if(btn.textContent === answer && answer !== correct){
+      btn.classList.add("wrong");
       btn.classList.add("shake");
       setTimeout(()=>btn.classList.remove("shake"),500);
     }
   });
 
-  if(answer===correct){ 
-    score++; ladderLevel++; updateMoneyLadder();
-    feedback.innerHTML="✅ <b>Correct!</b>";
-    correctSound.play();
-  } else { 
-    feedback.innerHTML=`❌ <b>Wrong!</b><br><span class="correct-answer">Correct: <b>${correct}</b></span>`; 
+  if(answer===correct){
+    score++; ladderLevel++; updateMoneyLadder(); feedback.innerHTML="✅ Correct!"; correctSound.play();
+  } else {
+    feedback.innerHTML=`❌ Wrong! <span class="correct-answer">Correct: ${correct}</span>`;
     wrongSound.play();
   }
 
@@ -215,9 +207,11 @@ function checkAnswer(answer){
 function nextQuestion(){
   current++;
   if(current>=questions.length){
-    quizDiv.innerHTML=`<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p><button onclick="location.reload()">Restart</button>`;
+    const user = auth.currentUser;
+    if(user) saveScore(user, score);
+
+    quizDiv.innerHTML=`<h2>Quiz Finished!</h2><p>Score: ${score}/${questions.length}</p><button onclick="location.reload()">Restart</button>`;
     lifelines.style.display="none"; moneyList.style.display="none"; hintBox.style.display="none";
-    const user = auth.currentUser; if(user) saveScore(user, score);
     return;
   }
   showQuestion();
@@ -226,57 +220,59 @@ function nextQuestion(){
 // ---------------- LIFELINES ----------------
 function useFifty(){
   if(fiftyUsed) return;
-  fiftyUsed=true; fiftyBtn.disabled=true;
+  fiftyUsed = true; fiftyBtn.disabled = true;
   const correct = questions[current].correctAnswer;
-  let removed=0;
-  const btns=Array.from(document.querySelectorAll(".option-btn"));
+  let removed = 0;
+  const btns = Array.from(document.querySelectorAll(".option-btn"));
   btns.forEach(b=>{
-    if(b.textContent!==correct && removed<2){ b.style.opacity=0.3; removed++; }
+    if(b.textContent !== correct && removed < 2){ b.style.opacity = 0.3; removed++; }
   });
 }
+
 function useHint(){
   if(hintUsed) return;
-  hintUsed=true; hintBtn.disabled=true;
+  hintUsed = true; hintBtn.disabled = true;
   const q = questions[current];
-  hintBox.textContent="💡 Hint: "+q.hint;
-  hintBox.style.display="block";
-  hintBtn.style.opacity=0.3;
+  hintBox.textContent = "💡 Hint: "+q.hint;
+  hintBox.style.display = "block";
+  hintBtn.style.opacity = 0.3;
 }
 
 // ---------------- MONEY LADDER ----------------
 function buildMoneyLadder(){
   moneyList.innerHTML="";
-  const numQuestions=parseInt(questionCount.value);
-  for(let i=numQuestions;i>0;i--){
-    const li=document.createElement("li");
-    li.textContent="$"+(Math.floor((i/numQuestions)*1000)); // dynamic reward
+  const numQuestions = parseInt(questionCount.value);
+  for(let i=numQuestions; i>0; i--){
+    const li = document.createElement("li");
+    li.textContent = "$"+(i*100); 
     moneyList.appendChild(li);
   }
 }
+
 function updateMoneyLadder(){
-  const lis=moneyList.querySelectorAll("li");
+  const lis = moneyList.querySelectorAll("li");
   lis.forEach(li=>li.classList.remove("current"));
-  const idx=moneyList.children.length-ladderLevel-1;
+  const idx = moneyList.children.length-ladderLevel-1;
   if(lis[idx]) lis[idx].classList.add("current");
 }
 
 // ---------------- LEADERBOARD ----------------
 async function saveScore(user,score){
   if(!user) return;
-  const userData={uid:user.uid, name:user.displayName||user.email, avatar:user.photoURL||"", score, date: firebase.firestore.FieldValue.serverTimestamp()};
+  const userData = {uid:user.uid, name:user.displayName||user.email, avatar:user.photoURL||"", score, date: firebase.firestore.FieldValue.serverTimestamp()};
   await db.collection("leaderboard").doc(user.uid).set(userData,{merge:true});
   updateLeaderboard();
 }
+
 async function updateLeaderboard(){
-  if(!leaderboardList) return;
   leaderboardList.innerHTML="";
-  const snapshot=await db.collection("leaderboard").orderBy("score","desc").limit(10).get();
+  const snapshot = await db.collection("leaderboard").orderBy("score","desc").limit(10).get();
   snapshot.forEach(doc=>{
-    const data=doc.data();
-    const li=document.createElement("li");
-    const img=document.createElement("img");
-    img.src=data.avatar||"";
-    img.width=30; img.height=30;
+    const data = doc.data();
+    const li = document.createElement("li");
+    const img = document.createElement("img");
+    img.src = data.avatar||"";
+    img.width = 30; img.height = 30;
     li.appendChild(img);
     li.appendChild(document.createTextNode(`${data.name} — ${data.score} pts`));
     leaderboardList.appendChild(li);
