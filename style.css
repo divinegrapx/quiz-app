@@ -20,7 +20,7 @@ body {
   box-shadow: 0 0 30px #00f2fe;
 }
 
-#authDiv button, #emailDiv button, #logoutDiv button {
+#authDiv button, #emailDiv button {
   margin: 10px;
   padding: 14px 28px;
   font-size: 1rem;
@@ -28,14 +28,14 @@ body {
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  background: linear-gradient(135deg,#00f2fe,#00c6ff);
-  color: #fff;
-  box-shadow: 0 0 5px #00f2fe, 0 0 20px #00c6ff inset;
+  background: linear-gradient(135deg,#00aaff,#00f2fe);
+  color: black;
+  box-shadow: 0 0 5px #00aaff, 0 0 20px #00f2fe inset;
   transition: transform 0.2s, box-shadow 0.3s;
 }
-#authDiv button:hover, #emailDiv button:hover, #logoutDiv button:hover {
+#authDiv button:hover, #emailDiv button:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 10px #00f2fe, 0 0 30px #00c6ff inset;
+  box-shadow: 0 0 10px #00aaff, 0 0 30px #00f2fe inset;
 }
 
 #quiz-and-ladder {
@@ -97,14 +97,14 @@ body {
   cursor:pointer;
   border-radius:12px;
   border:none;
-  background: linear-gradient(135deg,#00f2fe,#00c6ff);
+  background: linear-gradient(135deg,#00aaff,#00f2fe);
   color:black;
-  box-shadow:0 0 5px #00f2fe,0 0 15px #00c6ff inset;
+  box-shadow:0 0 5px #00aaff,0 0 15px #00f2fe inset;
   transition:0.3s, transform 0.2s;
 }
 .option-btn:hover:not(:disabled){
   transform: scale(1.05);
-  box-shadow:0 0 10px #00f2fe,0 0 30px #00c6ff inset;
+  box-shadow:0 0 10px #00aaff,0 0 30px #00f2fe inset;
 }
 .option-btn.correct {
   background-color: #00ff00 !important;
@@ -116,7 +116,6 @@ body {
   color: white !important;
   box-shadow: 0 0 15px #ff0000 inset;
 }
-.shake { animation: shake 0.5s; }
 
 #lifelines button {
   margin: 0 5px;
@@ -133,10 +132,10 @@ body {
 #lifelines button:hover:not(:disabled){ transform: scale(1.05); }
 
 #progress-container { width:100%; background: rgba(255,255,255,0.2); border-radius:15px; height:20px; margin:10px 0;}
-#progress-bar { width:0%; height:100%; background: linear-gradient(90deg,#00f2fe,#00c6ff); border-radius:15px; transition: width 0.4s; }
+#progress-bar { width:0%; height:100%; background: linear-gradient(90deg,#00aaff,#00f2fe); border-radius:15px; transition: width 0.4s; }
 
 #timer-container { width:100%; height:25px; background: rgba(255,255,255,0.2); border-radius:15px; margin:10px 0; position:relative;}
-#timer-bar { height:100%; width:100%; border-radius:15px; transition: width 1s linear, background 0.3s; }
+#timer-bar { height:100%; width:100%; border-radius:15px; transition: width 0.3s, background 0.3s; }
 #timer-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-weight:bold; font-size:1.2rem; text-shadow: 0 0 5px #000; }
 
 #feedback {
@@ -165,6 +164,8 @@ body {
   80% { transform: translateX(5px);}
   100% { transform: translateX(0px);}
 }
+
+.shake { animation: shake 0.5s; }
 
 #leaderboard-list {
   margin-top: 20px;
