@@ -20,8 +20,8 @@ const emailDiv = document.getElementById("emailDiv");
 const emailLoginBtn = document.getElementById("emailLoginBtn");
 const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
 const emailCancelBtn = document.getElementById("emailCancelBtn");
-const logoutBtn = document.getElementById("logoutBtn");
 const logoutDiv = document.getElementById("logoutDiv");
+const logoutBtn = document.getElementById("logoutBtn");
 
 const startBtn = document.getElementById("startBtn");
 const categorySelect = document.getElementById("categorySelect");
@@ -41,7 +41,9 @@ const categoryDiv = document.getElementById("categoryDiv");
 const authDiv = document.getElementById("authDiv");
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
-const tickSound = document.getElementById("tick-sound");
+
+// Tick sound
+const tickSound = new Audio("https://raw.githubusercontent.com/divinegrapx/quiz-app/main/tick.mp3");
 
 // ---------------- GLOBALS ----------------
 let questions=[], current=0, score=0, timer;
@@ -58,49 +60,31 @@ const fallbackQuestions = [
 googleLoginBtn.addEventListener("click", async ()=>{
   try{
     const provider = new firebase.auth.GoogleAuthProvider();
-    await auth.signInWithPopup(provider);
-    showCategory();
+    const result = await auth.signInWithPopup(provider);
+    authDiv.style.display="none";
+    categoryDiv.style.display="block";
+    logoutDiv.style.display="block";
+    updateLeaderboard();
   }catch(e){ alert("Login failed!"); console.error(e);}
 });
-
-facebookLoginBtn.addEventListener("click", async ()=>{
-  try{
-    const provider = new firebase.auth.FacebookAuthProvider();
-    await auth.signInWithPopup(provider);
-    showCategory();
-  }catch(e){ alert("Login failed!"); console.error(e);}
-});
-
-// ---------------- EMAIL LOGIN ----------------
 emailRegisterBtn.addEventListener("click", ()=>{ emailDiv.style.display="block"; authDiv.style.display="none"; });
 emailCancelBtn.addEventListener("click", ()=>{ emailDiv.style.display="none"; authDiv.style.display="block"; });
-
 emailLoginBtn.addEventListener("click", async ()=>{
   const email = document.getElementById("emailInput").value;
   const password = document.getElementById("passwordInput").value;
-  try{ await auth.signInWithEmailAndPassword(email,password); showCategory(); }
+  try{ await auth.signInWithEmailAndPassword(email,password); emailDiv.style.display="none"; categoryDiv.style.display="block"; logoutDiv.style.display="block"; updateLeaderboard(); }
   catch(e){ alert("Login failed: "+e.message);}
 });
 emailRegisterSubmitBtn.addEventListener("click", async ()=>{
   const email = document.getElementById("emailInput").value;
   const password = document.getElementById("passwordInput").value;
-  try{ await auth.createUserWithEmailAndPassword(email,password); showCategory(); }
+  try{ await auth.createUserWithEmailAndPassword(email,password); emailDiv.style.display="none"; categoryDiv.style.display="block"; logoutDiv.style.display="block"; updateLeaderboard(); }
   catch(e){ alert("Register failed: "+e.message);}
 });
-
-logoutBtn.addEventListener("click", async ()=>{
-  await auth.signOut();
+logoutBtn.addEventListener("click", ()=>{
+  auth.signOut();
   location.reload();
 });
-
-// ---------------- SHOW CATEGORY ----------------
-function showCategory(){
-  authDiv.style.display="none";
-  emailDiv.style.display="none";
-  categoryDiv.style.display="block";
-  logoutDiv.style.display="block";
-  updateLeaderboard();
-}
 
 // ---------------- START QUIZ ----------------
 startBtn.addEventListener("click", startQuiz);
@@ -137,12 +121,12 @@ async function startQuiz(){
 // ---------------- SHOW QUESTION ----------------
 function showQuestion(){
   clearInterval(timer);
-  let timeLeft = 30;
+  let timeLeft = 30; // 30s timer
   updateTimer(timeLeft);
   hintBox.style.display="none";
 
   const q = questions[current];
-  quizDiv.innerHTML=`<h2 style="color:black;">${q.question}</h2><div id="feedback"></div>`;
+  quizDiv.innerHTML=`<h2>${q.question}</h2><div id="feedback"></div>`;
 
   const answers = [...q.incorrectAnswers, q.correctAnswer].sort(()=>Math.random()-0.5);
   answers.forEach(a=>{
@@ -155,13 +139,10 @@ function showQuestion(){
 
   // TIMER
   timerBar.style.width="100%";
-  timerBar.style.background="#00ff00";
-  timerText.style.color="#00ff00";
-
   timer = setInterval(()=>{
     timeLeft--;
     updateTimer(timeLeft);
-    if(timeLeft<=5 && timeLeft>0) tickSound.play();
+    if(timeLeft <=5 && timeLeft>0) tickSound.play();
     if(timeLeft<=0){ clearInterval(timer); nextQuestion(false);}
   },1000);
 }
@@ -170,8 +151,8 @@ function showQuestion(){
 function updateTimer(timeLeft){
   timerText.textContent = `${timeLeft}s`;
   timerBar.style.width = (timeLeft/30*100) + "%";
-  if(timeLeft>10){ timerBar.style.background="#00ff00"; timerText.style.color="#00ff00";}
-  else if(timeLeft>5){ timerBar.style.background="#ffcc00"; timerText.style.color="#ffcc00";}
+  if(timeLeft>20){ timerBar.style.background="#00ff00"; timerText.style.color="#00ff00";}
+  else if(timeLeft>10){ timerBar.style.background="#ffcc00"; timerText.style.color="#ffcc00";}
   else{ timerBar.style.background="#ff4d4d"; timerText.style.color="#ff4d4d";}
 }
 
@@ -188,7 +169,8 @@ function checkAnswer(answer){
       btn.classList.add("correct");
     }
     if(btn.textContent===answer && answer!==correct){
-      btn.classList.add("wrong","shake");
+      btn.classList.add("wrong");
+      btn.classList.add("shake");
       setTimeout(()=>btn.classList.remove("shake"),500);
     }
   });
