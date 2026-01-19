@@ -58,13 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let hintUsed = false;
   let ladderLevel = 0;
 
-  /* ================= FALLBACK QUESTIONS ================= */
-  const fallbackQuestions = [
-    { question: "What color is the sky?", correctAnswer: "Blue", incorrectAnswers: ["Red", "Green", "Yellow"], hint: "Same color as the ocean." },
-    { question: "How many days are in a week?", correctAnswer: "7", incorrectAnswers: ["5", "6", "8"], hint: "Monday to Sunday." },
-    { question: "Which planet is known as the Red Planet?", correctAnswer: "Mars", incorrectAnswers: ["Venus", "Jupiter", "Saturn"], hint: "Roman god of war." }
-  ];
-
   /* ================= LOGIN ================= */
   googleLoginBtn.onclick = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -75,11 +68,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  /* ================= START QUIZ ================= */
   startBtn.onclick = startQuiz;
   fiftyBtn.onclick = useFifty;
   hintBtn.onclick = useHint;
 
+  /* ================= START QUIZ ================= */
   async function startQuiz() {
     categoryDiv.style.display = "none";
     quizContainer.style.display = "block";
@@ -112,7 +105,11 @@ document.addEventListener("DOMContentLoaded", () => {
         hint: q.hint || "Think carefully."
       }));
     } catch {
-      questions = fallbackQuestions;
+      questions = [
+        { question: "What color is the sky?", correctAnswer: "Blue", incorrectAnswers: ["Red", "Green", "Yellow"], hint: "Same color as the ocean." },
+        { question: "How many days are in a week?", correctAnswer: "7", incorrectAnswers: ["5", "6", "8"], hint: "Monday to Sunday." },
+        { question: "Which planet is known as the Red Planet?", correctAnswer: "Mars", incorrectAnswers: ["Venus", "Jupiter", "Saturn"], hint: "Roman god of war." }
+      ];
     }
 
     showQuestion();
@@ -156,17 +153,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   }
 
-  /* ================= TIMER ================= */
   function updateTimerUI() {
     timerText.textContent = `${timeLeft}s`;
     timerBar.style.width = `${(timeLeft / 20) * 100}%`;
-
     if (timeLeft > 12) timerBar.style.background = "lime";
     else if (timeLeft > 6) timerBar.style.background = "orange";
     else timerBar.style.background = "red";
   }
 
-  /* ================= CHECK ANSWER ================= */
   function checkAnswer(answer) {
     clearInterval(timer);
     const correct = questions[current].correctAnswer;
@@ -176,13 +170,9 @@ document.addEventListener("DOMContentLoaded", () => {
     buttons.forEach(btn => {
       btn.disabled = true;
 
-      if (btn.textContent === correct) {
-        // Always highlight correct answer green
-        btn.classList.add("correct");
-      }
+      if (btn.textContent === correct) btn.classList.add("correct");
 
       if (btn.textContent === answer && answer !== correct) {
-        // Wrong button: red + shake
         btn.classList.add("wrong");
         btn.classList.add("shake");
         setTimeout(() => btn.classList.remove("shake"), 500);
@@ -196,23 +186,17 @@ document.addEventListener("DOMContentLoaded", () => {
       feedback.innerHTML = "✅ <b>Correct!</b>";
       correctSound.play();
     } else {
-      feedback.innerHTML = `❌ <b>Wrong!</b><br>
-        <span class="correct-answer">Correct answer: <b>${correct}</b></span>`;
+      feedback.innerHTML = `❌ <b>Wrong!</b><br><span class="correct-answer">Correct answer: <b>${correct}</b></span>`;
       wrongSound.play();
     }
 
     setTimeout(nextQuestion, 1800);
   }
 
-  /* ================= NEXT QUESTION ================= */
   function nextQuestion() {
     current++;
     if (current >= questions.length) {
-      quizDiv.innerHTML = `
-        <h2>Quiz Finished!</h2>
-        <p>Score: ${score}/${questions.length}</p>
-        <button onclick="location.reload()">Restart</button>
-      `;
+      quizDiv.innerHTML = `<h2>Quiz Finished!</h2><p>Score: ${score}/${questions.length}</p><button onclick="location.reload()">Restart</button>`;
       lifelines.style.display = "none";
       moneyList.style.display = "none";
       timerContainer.style.display = "none";
@@ -223,12 +207,10 @@ document.addEventListener("DOMContentLoaded", () => {
     showQuestion();
   }
 
-  /* ================= LIFELINES ================= */
   function useFifty() {
     if (fiftyUsed) return;
     fiftyUsed = true;
     fiftyBtn.disabled = true;
-
     const correct = questions[current].correctAnswer;
     let removed = 0;
     document.querySelectorAll(".option-btn").forEach(btn => {
@@ -248,13 +230,6 @@ document.addEventListener("DOMContentLoaded", () => {
     hintBox.style.display = "block";
   }
 
-  /* ================= PROGRESS ================= */
-  function updateProgress() {
-    const percent = ((current + 1) / questions.length) * 100;
-    progressBar.style.width = percent + "%";
-  }
-
-  /* ================= MONEY LADDER ================= */
   function buildMoneyLadder() {
     moneyList.innerHTML = "";
     for (let i = questionCount.value; i > 0; i--) {
@@ -271,7 +246,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (items[idx]) items[idx].classList.add("current");
   }
 
-  /* ================= LEADERBOARD ================= */
   async function saveScore(user, score) {
     if (!user) return;
     await db.collection("leaderboard").doc(user.uid).set({
