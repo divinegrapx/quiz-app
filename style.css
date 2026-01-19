@@ -179,3 +179,45 @@ body {
 .shake {
   animation: shake 0.5s;
 }
+/* Fade-in animation for question blocks and buttons */
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* Shake animation for wrong answers */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+}
+
+.shake {
+  animation: shake 0.5s;
+}
+
+/* Correct and Wrong buttons */
+.option-btn.correct {
+  background-color: #00ff00 !important;
+  color: black;
+}
+
+.option-btn.wrong {
+  background-color: #ff4d4d !important;
+  color: white;
+}
+
+/* Correct answer text in feedback */
+.correct-answer {
+  color: #00ffcc;
+  font-size: 1rem;
+  margin-top: 6px;
+  display: inline-block;
+}
