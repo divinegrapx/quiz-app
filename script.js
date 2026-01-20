@@ -1,214 +1,162 @@
-// ================= FIREBASE =================
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+// ===== CONFIG =====
+const TIME_PER_QUESTION = 20;
+const TICK_SOUND = document.getElementById("tick-sound");
 
-// ================= DOM =================
-const authDiv = document.getElementById("authDiv");
-const emailDiv = document.getElementById("emailDiv");
-const categoryDiv = document.getElementById("categoryDiv");
-const quizContainer = document.getElementById("quiz-container");
-const quizDiv = document.getElementById("quiz");
-const lifelines = document.getElementById("lifelines");
-const moneyList = document.getElementById("money-list");
-const timerBar = document.getElementById("timer-bar");
-const timerText = document.getElementById("timer-text");
-
-const googleLoginBtn = document.getElementById("googleLoginBtn");
-const facebookLoginBtn = document.getElementById("facebookLoginBtn");
-const emailRegisterBtn = document.getElementById("emailRegisterBtn");
-const emailLoginBtn = document.getElementById("emailLoginBtn");
-const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
-const emailCancelBtn = document.getElementById("emailCancelBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-
-const startBtn = document.getElementById("startBtn");
-const questionCount = document.getElementById("questionCount");
-
-const fiftyBtn = document.getElementById("fiftyBtn");
-const callBtn = document.getElementById("callBtn");
-const audienceBtn = document.getElementById("audienceBtn");
-
-const correctSound = document.getElementById("correct-sound");
-const wrongSound = document.getElementById("wrong-sound");
-const tickSound = document.getElementById("tick-sound");
-
-// ================= STATE =================
-let questions = [];
-let current = 0;
+// ===== STATE =====
+let currentQuestion = 0;
 let score = 0;
 let timer;
-let timeLeft = 20;
+let timeLeft;
+let maxQuestions = 10;
+let ladderMax = 1000;
 
-// ================= AUTH =================
-googleLoginBtn.onclick = async () => {
-  try {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    await auth.signInWithPopup(provider);
-  } catch (e) {
-    alert("Google login failed");
-    console.error(e);
+// ===== SAMPLE QUESTIONS =====
+const questions = [
+  {
+    q: "What is the capital of France?",
+    answers: ["Berlin", "Madrid", "Paris", "Rome"],
+    correct: 2,
+    audience: [10, 10, 70, 10],
+    friend: "I'm pretty sure it's Paris."
+  },
+  {
+    q: "2 + 2 = ?",
+    answers: ["3", "4", "5", "6"],
+    correct: 1,
+    audience: [5, 80, 10, 5],
+    friend: "Come on, that's 4 😄"
   }
-};
+];
 
-facebookLoginBtn.onclick = async () => {
-  try {
-    const provider = new firebase.auth.FacebookAuthProvider();
-    await auth.signInWithPopup(provider);
-  } catch (e) {
-    alert("Facebook login failed");
-    console.error(e);
-  }
-};
+// ===== LOGIN =====
+function login() {
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("game").style.display = "block";
+  startGame();
+}
 
-emailRegisterBtn.onclick = () => {
-  authDiv.style.display = "none";
-  emailDiv.style.display = "block";
-};
+function logout() {
+  location.reload();
+}
 
-emailCancelBtn.onclick = () => {
-  emailDiv.style.display = "none";
-  authDiv.style.display = "block";
-};
-
-emailLoginBtn.onclick = async () => {
-  const email = emailInput.value;
-  const password = passwordInput.value;
-  try {
-    await auth.signInWithEmailAndPassword(email, password);
-  } catch (e) {
-    alert(e.message);
-  }
-};
-
-emailRegisterSubmitBtn.onclick = async () => {
-  const email = emailInput.value;
-  const password = passwordInput.value;
-  try {
-    await auth.createUserWithEmailAndPassword(email, password);
-  } catch (e) {
-    alert(e.message);
-  }
-};
-
-logoutBtn.onclick = async () => {
-  await auth.signOut();
-};
-
-// ================= AUTH STATE =================
-auth.onAuthStateChanged(user => {
-  if (user) {
-    authDiv.style.display = "none";
-    emailDiv.style.display = "none";
-    categoryDiv.style.display = "block";
-    logoutDiv.style.display = "block";
-  } else {
-    authDiv.style.display = "block";
-    emailDiv.style.display = "none";
-    categoryDiv.style.display = "none";
-    quizContainer.style.display = "none";
-    logoutDiv.style.display = "none";
-  }
-});
-
-// ================= START QUIZ =================
-startBtn.onclick = async () => {
-  categoryDiv.style.display = "none";
-  quizContainer.style.display = "block";
-  lifelines.style.display = "block";
-
-  current = 0;
+// ===== GAME SETUP =====
+function startGame() {
+  maxQuestions = Number(document.getElementById("questionCount").value);
+  ladderMax = maxQuestions * 100;
+  currentQuestion = 0;
   score = 0;
+  renderLadder();
+  loadQuestion();
+}
 
-  buildMoneyLadder();
+// ===== LADDER =====
+function renderLadder() {
+  document.getElementById("ladder").innerText =
+    `Prize: $${(currentQuestion) * 100} / $${ladderMax}`;
+}
 
-  const res = await fetch(
-    `https://the-trivia-api.com/api/questions?limit=${questionCount.value}`
-  );
-  questions = await res.json();
-  showQuestion();
-};
-
-// ================= QUESTION =================
-function showQuestion() {
+// ===== QUESTION =====
+function loadQuestion() {
   clearInterval(timer);
-  timeLeft = 20;
+  timeLeft = TIME_PER_QUESTION;
   updateTimer();
 
-  const q = questions[current];
-  quizDiv.innerHTML = `<h2>Question ${current + 1}/${questions.length}: ${q.question}</h2>`;
+  const q = questions[currentQuestion % questions.length];
+  document.getElementById("question").innerText =
+    `${currentQuestion + 1}/${maxQuestions}. ${q.q}`;
 
-  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
+  const answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = "";
 
-  answers.forEach(a => {
+  q.answers.forEach((text, index) => {
     const btn = document.createElement("button");
-    btn.className = "option-btn";
-    btn.textContent = a;
-    btn.onclick = () => checkAnswer(btn, a === q.correctAnswer);
-    quizDiv.appendChild(btn);
+    btn.className = "answer-btn";
+    btn.innerText = text;
+    btn.onclick = () => selectAnswer(btn, index, q.correct);
+    answersDiv.appendChild(btn);
   });
 
+  startTimer();
+}
+
+// ===== TIMER =====
+function startTimer() {
   timer = setInterval(() => {
     timeLeft--;
     updateTimer();
-    if (timeLeft <= 5) tickSound.play();
-    if (timeLeft <= 0) nextQuestion();
+
+    if (timeLeft <= 5) {
+      TICK_SOUND.currentTime = 0;
+      TICK_SOUND.play();
+    }
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      nextQuestion();
+    }
   }, 1000);
 }
 
-// ================= TIMER =================
 function updateTimer() {
-  timerText.textContent = timeLeft + "s";
-  timerBar.style.width = (timeLeft / 20 * 100) + "%";
-  timerBar.style.background = timeLeft > 5 ? "#00ff00" : "#ff4d4d";
+  document.getElementById("time-bar").style.width =
+    (timeLeft / TIME_PER_QUESTION) * 100 + "%";
 }
 
-// ================= ANSWER =================
-function checkAnswer(btn, correct) {
+// ===== ANSWER =====
+function selectAnswer(button, index, correct) {
   clearInterval(timer);
-  document.querySelectorAll(".option-btn").forEach(b => {
-    b.disabled = true;
-    if (b.textContent === questions[current].correctAnswer) {
-      b.classList.add("correct");
+  const buttons = document.querySelectorAll(".answer-btn");
+
+  buttons.forEach(b => b.disabled = true);
+
+  if (index === correct) {
+    button.classList.add("correct");
+    score++;
+  } else {
+    button.classList.add("wrong");
+    buttons[correct].classList.add("correct");
+  }
+
+  setTimeout(nextQuestion, 1200);
+}
+
+// ===== NEXT =====
+function nextQuestion() {
+  currentQuestion++;
+  renderLadder();
+
+  if (currentQuestion >= maxQuestions) {
+    alert(`Game Over! You won $${score * 100}`);
+    logout();
+  } else {
+    loadQuestion();
+  }
+}
+
+// ===== LIFELINES =====
+function fiftyFifty(btn) {
+  btn.disabled = true;
+  const q = questions[currentQuestion % questions.length];
+  const buttons = [...document.querySelectorAll(".answer-btn")];
+  let removed = 0;
+
+  buttons.forEach((b, i) => {
+    if (i !== q.correct && removed < 2) {
+      b.style.visibility = "hidden";
+      removed++;
     }
   });
-
-  if (!correct) {
-    btn.classList.add("wrong");
-    wrongSound.play();
-  } else {
-    score++;
-    correctSound.play();
-  }
-
-  setTimeout(nextQuestion, 1500);
 }
 
-// ================= NEXT =================
-function nextQuestion() {
-  current++;
-  if (current >= questions.length) {
-    quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>`;
-    return;
-  }
-  updateMoneyLadder();
-  showQuestion();
+function callFriend(btn) {
+  btn.disabled = true;
+  alert(questions[currentQuestion % questions.length].friend);
 }
 
-// ================= MONEY LADDER =================
-function buildMoneyLadder() {
-  moneyList.innerHTML = "";
-  const total = parseInt(questionCount.value);
-  for (let i = 1; i <= total; i++) {
-    const li = document.createElement("li");
-    li.textContent = `$${i * 100}`;
-    moneyList.appendChild(li);
-  }
-}
-
-function updateMoneyLadder() {
-  [...moneyList.children].forEach(li => li.classList.remove("current"));
-  if (moneyList.children[current - 1]) {
-    moneyList.children[current - 1].classList.add("current");
-  }
+function audienceVote(btn) {
+  btn.disabled = true;
+  const votes = questions[currentQuestion % questions.length].audience;
+  alert(
+    `Audience votes:\nA: ${votes[0]}%\nB: ${votes[1]}%\nC: ${votes[2]}%\nD: ${votes[3]}%`
+  );
 }
