@@ -20,6 +20,7 @@ const emailDiv = document.getElementById("emailDiv");
 const emailLoginBtn = document.getElementById("emailLoginBtn");
 const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
 const emailCancelBtn = document.getElementById("emailCancelBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 
 const startBtn = document.getElementById("startBtn");
 const categorySelect = document.getElementById("categorySelect");
@@ -39,10 +40,12 @@ const categoryDiv = document.getElementById("categoryDiv");
 const authDiv = document.getElementById("authDiv");
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
+const tickSound = document.getElementById("tick-sound");
 
 // ---------------- GLOBALS ----------------
-let questions=[], current=0, score=0, timer;
-let fiftyUsed=false, hintUsed=false, ladderLevel=0;
+let questions = [], current = 0, score = 0, timer;
+let fiftyUsed = false, hintUsed = false, ladderLevel = 0;
+let timePerQuestion = 30;
 
 // ---------------- FALLBACK QUESTIONS ----------------
 const fallbackQuestions = [
@@ -52,32 +55,42 @@ const fallbackQuestions = [
 ];
 
 // ---------------- LOGIN ----------------
-googleLoginBtn.addEventListener("click", async ()=>{
+googleLoginBtn.addEventListener("click", async () => {
   try{
     const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await auth.signInWithPopup(provider);
-    authDiv.style.display="none";
-    categoryDiv.style.display="block";
-    updateLeaderboard();
+    await auth.signInWithPopup(provider);
+    onLoginSuccess();
   }catch(e){ alert("Login failed!"); console.error(e);}
 });
 
-// ---------------- EMAIL LOGIN ----------------
 emailRegisterBtn.addEventListener("click", ()=>{ emailDiv.style.display="block"; authDiv.style.display="none"; });
 emailCancelBtn.addEventListener("click", ()=>{ emailDiv.style.display="none"; authDiv.style.display="block"; });
 
 emailLoginBtn.addEventListener("click", async ()=>{
   const email = document.getElementById("emailInput").value;
   const password = document.getElementById("passwordInput").value;
-  try{ await auth.signInWithEmailAndPassword(email,password); emailDiv.style.display="none"; categoryDiv.style.display="block"; updateLeaderboard(); }
+  try{ await auth.signInWithEmailAndPassword(email,password); onLoginSuccess(); }
   catch(e){ alert("Login failed: "+e.message);}
 });
+
 emailRegisterSubmitBtn.addEventListener("click", async ()=>{
   const email = document.getElementById("emailInput").value;
   const password = document.getElementById("passwordInput").value;
-  try{ await auth.createUserWithEmailAndPassword(email,password); emailDiv.style.display="none"; categoryDiv.style.display="block"; updateLeaderboard(); }
+  try{ await auth.createUserWithEmailAndPassword(email,password); onLoginSuccess(); }
   catch(e){ alert("Register failed: "+e.message);}
 });
+
+logoutBtn.addEventListener("click", async ()=>{
+  await auth.signOut();
+  location.reload();
+});
+
+function onLoginSuccess(){
+  authDiv.style.display="none";
+  emailDiv.style.display="none";
+  categoryDiv.style.display="block";
+  updateLeaderboard();
+}
 
 // ---------------- START QUIZ ----------------
 startBtn.addEventListener("click", startQuiz);
@@ -100,7 +113,7 @@ async function startQuiz(){
     const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`);
     if(!res.ok) throw "API error";
     const data = await res.json();
-    questions = data.map(q=>({
+    questions = data.map((q,i)=>({
       question: q.question,
       correctAnswer: q.correctAnswer,
       incorrectAnswers: q.incorrectAnswers,
@@ -114,19 +127,19 @@ async function startQuiz(){
 // ---------------- SHOW QUESTION ----------------
 function showQuestion(){
   clearInterval(timer);
-  let timeLeft = 20;
+  let timeLeft = timePerQuestion;
   updateTimer(timeLeft);
   hintBox.style.display="none";
 
   const q = questions[current];
-  quizDiv.innerHTML=`<h2>${q.question}</h2><div id="feedback"></div>`;
+  quizDiv.innerHTML=`<h2>Q${current+1}: ${q.question}</h2><div id="feedback"></div>`;
 
   const answers = [...q.incorrectAnswers, q.correctAnswer].sort(()=>Math.random()-0.5);
   answers.forEach(a=>{
     const btn = document.createElement("button");
     btn.textContent=a;
     btn.className="option-btn";
-    btn.addEventListener("click", ()=>checkAnswer(a));
+    btn.addEventListener("click", ()=>checkAnswer(a,btn));
     quizDiv.appendChild(btn);
   });
 
@@ -135,6 +148,7 @@ function showQuestion(){
   timer = setInterval(()=>{
     timeLeft--;
     updateTimer(timeLeft);
+    if(timeLeft <= 5 && timeLeft>0) tickSound.play();
     if(timeLeft<=0){ clearInterval(timer); nextQuestion(false);}
   },1000);
 }
@@ -142,14 +156,14 @@ function showQuestion(){
 // ---------------- TIMER ----------------
 function updateTimer(timeLeft){
   timerText.textContent = `${timeLeft}s`;
-  timerBar.style.width = (timeLeft/20*100) + "%";
+  timerBar.style.width = (timeLeft/timePerQuestion*100) + "%";
   if(timeLeft>10){ timerBar.style.background="#00ff00"; timerText.style.color="#00ff00";}
   else if(timeLeft>5){ timerBar.style.background="#ffcc00"; timerText.style.color="#ffcc00";}
   else{ timerBar.style.background="#ff4d4d"; timerText.style.color="#ff4d4d";}
 }
 
 // ---------------- CHECK ANSWER ----------------
-function checkAnswer(answer){
+function checkAnswer(answer, btnClicked){
   clearInterval(timer);
   const correct = questions[current].correctAnswer;
   const feedback = document.getElementById("feedback");
@@ -157,15 +171,11 @@ function checkAnswer(answer){
 
   buttons.forEach(btn=>{
     btn.disabled=true;
-    if(btn.textContent===correct){
-      btn.style.background="#00ff00";
-      btn.style.color="#000";
-      btn.style.boxShadow="0 0 15px #00ff00 inset";
+    if(btn.textContent === correct){
+      btn.classList.add("correct");
     }
-    if(btn.textContent===answer && answer!==correct){
-      btn.style.background="#ff4d4d";
-      btn.style.color="#fff";
-      btn.style.boxShadow="0 0 15px #ff0000 inset";
+    if(btn.textContent === answer && answer !== correct){
+      btn.classList.add("wrong");
       btn.classList.add("shake");
       setTimeout(()=>btn.classList.remove("shake"),500);
     }
@@ -181,7 +191,8 @@ function checkAnswer(answer){
 function nextQuestion(){
   current++;
   if(current>=questions.length){
-    quizDiv.innerHTML=`<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p><button onclick="location.reload()">Restart</button>`;
+    quizDiv.innerHTML=`<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p><button id="restartBtn">Restart</button>`;
+    document.getElementById("restartBtn").addEventListener("click", ()=>location.reload());
     lifelines.style.display="none"; moneyList.style.display="none"; hintBox.style.display="none";
     const user = auth.currentUser; if(user) saveScore(user, score);
     return;
@@ -212,16 +223,18 @@ function useHint(){
 // ---------------- MONEY LADDER ----------------
 function buildMoneyLadder(){
   moneyList.innerHTML="";
-  const numQuestions=parseInt(questionCount.value);
+  const numQuestions = parseInt(questionCount.value);
+  const increment = 100;
   for(let i=numQuestions;i>0;i--){
-    const li=document.createElement("li");
-    li.textContent="$"+(i*100); moneyList.appendChild(li);
+    const li = document.createElement("li");
+    li.textContent = "$"+(i*increment);
+    moneyList.appendChild(li);
   }
 }
 function updateMoneyLadder(){
-  const lis=moneyList.querySelectorAll("li");
+  const lis = moneyList.querySelectorAll("li");
   lis.forEach(li=>li.classList.remove("current"));
-  const idx=moneyList.children.length-ladderLevel-1;
+  const idx = moneyList.children.length-ladderLevel-1;
   if(lis[idx]) lis[idx].classList.add("current");
 }
 
