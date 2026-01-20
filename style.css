@@ -285,3 +285,18 @@ button:disabled {
     text-align: center;
   }
 }
+/* ---------------- PROFILE & SETTINGS ---------------- */
+#profileDiv img {
+  width: 80px;
+  border-radius: 50%;
+  border: 2px solid #00f2fe;
+}
+
+#settingsDiv {
+  margin: 15px 0;
+}
+
+#settingsDiv select {
+  padding: 8px;
+  border-radius: 8px;
+}
