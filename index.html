@@ -2,40 +2,30 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Neon Quiz App</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="data:,">
+<title>Neon Quiz App</title>
+<link rel="stylesheet" href="style.css">
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-
-<!-- CSS (online) -->
-<link rel="stylesheet" href="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/style.css">
-
-<!-- Firebase (modular v10) -->
-<script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-<script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-
-<!-- Main JS -->
-<script type="module" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/script.js"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
 <div class="container">
 
-  <!-- AUTH -->
+  <!-- LOGIN / REGISTER -->
   <div id="authDiv">
     <h1>🎯 Neon Quiz Challenge</h1>
     <button id="googleLoginBtn">Login with Google</button>
     <button id="facebookLoginBtn">Login with Facebook</button>
-    <button id="emailRegisterBtn">Login / Register with Email</button>
+    <button id="emailRegisterBtn">Register / Login with Email</button>
   </div>
 
-  <!-- EMAIL LOGIN -->
+  <!-- EMAIL LOGIN FORM -->
   <div id="emailDiv" style="display:none;">
-    <input id="emailInput" type="email" placeholder="Email">
-    <input id="passwordInput" type="password" placeholder="Password">
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passwordInput" placeholder="Password">
     <button id="emailLoginBtn">Login</button>
     <button id="emailRegisterSubmitBtn">Register</button>
     <button id="emailCancelBtn">Cancel</button>
@@ -46,7 +36,33 @@
     <button id="logoutBtn">Logout</button>
   </div>
 
-  <!-- QUIZ -->
+  <!-- CATEGORY SELECTION -->
+  <div id="categoryDiv" style="display:none;">
+    <label for="categorySelect">Choose Category:</label>
+    <select id="categorySelect">
+      <option value="science">Science</option>
+      <option value="history">History</option>
+      <option value="geography">Geography</option>
+      <option value="music">Music</option>
+      <option value="film_and_tv">Film & TV</option>
+      <option value="sports">Sports</option>
+      <option value="food_and_drink">Food & Drink</option>
+      <option value="general_knowledge">General Knowledge</option>
+    </select>
+
+    <label for="questionCount">Number of Questions:</label>
+    <select id="questionCount">
+      <option value="10">10</option>
+      <option value="15">15</option>
+      <option value="20">20</option>
+      <option value="25">25</option>
+      <option value="30">30</option>
+    </select>
+
+    <button id="startBtn">Start Quiz</button>
+  </div>
+
+  <!-- QUIZ + MONEY LADDER -->
   <div id="quiz-container" style="display:none;">
     <div id="quiz-and-ladder">
       <div id="quiz"></div>
@@ -56,23 +72,27 @@
     <!-- Lifelines -->
     <div id="lifelines" style="display:none;">
       <button id="fiftyBtn">50:50 ✂️</button>
-      <button id="callBtn">📞 Call a Friend</button>
-      <button id="audienceBtn">👥 Audience Vote</button>
-      <div id="lifeline-result"></div>
+      <button id="hintBtn">💡 Hint</button>
     </div>
 
     <!-- Timer -->
-    <div id="timer-container">
+    <div id="timer-container" style="display:block;">
       <div id="timer-bar"></div>
       <span id="timer-text">20s</span>
     </div>
+
+    <div id="hint-box"></div>
   </div>
+
+  <!-- Leaderboard -->
+  <h2>🏆 Leaderboard</h2>
+  <ul id="leaderboard-list"></ul>
 
   <!-- Sounds -->
   <audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
   <audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
-  <audio id="tick-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/tick.mp3"></audio>
 
 </div>
+<script src="script.js"></script>
 </body>
 </html>
