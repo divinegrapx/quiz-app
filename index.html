@@ -16,28 +16,10 @@
 
 <div class="container">
 
-  <!-- AUTH -->
+  <!-- AUTH (TEMP BYPASSED) -->
   <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
-
-    <button id="googleLoginBtn">Login with Google</button>
-    <button id="facebookLoginBtn">Login with Facebook</button>
-    <button id="emailRegisterBtn">Login / Register with Email</button>
-  </div>
-
-  <!-- EMAIL LOGIN -->
-  <div id="emailDiv" style="display:none;">
-    <input type="email" id="emailInput" placeholder="Email" />
-    <input type="password" id="passwordInput" placeholder="Password" />
-
-    <button id="emailLoginBtn">Login</button>
-    <button id="emailRegisterSubmitBtn">Register</button>
-    <button id="emailCancelBtn">Cancel</button>
-  </div>
-
-  <!-- LOGOUT -->
-  <div id="logoutDiv" style="display:none;">
-    <button id="logoutBtn">Logout</button>
+    <button id="skipLoginBtn">Play Now</button>
   </div>
 
   <!-- SETTINGS -->
@@ -114,27 +96,19 @@
     <div class="audience-box">
       <h3>Audience Vote</h3>
 
-      <div class="audience-bar">A <span></span></div>
-      <div class="audience-bar">B <span></span></div>
-      <div class="audience-bar">C <span></span></div>
-      <div class="audience-bar">D <span></span></div>
+      <div class="audience-bar">A <span>0%</span></div>
+      <div class="audience-bar">B <span>0%</span></div>
+      <div class="audience-bar">C <span>0%</span></div>
+      <div class="audience-bar">D <span>0%</span></div>
     </div>
   </div>
 
-  <!-- LEADERBOARD -->
-  <h2>🏆 Leaderboard</h2>
-  <ul id="leaderboard-list"></ul>
-
   <!-- SOUNDS -->
-  <audio id="intro-sound" src="intro.mp3"></audio>
-  <audio id="thinking-sound" src="thinking.mp3" loop></audio>
   <audio id="tick-sound" src="tick.mp3"></audio>
   <audio id="call-sound" src="call.mp3"></audio>
   <audio id="audience-sound" src="audience.mp3"></audio>
   <audio id="correct-sound" src="correct.wav"></audio>
   <audio id="wrong-sound" src="wrong.wav"></audio>
-  <audio id="win-sound" src="win.mp3"></audio>
-  <audio id="lose-sound" src="lose.mp3"></audio>
 
 </div>
 
