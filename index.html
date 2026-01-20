@@ -3,26 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Quiz App</title>
+<title>Neon Quiz Challenge</title>
 <link rel="stylesheet" href="style.css">
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
 <div class="container">
 
-  <!-- LOGIN -->
+  <div id="profileDiv"></div>
+
   <div id="authDiv">
     <h1>🎯 Neon Quiz Challenge</h1>
     <button id="googleLoginBtn">Login with Google</button>
     <button id="facebookLoginBtn">Login with Facebook</button>
-    <button id="emailRegisterBtn">Register / Login with Email</button>
+    <button id="emailRegisterBtn">Login / Register with Email</button>
   </div>
 
-  <!-- EMAIL LOGIN -->
   <div id="emailDiv" style="display:none;">
     <input type="email" id="emailInput" placeholder="Email">
     <input type="password" id="passwordInput" placeholder="Password">
@@ -31,28 +31,10 @@
     <button id="emailCancelBtn">Cancel</button>
   </div>
 
-  <!-- PROFILE -->
-  <div id="profileDiv" style="display:none;">
-    <img id="profilePic" />
-    <h3 id="profileName"></h3>
-    <p id="profileStats"></p>
+  <div id="logoutDiv" style="display:none;">
     <button id="logoutBtn">Logout</button>
   </div>
 
-  <!-- SETTINGS -->
-  <div id="settingsDiv" style="display:none;">
-    <label>Difficulty:</label>
-    <select id="difficultySelect">
-      <option value="easy">Easy</option>
-      <option value="medium">Medium</option>
-      <option value="hard">Hard</option>
-    </select>
-
-    <label>Sounds:</label>
-    <input type="checkbox" id="soundToggle" checked> Enable Sounds
-  </div>
-
-  <!-- CATEGORY -->
   <div id="categoryDiv" style="display:none;">
     <label>Category:</label>
     <select id="categorySelect">
@@ -60,6 +42,9 @@
       <option value="history">History</option>
       <option value="geography">Geography</option>
       <option value="music">Music</option>
+      <option value="film_and_tv">Film & TV</option>
+      <option value="sports">Sports</option>
+      <option value="general_knowledge">General</option>
     </select>
 
     <label>Questions:</label>
@@ -69,10 +54,24 @@
       <option value="30">30</option>
     </select>
 
+    <div id="settingsDiv">
+      <label>Difficulty:</label>
+      <select id="difficultySelect">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+
+      <label>Sound:</label>
+      <select id="soundToggle">
+        <option value="on">On</option>
+        <option value="off">Off</option>
+      </select>
+    </div>
+
     <button id="startBtn">Start Quiz</button>
   </div>
 
-  <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
     <div id="quiz-and-ladder">
       <div id="quiz"></div>
@@ -81,26 +80,28 @@
 
     <div id="lifelines">
       <button id="fiftyBtn">50:50</button>
-      <button id="callBtn">📞 Call</button>
-      <button id="audienceBtn">👥 Audience</button>
+      <button id="callFriendBtn">📞 Call a Friend</button>
+      <button id="audienceBtn">📊 Ask Audience</button>
     </div>
 
     <div id="timer-container">
       <div id="timer-bar"></div>
       <span id="timer-text">30s</span>
     </div>
+
+    <div id="callFriendBox"></div>
+    <div id="audienceVote"></div>
   </div>
 
-  <!-- LEADERBOARD -->
   <h2>🏆 Leaderboard</h2>
   <ul id="leaderboard-list"></ul>
 
-  <!-- SOUNDS -->
   <audio id="correct-sound" src="correct.wav"></audio>
   <audio id="wrong-sound" src="wrong.wav"></audio>
   <audio id="tick-sound" src="tick.mp3"></audio>
 
 </div>
+
 <script src="script.js"></script>
 </body>
 </html>
