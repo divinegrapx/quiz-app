@@ -4,10 +4,18 @@
 <meta charset="UTF-8">
 <title>Neon Quiz App</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css">
 
-<!-- Firebase logic -->
+<!-- Favicon -->
+<link rel="icon" href="data:,">
+
+<!-- CSS -->
+<link rel="stylesheet" href="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/style.css">
+
+<!-- Firebase v10 (modular) -->
+<script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+
+<!-- Main JS -->
 <script type="module" src="script.js"></script>
 </head>
 <body>
@@ -32,14 +40,36 @@
   </div>
 
   <!-- LOGOUT -->
-  <div id="logoutDiv" style="display:none;">
+  <div id="logoutDiv" style="display:none; margin-bottom:15px;">
     <button id="logoutBtn">Logout</button>
   </div>
 
   <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
-    <div id="quiz"></div>
+    <div id="quiz-and-ladder">
+      <div id="quiz"></div>
+      <ul id="money-list"></ul>
+    </div>
+
+    <!-- LIFELINES -->
+    <div id="lifelines" style="margin-top:15px;">
+      <button id="fiftyBtn">50:50 ✂️</button>
+      <button id="callBtn">📞 Call a Friend</button>
+      <button id="audienceBtn">👥 Audience Vote</button>
+    </div>
+    <div id="lifeline-result"></div>
+
+    <!-- TIMER -->
+    <div id="timer-container">
+      <div id="timer-bar"></div>
+      <span id="timer-text">20s</span>
+    </div>
   </div>
+
+  <!-- AUDIO -->
+  <audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
+  <audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
+  <audio id="tick-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/tick.mp3"></audio>
 
 </div>
 
