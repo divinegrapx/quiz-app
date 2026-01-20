@@ -12,9 +12,10 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
 <div class="container">
 
-  <!-- LOGIN / REGISTER -->
+  <!-- LOGIN -->
   <div id="authDiv">
     <h1>🎯 Neon Quiz Challenge</h1>
     <button id="googleLoginBtn">Login with Google</button>
@@ -22,7 +23,7 @@
     <button id="emailRegisterBtn">Register / Login with Email</button>
   </div>
 
-  <!-- EMAIL LOGIN FORM -->
+  <!-- EMAIL LOGIN -->
   <div id="emailDiv" style="display:none;">
     <input type="email" id="emailInput" placeholder="Email">
     <input type="password" id="passwordInput" placeholder="Password">
@@ -32,13 +33,13 @@
   </div>
 
   <!-- LOGOUT -->
-  <div id="logoutDiv" style="display:none; margin-bottom:15px;">
+  <div id="logoutDiv" style="display:none;">
     <button id="logoutBtn">Logout</button>
   </div>
 
-  <!-- CATEGORY SELECTION -->
+  <!-- CATEGORY -->
   <div id="categoryDiv" style="display:none;">
-    <label for="categorySelect">Choose Category:</label>
+    <label>Category:</label>
     <select id="categorySelect">
       <option value="science">Science</option>
       <option value="history">History</option>
@@ -50,19 +51,17 @@
       <option value="general_knowledge">General Knowledge</option>
     </select>
 
-    <label for="questionCount">Number of Questions:</label>
+    <label>Questions:</label>
     <select id="questionCount">
       <option value="10">10</option>
-      <option value="15">15</option>
       <option value="20">20</option>
-      <option value="25">25</option>
       <option value="30">30</option>
     </select>
 
     <button id="startBtn">Start Quiz</button>
   </div>
 
-  <!-- QUIZ + MONEY LADDER -->
+  <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
     <div id="quiz-and-ladder">
       <div id="quiz"></div>
@@ -70,18 +69,19 @@
     </div>
 
     <!-- Lifelines -->
-    <div id="lifelines" style="display:none;">
+    <div id="lifelines">
       <button id="fiftyBtn">50:50 ✂️</button>
-      <button id="hintBtn">💡 Hint</button>
+      <button id="callBtn">📞 Call a Friend</button>
+      <button id="audienceBtn">👥 Audience Vote</button>
     </div>
 
     <!-- Timer -->
-    <div id="timer-container" style="display:block;">
+    <div id="timer-container">
       <div id="timer-bar"></div>
       <span id="timer-text">30s</span>
     </div>
 
-    <div id="hint-box"></div>
+    <div id="audience-box"></div>
   </div>
 
   <!-- Leaderboard -->
@@ -94,6 +94,7 @@
   <audio id="tick-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/tick.mp3"></audio>
 
 </div>
+
 <script src="script.js"></script>
 </body>
 </html>
