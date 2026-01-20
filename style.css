@@ -1,267 +1,311 @@
-/* ---------------- GLOBAL ---------------- */
+/* ===============================
+   GLOBAL RESET + BODY
+================================ */
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
 body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
+  background: radial-gradient(circle at top, #050014, #000);
   color: #fff;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  padding: 20px;
-  background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a3a);
-  background-size: 400% 400%;
-  animation: gradientMove 25s ease infinite;
+  align-items: center;
 }
 
-@keyframes gradientMove {
-  0% {background-position:0% 50%;}
-  50% {background-position:100% 50%;}
-  100% {background-position:0% 50%;}
-}
-
-/* ---------------- CONTAINER ---------------- */
+/* ===============================
+   MAIN CONTAINER
+================================ */
 .container {
-  width: 100%;
-  max-width: 950px;
+  width: 95%;
+  max-width: 1100px;
+  padding: 25px;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.85);
+  box-shadow: 0 0 40px rgba(0,255,255,0.2);
+  animation: cinematicIn 1.2s ease;
+}
+
+/* ===============================
+   HEADINGS
+================================ */
+h1, h2 {
   text-align: center;
-  border-radius: 25px;
-  padding: 30px;
-  background: rgba(0,0,0,0.7);
-  box-shadow: 0 0 40px #00f2fe;
-  backdrop-filter: blur(8px);
-  animation: fadeIn 1s ease;
-}
-
-/* ---------------- TITLES ---------------- */
-h1 {
-  font-size: 2.5rem;
+  margin-bottom: 15px;
   text-shadow: 0 0 15px #00f2fe;
-  animation: glowPulse 2s infinite alternate;
 }
 
-@keyframes glowPulse {
-  from { text-shadow: 0 0 10px #00f2fe; }
-  to   { text-shadow: 0 0 25px #00f2fe; }
-}
-
-/* ---------------- LOGIN BUTTONS ---------------- */
+/* ===============================
+   AUTH BUTTONS (LOGIN)
+================================ */
 #authDiv button {
-  width: 80%;
-  max-width: 300px;
-  margin: 12px auto;
-  padding: 16px;
-  font-size: 1.1rem;
-  border-radius: 16px;
-  background: linear-gradient(135deg,#00c6ff,#00f2fe);
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #00f2fe, #4facfe);
   color: #000;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.6),
-              0 0 20px #00f2fe inset;
-  transform-style: preserve-3d;
-  transition: transform 0.3s, box-shadow 0.3s;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
 #authDiv button:hover {
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.8),
-              0 0 35px #00f2fe inset;
-}
-
-/* ---------------- CATEGORY + DIFFICULTY ---------------- */
-#categoryDiv {
-  margin-top: 20px;
-  animation: fadeIn 1s ease;
-}
-
-#categoryDiv label {
-  display: block;
-  margin: 12px 0 5px;
-  font-weight: bold;
-  color: #00f2fe;
-}
-
-#categoryDiv select {
-  width: 80%;
-  max-width: 260px;
-  padding: 12px;
-  border-radius: 14px;
-  border: none;
-  background: rgba(0,0,0,0.6);
-  color: #00f2fe;
-  font-size: 1rem;
-  box-shadow: 0 0 15px #00f2fe;
-  transition: transform 0.2s, box-shadow 0.3s;
-}
-
-#categoryDiv select:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 25px #00f2fe;
+  box-shadow: 0 0 20px #00f2fe;
+}
+
+/* ===============================
+   CATEGORY + DIFFICULTY
+================================ */
+#categoryDiv select,
+#settingsDiv select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  background: #050014;
+  color: #00f2fe;
+  border: 1px solid #00f2fe;
+  margin: 10px 0;
 }
 
 #startBtn {
-  margin-top: 20px;
-  padding: 16px 40px;
-  font-size: 1.2rem;
-  border-radius: 20px;
-  background: linear-gradient(135deg,#ffb347,#ff6a00);
-  color: #fff;
-  box-shadow: 0 0 20px #ffb347;
-  transition: transform 0.3s, box-shadow 0.3s;
+  padding: 14px;
+  width: 100%;
+  border-radius: 12px;
+  background: linear-gradient(135deg, gold, orange);
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
 #startBtn:hover {
   transform: scale(1.1);
-  box-shadow: 0 0 35px #ffb347;
+  box-shadow: 0 0 25px gold;
 }
 
-/* ---------------- QUIZ ---------------- */
-#quiz {
-  background: rgba(255,255,255,0.05);
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 0 30px #00f2fe;
-  min-height: 420px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  perspective: 1200px;
-}
-
-/* ---------------- 3D ANSWER BUTTONS ---------------- */
-.option-btn {
-  width: 90%;
-  margin: 12px auto;
-  padding: 16px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 16px;
-  background: linear-gradient(135deg,#00c6ff,#00f2fe);
-  color: #000;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5),
-              0 0 10px #00f2fe inset;
-  transform-style: preserve-3d;
-  transition: transform 0.2s, box-shadow 0.3s;
-}
-
-.option-btn:hover:not(:disabled) {
-  transform: rotateX(10deg) scale(1.07);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.6),
-              0 0 25px #00f2fe inset;
-}
-
-.option-btn.correct {
-  background: linear-gradient(135deg,#00ff99,#00ff00) !important;
-  box-shadow: 0 0 25px #00ff00;
-}
-
-.option-btn.wrong {
-  background: linear-gradient(135deg,#ff4d4d,#ff0000) !important;
-  box-shadow: 0 0 25px #ff0000;
-}
-
-/* ---------------- LIFELINES ---------------- */
-#lifelines button {
-  margin: 6px;
-  padding: 12px 22px;
-  border-radius: 16px;
-  background: linear-gradient(135deg,#ff6a00,#ffb347);
-  box-shadow: 0 0 15px #ffb347 inset;
-  color: #fff;
-  transition: transform 0.2s;
-}
-
-#lifelines button:hover:not(:disabled) {
-  transform: scale(1.1);
-}
-
-/* ---------------- CALL A FRIEND ---------------- */
-.call-anim {
-  font-size: 50px;
-  animation: phoneRing 1s infinite;
-}
-
-@keyframes phoneRing {
-  0% { transform: rotate(0deg); }
-  20% { transform: rotate(-12deg); }
-  40% { transform: rotate(12deg); }
-  60% { transform: rotate(-12deg); }
-  80% { transform: rotate(12deg); }
-  100% { transform: rotate(0deg); }
-}
-
-/* ---------------- AUDIENCE VOTE ---------------- */
-.vote-bar {
-  height: 28px;
-  border-radius: 14px;
-  background: linear-gradient(90deg,#00f2fe,#00c6ff);
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.6),
-              0 0 15px #00f2fe;
-  transform: perspective(600px) rotateX(10deg);
-  transition: width 1s ease;
-}
-
-/* ---------------- TIMER ---------------- */
-#timer-container {
-  width:100%;
-  height:25px;
-  background: rgba(255,255,255,0.2);
-  border-radius:15px;
-  margin:10px 0;
-  position:relative;
-}
-
-#timer-bar {
-  height:100%;
-  width:100%;
-  border-radius:15px;
-  transition: width 0.3s linear;
-  background: #00ff00;
-}
-
-#timer-text {
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-weight:bold;
-  font-size:1.2rem;
-  text-shadow: 0 0 5px #000;
-  color: #00ff00;
-}
-
-/* ---------------- MONEY LADDER ---------------- */
-#money-list li.current {
-  background: linear-gradient(90deg,#ffd200,#f7971e);
-  color: #000;
-  font-weight: bold;
-  box-shadow: 0 0 20px #ffd200;
-}
-
-/* ---------------- PROFILE ---------------- */
+/* ===============================
+   PROFILE UI
+================================ */
 #profileDiv img {
   width: 80px;
   border-radius: 50%;
   border: 2px solid #00f2fe;
-  box-shadow: 0 0 15px #00f2fe;
 }
 
-/* ---------------- ANIMATIONS ---------------- */
-@keyframes fadeIn {
-  from { opacity:0; transform: translateY(20px);}
-  to { opacity:1; transform: translateY(0);}
+#settingsDiv {
+  margin: 15px 0;
 }
 
-@keyframes shake {
-  0% { transform: translateX(0px);}
-  20% { transform: translateX(-5px);}
-  40% { transform: translateX(5px);}
-  60% { transform: translateX(-5px);}
-  80% { transform: translateX(5px);}
-  100% { transform: translateX(0px);}
+/* ===============================
+   QUIZ AREA
+================================ */
+#quiz-container {
+  margin-top: 20px;
 }
 
-.shake { animation: shake 0.5s; }
+#quiz {
+  padding: 20px;
+  background: linear-gradient(135deg, #020024, #090979, #00d4ff);
+  border-radius: 15px;
+  box-shadow: 0 0 30px rgba(0,255,255,0.4);
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+}
+
+#quiz.flip {
+  transform: rotateY(180deg);
+}
+
+/* ===============================
+   ANSWER BUTTONS
+================================ */
+.option-btn {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 2px solid #00f2fe;
+  background: #020024;
+  color: #00f2fe;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.option-btn:hover {
+  background: #00f2fe;
+  color: #000;
+}
+
+.correct {
+  background: #00ff99 !important;
+  color: #000;
+}
+
+.wrong {
+  background: #ff4d4d !important;
+  color: #fff;
+}
+
+/* ===============================
+   TIMER
+================================ */
+#timer-container {
+  margin-top: 15px;
+}
+
+#timer-bar {
+  height: 10px;
+  background: #00ff00;
+  border-radius: 5px;
+  transition: width 1s linear, background 0.5s;
+}
+
+#timer-text {
+  display: block;
+  text-align: center;
+  font-size: 18px;
+  margin-top: 5px;
+}
+
+/* ===============================
+   URGENCY EFFECT
+================================ */
+.urgent {
+  animation: urgentPulse 0.5s infinite alternate;
+}
+
+@keyframes urgentPulse {
+  from { box-shadow: 0 0 10px red; }
+  to { box-shadow: 0 0 25px red; }
+}
+
+/* ===============================
+   MONEY LADDER
+================================ */
+#money-list {
+  list-style: none;
+  margin-left: 20px;
+}
+
+#money-list li {
+  padding: 8px;
+  margin: 5px 0;
+  background: #020024;
+  border-left: 4px solid #00f2fe;
+}
+
+#money-list li.current {
+  background: gold;
+  color: #000;
+  animation: ladderPulse 1s infinite alternate;
+}
+
+@keyframes ladderPulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
+}
+
+/* ===============================
+   LIFELINES
+================================ */
+#lifelines {
+  display: flex;
+  justify-content: space-around;
+  margin: 15px 0;
+}
+
+#lifelines button {
+  padding: 10px 15px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #00f2fe, #4facfe);
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* ===============================
+   CALL A FRIEND UI
+================================ */
+.phone-ui {
+  font-size: 60px;
+  text-align: center;
+  animation: phoneFloat 2s infinite ease-in-out;
+}
+
+@keyframes phoneFloat {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+/* ===============================
+   AUDIENCE VOTE BARS
+================================ */
+.vote-bar {
+  height: 20px;
+  background: linear-gradient(90deg, #00f2fe, #4facfe);
+  margin: 5px 0;
+  border-radius: 10px;
+  animation: riseUp 1.5s ease-out;
+}
+
+@keyframes riseUp {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* ===============================
+   LEADERBOARD
+================================ */
+#leaderboard-list li {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+#leaderboard-list img {
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+/* ===============================
+   SHAKE EFFECT
+================================ */
+.shake-hard {
+  animation: bigShake 0.6s;
+}
+
+@keyframes bigShake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  50% { transform: translateX(10px); }
+  75% { transform: translateX(-10px); }
+  100% { transform: translateX(0); }
+}
+
+/* ===============================
+   MUSIC BEAT EFFECT
+================================ */
+.beat {
+  animation: beatPulse 1s infinite;
+}
+
+@keyframes beatPulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
+/* ===============================
+   PAGE ENTRY
+================================ */
+@keyframes cinematicIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
