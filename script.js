@@ -1,29 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ---------------- FIREBASE ----------------
-  const firebaseConfig = {
-    apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
-    authDomain: "neon-quiz-app.firebaseapp.com",
-    projectId: "neon-quiz-app",
-    storageBucket: "neon-quiz-app.appspot.com",
-    messagingSenderId: "891061147021",
-    appId: "1:891061147021:web:7b3d80020f642da7b699c4"
-  };
+  console.log("SCRIPT LOADED");
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  // ---------------- SOUNDS ----------------
-  const correctSound = document.getElementById("correct-sound");
-  const wrongSound = document.getElementById("wrong-sound");
-  const tickSound = document.getElementById("tick-sound");
-  const callSound = document.getElementById("call-sound");
-  const audienceSound = document.getElementById("audience-sound");
-
-  // ---------------- ELEMENTS ----------------
   const quizDiv = document.getElementById("quiz");
   const startBtn = document.getElementById("startBtn");
+  const skipLoginBtn = document.getElementById("skipLoginBtn");
+
+  const authDiv = document.getElementById("authDiv");
+  const categoryDiv = document.getElementById("categoryDiv");
+  const quizContainer = document.getElementById("quiz-container");
+
   const categorySelect = document.getElementById("categorySelect");
   const questionCount = document.getElementById("questionCount");
   const difficultySelect = document.getElementById("difficultySelect");
@@ -34,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const timerBar = document.getElementById("timer-bar");
   const timerText = document.getElementById("timer-text");
-
   const moneyList = document.getElementById("money-list");
 
   const callScreen = document.getElementById("callScreen");
@@ -43,7 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const audienceScreen = document.getElementById("audienceScreen");
   const audienceBars = document.querySelectorAll(".audience-bar");
 
-  // ---------------- GAME STATE ----------------
+  const correctSound = document.getElementById("correct-sound");
+  const wrongSound = document.getElementById("wrong-sound");
+  const tickSound = document.getElementById("tick-sound");
+  const callSound = document.getElementById("call-sound");
+  const audienceSound = document.getElementById("audience-sound");
+
   let questions = [];
   let current = 0;
   let score = 0;
@@ -55,18 +45,23 @@ document.addEventListener("DOMContentLoaded", () => {
   let callUsed = false;
   let audienceUsed = false;
 
-  // ---------------- START QUIZ ----------------
-  startBtn.addEventListener("click", startQuiz);
+  skipLoginBtn.onclick = () => {
+    authDiv.style.display = "none";
+    categoryDiv.style.display = "block";
+  };
+
+  startBtn.onclick = startQuiz;
 
   async function startQuiz() {
+    categoryDiv.style.display = "none";
+    quizContainer.style.display = "block";
+
     current = 0;
     score = 0;
     ladderLevel = 0;
-    fiftyUsed = callUsed = audienceUsed = false;
 
-    fiftyBtn.disabled = false;
-    callBtn.disabled = false;
-    audienceBtn.disabled = false;
+    fiftyUsed = callUsed = audienceUsed = false;
+    fiftyBtn.disabled = callBtn.disabled = audienceBtn.disabled = false;
 
     buildMoneyLadder();
 
@@ -78,7 +73,6 @@ document.addEventListener("DOMContentLoaded", () => {
     showQuestion();
   }
 
-  // ---------------- SHOW QUESTION ----------------
   function showQuestion() {
     clearInterval(timer);
     timeLeft = 30;
@@ -96,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const btn = document.createElement("button");
       btn.textContent = a;
       btn.className = "answer-btn";
-      btn.onclick = () => checkAnswer(a, btn);
+      btn.onclick = () => checkAnswer(a);
       quizDiv.appendChild(btn);
     });
 
@@ -104,21 +98,16 @@ document.addEventListener("DOMContentLoaded", () => {
       timeLeft--;
       updateTimer();
       if (timeLeft <= 5 && timeLeft > 0) tickSound.play();
-      if (timeLeft <= 0) {
-        clearInterval(timer);
-        nextQuestion();
-      }
+      if (timeLeft <= 0) nextQuestion();
     }, 1000);
   }
 
-  // ---------------- TIMER ----------------
   function updateTimer() {
     timerText.textContent = `${timeLeft}s`;
     timerBar.style.width = (timeLeft / 30 * 100) + "%";
   }
 
-  // ---------------- CHECK ANSWER ----------------
-  function checkAnswer(answer, btn) {
+  function checkAnswer(answer) {
     clearInterval(timer);
     const correct = questions[current].correctAnswer;
 
@@ -140,18 +129,15 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(nextQuestion, 1500);
   }
 
-  // ---------------- NEXT ----------------
   function nextQuestion() {
     current++;
     if (current >= questions.length) {
       quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p>`;
-      saveScore();
       return;
     }
     showQuestion();
   }
 
-  // ---------------- LIFELINES ----------------
   fiftyBtn.onclick = () => {
     if (fiftyUsed) return;
     fiftyUsed = true;
@@ -174,8 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
     callBtn.disabled = true;
     callSound.play();
 
-    const q = questions[current];
-    friendAnswer.textContent = `🤙 Your friend thinks the answer is: "${q.correctAnswer}"`;
+    friendAnswer.textContent = `Your friend thinks the answer is: "${questions[current].correctAnswer}"`;
     callScreen.style.display = "flex";
   };
 
@@ -192,21 +177,17 @@ document.addEventListener("DOMContentLoaded", () => {
     audienceBars.forEach(bar => {
       const option = bar.textContent.trim()[0];
       let percent = option === correct ? correctPercent : Math.floor(rest / 3);
-
       bar.querySelector("span").textContent = percent + "%";
       bar.style.setProperty("--width", percent + "%");
-      bar.classList.add("show");
     });
 
-    audienceScreen.style.display = "block";
+    audienceScreen.style.display = "flex";
 
     setTimeout(() => {
       audienceScreen.style.display = "none";
-      audienceBars.forEach(b => b.classList.remove("show"));
     }, 5000);
   };
 
-  // ---------------- MONEY LADDER ----------------
   function buildMoneyLadder() {
     moneyList.innerHTML = "";
     const total = parseInt(questionCount.value);
@@ -224,18 +205,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const index = lis.length - ladderLevel;
     if (lis[index]) lis[index].classList.add("active");
-  }
-
-  // ---------------- SAVE SCORE ----------------
-  async function saveScore() {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    await db.collection("leaderboard").doc(user.uid).set({
-      name: user.displayName || user.email,
-      score,
-      date: firebase.firestore.FieldValue.serverTimestamp()
-    });
   }
 
 });
