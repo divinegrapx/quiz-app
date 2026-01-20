@@ -1,248 +1,250 @@
-/***********************
-  GLOBAL STATE
-************************/
-let currentQuestionIndex = 0;
-let score = 0;
-let timer;
-let timeLeft = 30;
+// ---------------- FIREBASE CONFIG ----------------
+const firebaseConfig = {
+  apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
+  authDomain: "neon-quiz-app.firebaseapp.com",
+  projectId: "neon-quiz-app",
+  storageBucket: "neon-quiz-app.appspot.com",
+  messagingSenderId: "891061147021",
+  appId: "1:891061147021:web:7b3d80020f642da7b699c4",
+  measurementId: "G-7LKHH1EHQW"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-let fiftyUsed = false;
-let callFriendUsed = false;
-let askAudienceUsed = false;
+// ---------------- DOM ELEMENTS ----------------
+const googleLoginBtn = document.getElementById("googleLoginBtn");
+const facebookLoginBtn = document.getElementById("facebookLoginBtn");
+const emailRegisterBtn = document.getElementById("emailRegisterBtn");
+const emailDiv = document.getElementById("emailDiv");
+const emailLoginBtn = document.getElementById("emailLoginBtn");
+const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
+const emailCancelBtn = document.getElementById("emailCancelBtn");
 
-const tickSound = document.getElementById("tick-sound");
+const startBtn = document.getElementById("startBtn");
+const categorySelect = document.getElementById("categorySelect");
+const questionCount = document.getElementById("questionCount");
+const quizDiv = document.getElementById("quiz");
+const lifelines = document.getElementById("lifelines");
+const fiftyBtn = document.getElementById("fiftyBtn");
+const hintBtn = document.getElementById("hintBtn");
+const progressBar = document.getElementById("progress-bar");
+const timerBar = document.getElementById("timer-bar");
+const timerText = document.getElementById("timer-text");
+const moneyList = document.getElementById("money-list");
+const hintBox = document.getElementById("hint-box");
+const leaderboardList = document.getElementById("leaderboard-list");
+const quizContainer = document.getElementById("quiz-container");
+const categoryDiv = document.getElementById("categoryDiv");
+const authDiv = document.getElementById("authDiv");
+const correctSound = document.getElementById("correct-sound");
+const wrongSound = document.getElementById("wrong-sound");
 
-const questions = [
-  {
-    question: "What is the capital of France?",
-    answers: ["Paris", "Berlin", "Rome", "Madrid"],
-    correct: "Paris"
-  },
-  {
-    question: "Which planet is known as the Red Planet?",
-    answers: ["Earth", "Mars", "Jupiter", "Venus"],
-    correct: "Mars"
-  },
-  {
-    question: "Who painted the Mona Lisa?",
-    answers: ["Van Gogh", "Da Vinci", "Picasso", "Rembrandt"],
-    correct: "Da Vinci"
-  }
+// ---------------- GLOBALS ----------------
+let questions=[], current=0, score=0, timer;
+let fiftyUsed=false, hintUsed=false, ladderLevel=0;
+
+// ---------------- FALLBACK QUESTIONS ----------------
+const fallbackQuestions = [
+  { question: "What color is the sky?", correctAnswer: "Blue", incorrectAnswers: ["Red","Green","Yellow"], hint: "It's the same color as the ocean." },
+  { question: "How many days are in a week?", correctAnswer: "7", incorrectAnswers: ["5","6","8"], hint: "Think Monday to Sunday." },
+  { question: "Which planet is known as the Red Planet?", correctAnswer: "Mars", incorrectAnswers: ["Venus","Jupiter","Saturn"], hint: "Named after Roman god of war." }
 ];
 
-/***********************
-  INIT
-************************/
-startGame();
+// ---------------- LOGIN ----------------
+googleLoginBtn.addEventListener("click", async ()=>{
+  try{
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result = await auth.signInWithPopup(provider);
+    authDiv.style.display="none";
+    categoryDiv.style.display="block";
+    updateLeaderboard();
+  }catch(e){ alert("Login failed!"); console.error(e);}
+});
 
-function startGame() {
-  currentQuestionIndex = 0;
-  score = 0;
-  fiftyUsed = false;
-  callFriendUsed = false;
-  askAudienceUsed = false;
+// ---------------- EMAIL LOGIN ----------------
+emailRegisterBtn.addEventListener("click", ()=>{ emailDiv.style.display="block"; authDiv.style.display="none"; });
+emailCancelBtn.addEventListener("click", ()=>{ emailDiv.style.display="none"; authDiv.style.display="block"; });
 
-  document.getElementById("fiftyBtn").disabled = false;
-  document.getElementById("callFriendBtn").disabled = false;
-  document.getElementById("askAudienceBtn").disabled = false;
+emailLoginBtn.addEventListener("click", async ()=>{
+  const email = document.getElementById("emailInput").value;
+  const password = document.getElementById("passwordInput").value;
+  try{ await auth.signInWithEmailAndPassword(email,password); emailDiv.style.display="none"; categoryDiv.style.display="block"; updateLeaderboard(); }
+  catch(e){ alert("Login failed: "+e.message);}
+});
+emailRegisterSubmitBtn.addEventListener("click", async ()=>{
+  const email = document.getElementById("emailInput").value;
+  const password = document.getElementById("passwordInput").value;
+  try{ await auth.createUserWithEmailAndPassword(email,password); emailDiv.style.display="none"; categoryDiv.style.display="block"; updateLeaderboard(); }
+  catch(e){ alert("Register failed: "+e.message);}
+});
 
-  renderQuestion();
+// ---------------- START QUIZ ----------------
+startBtn.addEventListener("click", startQuiz);
+fiftyBtn.addEventListener("click", useFifty);
+hintBtn.addEventListener("click", useHint);
+
+async function startQuiz(){
+  startBtn.disabled=true;
+  quizDiv.innerHTML="Loading...";
+  quizDiv.classList.add("fade-in");
+  quizContainer.style.display="block";
+  lifelines.style.display="flex";
+  moneyList.style.display="block";
+  hintBox.style.display="none";
+  ladderLevel=current=score=0; fiftyUsed=hintUsed=false;
+  fiftyBtn.disabled=false; hintBtn.disabled=false;
+  buildMoneyLadder();
+
+  try{
+    const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`);
+    if(!res.ok) throw "API error";
+    const data = await res.json();
+    questions = data.map(q=>({
+      question: q.question,
+      correctAnswer: q.correctAnswer,
+      incorrectAnswers: q.incorrectAnswers,
+      hint: q.hint || "Think carefully."
+    }));
+  }catch{ questions = fallbackQuestions; }
+
+  showQuestion();
 }
 
-/***********************
-  QUESTION RENDER
-************************/
-function renderQuestion() {
-  resetTimer();
-
-  const q = questions[currentQuestionIndex];
-  document.getElementById("question").innerText =
-    `Question ${currentQuestionIndex + 1} / ${questions.length}\n${q.question}`;
-
-  const answersEl = document.getElementById("answers");
-  answersEl.innerHTML = "";
-
-  q.answers.forEach(answer => {
-    const btn = document.createElement("button");
-    btn.className = "answer-btn";
-    btn.innerText = answer;
-    btn.onclick = () => selectAnswer(btn, answer);
-    answersEl.appendChild(btn);
-  });
-
-  startTimer();
-}
-
-/***********************
-  ANSWER SELECTION
-************************/
-function selectAnswer(button, selected) {
-  stopTimer();
-
-  const correct = questions[currentQuestionIndex].correct;
-  const buttons = document.querySelectorAll(".answer-btn");
-
-  buttons.forEach(btn => {
-    btn.disabled = true;
-    if (btn.innerText === correct) {
-      btn.classList.add("correct");
-    }
-    if (btn.innerText === selected && selected !== correct) {
-      btn.classList.add("wrong");
-    }
-  });
-
-  if (selected === correct) {
-    score += 100;
-  }
-
-  setTimeout(() => {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-      renderQuestion();
-    } else {
-      alert("Game finished! Score: $" + score);
-    }
-  }, 1500);
-}
-
-/***********************
-  TIMER
-************************/
-function startTimer() {
-  timeLeft = 30;
-  updateTimerUI();
-
-  timer = setInterval(() => {
-    timeLeft--;
-    updateTimerUI();
-
-    if (timeLeft <= 5) {
-      tickSound.currentTime = 0;
-      tickSound.play();
-    }
-
-    if (timeLeft <= 0) {
-      stopTimer();
-      autoFail();
-    }
-  }, 1000);
-}
-
-function stopTimer() {
+// ---------------- SHOW QUESTION ----------------
+function showQuestion(){
   clearInterval(timer);
+  let timeLeft = 20;
+  updateTimer(timeLeft);
+  hintBox.style.display="none";
+
+  const q = questions[current];
+  quizDiv.innerHTML=`<h2>${q.question}</h2><div id="feedback"></div>`;
+
+  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(()=>Math.random()-0.5);
+  answers.forEach(a=>{
+    const btn = document.createElement("button");
+    btn.textContent=a;
+    btn.className="option-btn";
+    btn.addEventListener("click", ()=>checkAnswer(a));
+    quizDiv.appendChild(btn);
+  });
+
+  // TIMER
+  timerBar.style.width="100%";
+  timer = setInterval(()=>{
+    timeLeft--;
+    updateTimer(timeLeft);
+    if(timeLeft<=0){ clearInterval(timer); nextQuestion(false);}
+  },1000);
 }
 
-function resetTimer() {
-  stopTimer();
+// ---------------- TIMER ----------------
+function updateTimer(timeLeft){
+  timerText.textContent = `${timeLeft}s`;
+  timerBar.style.width = (timeLeft/20*100) + "%";
+  if(timeLeft>10){ timerBar.style.background="#00ff00"; timerText.style.color="#00ff00";}
+  else if(timeLeft>5){ timerBar.style.background="#ffcc00"; timerText.style.color="#ffcc00";}
+  else{ timerBar.style.background="#ff4d4d"; timerText.style.color="#ff4d4d";}
 }
 
-function updateTimerUI() {
-  document.getElementById("time").innerText = timeLeft;
-  document.getElementById("time-bar").style.width = `${(timeLeft / 30) * 100}%`;
-}
+// ---------------- CHECK ANSWER ----------------
+function checkAnswer(answer){
+  clearInterval(timer);
+  const correct = questions[current].correctAnswer;
+  const feedback = document.getElementById("feedback");
+  const buttons = document.querySelectorAll(".option-btn");
 
-function autoFail() {
-  const buttons = document.querySelectorAll(".answer-btn");
-  const correct = questions[currentQuestionIndex].correct;
-
-  buttons.forEach(btn => {
-    btn.disabled = true;
-    if (btn.innerText === correct) {
-      btn.classList.add("correct");
+  buttons.forEach(btn=>{
+    btn.disabled=true;
+    if(btn.textContent===correct){
+      btn.style.background="#00ff00";
+      btn.style.color="#000";
+      btn.style.boxShadow="0 0 15px #00ff00 inset";
+    }
+    if(btn.textContent===answer && answer!==correct){
+      btn.style.background="#ff4d4d";
+      btn.style.color="#fff";
+      btn.style.boxShadow="0 0 15px #ff0000 inset";
+      btn.classList.add("shake");
+      setTimeout(()=>btn.classList.remove("shake"),500);
     }
   });
 
-  setTimeout(() => {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-      renderQuestion();
-    }
-  }, 1500);
+  if(answer===correct){ score++; ladderLevel++; updateMoneyLadder(); feedback.innerHTML="✅ <b>Correct!</b>"; correctSound.play();}
+  else{ feedback.innerHTML=`❌ <b>Wrong!</b><br><span class="correct-answer">Correct: <b>${correct}</b></span>`; wrongSound.play();}
+
+  setTimeout(nextQuestion,1800);
 }
 
-/***********************
-  50:50
-************************/
-document.getElementById("fiftyBtn").onclick = () => {
-  if (fiftyUsed) return;
-  fiftyUsed = true;
-  document.getElementById("fiftyBtn").disabled = true;
-
-  const q = questions[currentQuestionIndex];
-  const wrong = q.answers.filter(a => a !== q.correct);
-  const remove = wrong.sort(() => 0.5 - Math.random()).slice(0, 2);
-
-  document.querySelectorAll(".answer-btn").forEach(btn => {
-    if (remove.includes(btn.innerText)) {
-      btn.style.visibility = "hidden";
-    }
-  });
-};
-
-/***********************
-  CALL A FRIEND
-************************/
-document.getElementById("callFriendBtn").onclick = () => {
-  if (callFriendUsed) return;
-  callFriendUsed = true;
-  document.getElementById("callFriendBtn").disabled = true;
-
-  const q = questions[currentQuestionIndex];
-  const chance = Math.random() < 0.7 ? q.correct :
-    q.answers.filter(a => a !== q.correct)[0];
-
-  openModal("📞 Call a Friend",
-    `"I’m not 100% sure, but I believe the answer is <b>${chance}</b>."`);
-};
-
-/***********************
-  ASK AUDIENCE
-************************/
-document.getElementById("askAudienceBtn").onclick = () => {
-  if (askAudienceUsed) return;
-  askAudienceUsed = true;
-  document.getElementById("askAudienceBtn").disabled = true;
-
-  const q = questions[currentQuestionIndex];
-  let remaining = 100;
-  let results = {};
-
-  q.answers.forEach(a => {
-    if (a === q.correct) {
-      results[a] = Math.floor(50 + Math.random() * 25);
-      remaining -= results[a];
-    }
-  });
-
-  q.answers.filter(a => a !== q.correct).forEach((a, i, arr) => {
-    results[a] = i === arr.length - 1 ? remaining : Math.floor(Math.random() * remaining);
-    remaining -= results[a];
-  });
-
-  let html = "";
-  q.answers.forEach(a => {
-    html += `
-      <div>${a}</div>
-      <div class="audience-bar">
-        <div class="audience-fill" style="width:${results[a]}%">
-          ${results[a]}%
-        </div>
-      </div>`;
-  });
-
-  openModal("👥 Ask the Audience", html);
-};
-
-/***********************
-  MODAL
-************************/
-function openModal(title, body) {
-  document.getElementById("modalTitle").innerHTML = title;
-  document.getElementById("modalBody").innerHTML = body;
-  document.getElementById("lifelineModal").classList.remove("hidden");
+// ---------------- NEXT QUESTION ----------------
+function nextQuestion(){
+  current++;
+  if(current>=questions.length){
+    quizDiv.innerHTML=`<h2>Finished!</h2><p>Score: ${score}/${questions.length}</p><button onclick="location.reload()">Restart</button>`;
+    lifelines.style.display="none"; moneyList.style.display="none"; hintBox.style.display="none";
+    const user = auth.currentUser; if(user) saveScore(user, score);
+    return;
+  }
+  showQuestion();
 }
 
-function closeModal() {
-  document.getElementById("lifelineModal").classList.add("hidden");
+// ---------------- LIFELINES ----------------
+function useFifty(){
+  if(fiftyUsed) return;
+  fiftyUsed=true; fiftyBtn.disabled=true;
+  const correct = questions[current].correctAnswer;
+  let removed=0;
+  const btns=Array.from(document.querySelectorAll(".option-btn"));
+  btns.forEach(b=>{
+    if(b.textContent!==correct && removed<2){ b.style.opacity=0.3; removed++; }
+  });
 }
+function useHint(){
+  if(hintUsed) return;
+  hintUsed=true; hintBtn.disabled=true;
+  const q = questions[current];
+  hintBox.textContent="💡 Hint: "+q.hint;
+  hintBox.style.display="block";
+  hintBtn.style.opacity=0.3;
+}
+
+// ---------------- MONEY LADDER ----------------
+function buildMoneyLadder(){
+  moneyList.innerHTML="";
+  const numQuestions=parseInt(questionCount.value);
+  for(let i=numQuestions;i>0;i--){
+    const li=document.createElement("li");
+    li.textContent="$"+(i*100); moneyList.appendChild(li);
+  }
+}
+function updateMoneyLadder(){
+  const lis=moneyList.querySelectorAll("li");
+  lis.forEach(li=>li.classList.remove("current"));
+  const idx=moneyList.children.length-ladderLevel-1;
+  if(lis[idx]) lis[idx].classList.add("current");
+}
+
+// ---------------- LEADERBOARD ----------------
+async function saveScore(user,score){
+  if(!user) return;
+  const userData={uid:user.uid, name:user.displayName||user.email, avatar:user.photoURL||"", score, date: firebase.firestore.FieldValue.serverTimestamp()};
+  await db.collection("leaderboard").doc(user.uid).set(userData,{merge:true});
+  updateLeaderboard();
+}
+async function updateLeaderboard(){
+  if(!leaderboardList) return;
+  leaderboardList.innerHTML="";
+  const snapshot=await db.collection("leaderboard").orderBy("score","desc").limit(10).get();
+  snapshot.forEach(doc=>{
+    const data=doc.data();
+    const li=document.createElement("li");
+    const img=document.createElement("img");
+    img.src=data.avatar||"";
+    img.width=30; img.height=30;
+    li.appendChild(img);
+    li.appendChild(document.createTextNode(`${data.name} — ${data.score} pts`));
+    leaderboardList.appendChild(li);
+  });
+}
+updateLeaderboard();
