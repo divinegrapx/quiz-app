@@ -1,31 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Quiz Challenge</title>
-<link rel="stylesheet" href="style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Neon Millionaire Quiz</title>
+<link rel="stylesheet" href="style.css" />
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
-<body>
 
+<body>
 <div class="container">
 
-  <div id="profileDiv"></div>
+  <!-- PROFILE -->
+  <div id="profileDiv" style="display:none;">
+    <img id="profilePic" />
+    <p id="playerName"></p>
+  </div>
 
+  <!-- AUTH -->
   <div id="authDiv">
-    <h1>🎯 Neon Quiz Challenge</h1>
+    <h1>🎯 Neon Millionaire</h1>
     <button id="googleLoginBtn">Login with Google</button>
     <button id="facebookLoginBtn">Login with Facebook</button>
     <button id="emailRegisterBtn">Login / Register with Email</button>
   </div>
 
+  <!-- EMAIL -->
   <div id="emailDiv" style="display:none;">
-    <input type="email" id="emailInput" placeholder="Email">
-    <input type="password" id="passwordInput" placeholder="Password">
+    <input id="emailInput" type="email" placeholder="Email" />
+    <input id="passwordInput" type="password" placeholder="Password" />
     <button id="emailLoginBtn">Login</button>
     <button id="emailRegisterSubmitBtn">Register</button>
     <button id="emailCancelBtn">Cancel</button>
@@ -35,8 +42,9 @@
     <button id="logoutBtn">Logout</button>
   </div>
 
+  <!-- SETTINGS -->
   <div id="categoryDiv" style="display:none;">
-    <label>Category:</label>
+    <label>Category</label>
     <select id="categorySelect">
       <option value="science">Science</option>
       <option value="history">History</option>
@@ -44,61 +52,66 @@
       <option value="music">Music</option>
       <option value="film_and_tv">Film & TV</option>
       <option value="sports">Sports</option>
-      <option value="general_knowledge">General</option>
+      <option value="general_knowledge">General Knowledge</option>
     </select>
 
-    <label>Questions:</label>
+    <label>Questions</label>
     <select id="questionCount">
       <option value="10">10</option>
       <option value="20">20</option>
       <option value="30">30</option>
     </select>
 
-    <div id="settingsDiv">
-      <label>Difficulty:</label>
-      <select id="difficultySelect">
-        <option value="easy">Easy</option>
-        <option value="medium" selected>Medium</option>
-        <option value="hard">Hard</option>
-      </select>
-
-      <label>Sound:</label>
-      <select id="soundToggle">
-        <option value="on">On</option>
-        <option value="off">Off</option>
-      </select>
-    </div>
+    <label>Difficulty</label>
+    <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
 
     <button id="startBtn">Start Quiz</button>
   </div>
 
+  <!-- SOUND CONTROLS -->
+  <div id="soundControls">
+    <button id="musicToggle">🔊 Music</button>
+    <button id="sfxToggle">🎵 SFX</button>
+  </div>
+
+  <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
     <div id="quiz-and-ladder">
       <div id="quiz"></div>
       <ul id="money-list"></ul>
     </div>
 
+    <!-- LIFELINES -->
     <div id="lifelines">
       <button id="fiftyBtn">50:50</button>
       <button id="callFriendBtn">📞 Call a Friend</button>
-      <button id="audienceBtn">📊 Ask Audience</button>
+      <button id="audienceBtn">📊 Audience</button>
     </div>
 
+    <!-- TIMER -->
     <div id="timer-container">
       <div id="timer-bar"></div>
       <span id="timer-text">30s</span>
     </div>
 
-    <div id="callFriendBox"></div>
-    <div id="audienceVote"></div>
+    <div id="hint-box"></div>
+    <div id="audience-box"></div>
   </div>
 
   <h2>🏆 Leaderboard</h2>
   <ul id="leaderboard-list"></ul>
 
-  <audio id="correct-sound" src="correct.wav"></audio>
-  <audio id="wrong-sound" src="wrong.wav"></audio>
-  <audio id="tick-sound" src="tick.mp3"></audio>
+  <!-- SOUNDS -->
+  <audio id="correct-sound" src="sounds/correct.wav"></audio>
+  <audio id="wrong-sound" src="sounds/wrong.wav"></audio>
+  <audio id="tick-sound" src="sounds/tick.mp3"></audio>
+  <audio id="bgMusic" loop></audio>
+  <audio id="callSound" src="sounds/call.mp3"></audio>
+  <audio id="audienceSound" src="sounds/audience.mp3"></audio>
 
 </div>
 
