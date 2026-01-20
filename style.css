@@ -1,230 +1,137 @@
-/* ---------------- BODY & BACKGROUND ---------------- */
-body {
+/* RESET */
+* {
   margin: 0;
-  font-family: 'Poppins', sans-serif;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+/* ANIMATED BACKGROUND */
+body {
+  min-height: 100vh;
+  background: linear-gradient(270deg, #0f2027, #203a43, #2c5364);
+  background-size: 600% 600%;
+  animation: gradientMove 20s ease infinite;
   color: #fff;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  padding: 20px;
-  background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a3a);
-  background-size: 400% 400%;
-  animation: gradientMove 30s ease infinite;
+  align-items: center;
 }
 
 @keyframes gradientMove {
-  0% {background-position:0% 50%;}
-  50% {background-position:100% 50%;}
-  100% {background-position:0% 50%;}
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* ---------------- CONTAINER ---------------- */
-.container {
+/* APP CONTAINER */
+.app {
+  width: 420px;
+  background: rgba(0,0,0,0.55);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+}
+
+/* AUTH */
+.auth button {
   width: 100%;
-  max-width: 900px;
-  text-align: center;
-  border-radius: 20px;
-  padding: 30px;
-  background: rgba(0,0,0,0.65);
-  box-shadow: 0 0 40px #00f2fe;
-}
-
-/* ---------------- BUTTONS ---------------- */
-button {
-  font-size: 1rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.3s;
-}
-
-#authDiv button, #emailDiv button, #restartBtn, #logoutBtn {
-  margin: 10px;
-  padding: 14px 28px;
-  background: linear-gradient(135deg,#00c6ff,#00f2fe);
-  color: #000;
-  box-shadow: 0 0 5px #00f2fe, 0 0 20px #00c6ff inset;
-}
-#authDiv button:hover, #emailDiv button:hover, #restartBtn:hover, #logoutBtn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 15px #00f2fe, 0 0 30px #00c6ff inset;
-}
-
-/* ---------------- QUIZ & MONEY LADDER ---------------- */
-#quiz-and-ladder {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-}
-
-#quiz {
-  background: rgba(255,255,255,0.05);
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 0 30px #00f2fe;
-  min-height: 400px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 0.3s;
-  color: #fff;
-}
-
-#quiz.fade-in {
-  animation: fadeIn 0.5s ease forwards;
-  opacity: 0;
-}
-
-.option-btn {
-  display: block;
-  width: 90%;
-  margin: 10px auto;
-  padding: 14px;
-  font-size:16px;
-  font-weight:600;
-  cursor:pointer;
-  border-radius:12px;
-  border:none;
-  background: #00c6ff;
-  color:#000;
-  box-shadow:0 0 5px #00f2fe,0 0 15px #00c6ff inset;
-  transition:0.3s, transform 0.2s;
-}
-.option-btn:hover:not(:disabled){
-  transform: scale(1.05);
-  box-shadow:0 0 15px #00f2fe,0 0 30px #00c6ff inset;
-}
-.option-btn.correct {
-  background-color: #00ff00 !important;
-  color: black !important;
-  box-shadow: 0 0 15px #00ff00 inset;
-}
-.option-btn.wrong {
-  background-color: #ff4d4d !important;
-  color: white !important;
-  box-shadow: 0 0 15px #ff0000 inset;
-}
-
-/* ---------------- LIFELINES ---------------- */
-#lifelines button {
-  margin: 0 5px;
-  padding: 10px 18px;
-  font-weight:bold;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  background: linear-gradient(135deg,#ff6a00,#ffb347);
-  box-shadow: 0 0 10px #ffb347 inset;
-  color:#fff;
-  transition: transform 0.2s, opacity 0.3s;
-}
-#lifelines button:hover:not(:disabled){ transform: scale(1.05); }
-
-/* ---------------- TIMER ---------------- */
-#timer-container {
-  width:100%;
-  height:25px;
-  background: rgba(255,255,255,0.2);
-  border-radius:15px;
-  margin:10px 0;
-  position:relative;
-}
-#timer-bar { height:100%; width:100%; border-radius:15px; transition: width 0.3s, background 0.3s; }
-#timer-text {
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-weight:bold;
-  font-size:1.2rem;
-  text-shadow: 0 0 5px #000;
-}
-
-/* ---------------- FEEDBACK ---------------- */
-#feedback {
-  margin-top: 10px;
-  font-size:1.1rem;
-  font-weight:bold;
-  text-shadow: 0 0 5px #000;
-}
-.correct-answer {
-  color: #00ffcc;
-  font-weight:bold;
-  display:block;
-  margin-top:5px;
-}
-
-/* ---------------- MONEY LADDER ---------------- */
-#money-list {
-  display: flex;
-  flex-direction: column-reverse;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  width: 130px;
-  max-height: 400px;
-  overflow: hidden;
-}
-#money-list li {
-  padding: 10px 12px;
-  text-align: right;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-  font-size: 14px;
-  transition: 0.3s;
-  color: #fff;
-}
-#money-list li.current {
-  background: linear-gradient(90deg,#f7971e,#ffd200);
-  font-weight: bold;
-  color: #000;
-  box-shadow: 0 0 10px #ffd200, 0 0 20px #f7971e inset;
-}
-
-/* ---------------- HINT BOX ---------------- */
-#hint-box {
-  margin-top: 10px;
-  padding: 10px 15px;
-  background: rgba(255,255,255,0.1);
+  padding: 12px;
   border-radius: 10px;
-  font-weight:bold;
-  color:#00ffcc;
-  text-shadow: 0 0 5px #000;
+  border: none;
+  background: #1e90ff;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 10px;
 }
 
-/* ---------------- LEADERBOARD ---------------- */
-#leaderboard-list {
-  margin-top: 20px;
-  list-style:none;
-  padding:0;
-}
-#leaderboard-list li {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:5px 0;
-  font-weight:bold;
-  color:#fff;
-}
-#leaderboard-list img {
-  border-radius:50%;
-  border:1px solid #00f2fe;
+.auth button:hover {
+  background: #187bcd;
 }
 
-/* ---------------- ANIMATIONS ---------------- */
-@keyframes fadeIn {
-  from{ opacity:0; transform: translateY(20px);}
-  to{ opacity:1; transform: translateY(0);}
+/* QUESTION */
+#question {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #fff;
 }
 
-@keyframes shake {
-  0% { transform: translateX(0px);}
-  20% { transform: translateX(-5px);}
-  40% { transform: translateX(5px);}
-  60% { transform: translateX(-5px);}
-  80% { transform: translateX(5px);}
-  100% { transform: translateX(0px);}
+/* ANSWERS */
+.answers {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
-.shake { animation: shake 0.5s; }
+
+.answer-btn {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: #1e90ff;
+  color: #000;
+  font-weight: 600;
+  transition: background 0.25s ease, transform 0.1s;
+}
+
+.answer-btn:hover {
+  transform: scale(1.02);
+}
+
+/* STATES (IMPORTANT – DO NOT OVERRIDE) */
+.answer-btn.correct {
+  background: #2ecc71 !important;
+  color: #000;
+}
+
+.answer-btn.wrong {
+  background: #e74c3c !important;
+  color: #000;
+}
+
+/* TIMER */
+.timer {
+  height: 10px;
+  background: #333;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+#time-bar {
+  height: 100%;
+  width: 100%;
+  background: #1e90ff;
+  transition: width 1s linear;
+}
+
+/* LIFELINES */
+.lifelines {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.lifelines button {
+  flex: 1;
+  margin: 0 4px;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  background: #555;
+  color: #fff;
+  cursor: pointer;
+}
+
+.lifelines button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* MONEY LADDER */
+#ladder {
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: center;
+}
