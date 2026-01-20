@@ -1,8 +1,8 @@
 // ===== FIREBASE =====
 const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_PROJECT_ID"
+  apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
+  authDomain: "neon-quiz-app.firebaseapp.com",
+  projectId: "neon-quiz-app"
 };
 
 firebase.initializeApp(firebaseConfig);
