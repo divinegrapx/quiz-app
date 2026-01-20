@@ -1,18 +1,17 @@
-// ---------------- FIREBASE CONFIG ----------------
+// FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
   authDomain: "neon-quiz-app.firebaseapp.com",
   projectId: "neon-quiz-app",
-  storageBucket: "neon-quiz-app.appspot.com",
-  messagingSenderId: "891061147021",
-  appId: "1:891061147021:web:7b3d80020f642da7b699c4"
 };
 firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ---------------- DOM ----------------
+// ELEMENTS
 const googleLoginBtn = document.getElementById("googleLoginBtn");
+const facebookLoginBtn = document.getElementById("facebookLoginBtn");
 const emailRegisterBtn = document.getElementById("emailRegisterBtn");
 const emailDiv = document.getElementById("emailDiv");
 const emailLoginBtn = document.getElementById("emailLoginBtn");
@@ -21,203 +20,157 @@ const emailCancelBtn = document.getElementById("emailCancelBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 
 const startBtn = document.getElementById("startBtn");
-const categorySelect = document.getElementById("categorySelect");
-const questionCount = document.getElementById("questionCount");
-const difficultySelect = document.getElementById("difficultySelect");
-const soundToggle = document.getElementById("soundToggle");
-
+const categoryDiv = document.getElementById("categoryDiv");
+const authDiv = document.getElementById("authDiv");
+const quizContainer = document.getElementById("quiz-container");
 const quizDiv = document.getElementById("quiz");
 const moneyList = document.getElementById("money-list");
-const timerBar = document.getElementById("timer-bar");
-const timerText = document.getElementById("timer-text");
 
 const fiftyBtn = document.getElementById("fiftyBtn");
 const callFriendBtn = document.getElementById("callFriendBtn");
 const audienceBtn = document.getElementById("audienceBtn");
 
-const callFriendBox = document.getElementById("callFriendBox");
-const audienceVote = document.getElementById("audienceVote");
+const timerBar = document.getElementById("timer-bar");
+const timerText = document.getElementById("timer-text");
+const audienceBox = document.getElementById("audience-box");
 
+const bgMusic = document.getElementById("bgMusic");
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
 const tickSound = document.getElementById("tick-sound");
+const callSound = document.getElementById("callSound");
+const audienceSound = document.getElementById("audienceSound");
 
-// ---------------- GLOBALS ----------------
-let questions=[], current=0, score=0, ladderLevel=0, timer;
-let fiftyUsed=false, friendUsed=false, audienceUsed=false;
-const timePerQuestion = 30;
+let questions = [];
+let current = 0;
+let score = 0;
+let timer;
+let timePerQuestion = 30;
 
-// Safe Milestones (Real style)
-function getSafeAmount(level, total){
-  if(total===10 && level>=5) return 500;
-  if(total===20 && level>=10) return 1000;
-  if(total===30 && level>=15) return 1500;
-  return 0;
+// LOGIN
+googleLoginBtn.onclick = async () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  await auth.signInWithPopup(provider);
+  onLoginSuccess();
+};
+
+function onLoginSuccess() {
+  authDiv.style.display = "none";
+  categoryDiv.style.display = "block";
+  document.getElementById("profileDiv").style.display = "block";
+
+  const user = auth.currentUser;
+  document.getElementById("profilePic").src = user.photoURL;
+  document.getElementById("playerName").textContent = user.displayName;
 }
 
-// ---------------- LOGIN ----------------
-googleLoginBtn.onclick = async ()=>{
-  await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-  document.getElementById("authDiv").style.display="none";
-  document.getElementById("categoryDiv").style.display="block";
-  showProfile(auth.currentUser);
-};
+// START QUIZ
+startBtn.onclick = async () => {
+  quizContainer.style.display = "block";
+  bgMusic.src = "sounds/thinking.mp3";
+  bgMusic.play();
 
-emailRegisterBtn.onclick = ()=> emailDiv.style.display="block";
-emailCancelBtn.onclick = ()=> emailDiv.style.display="none";
+  const count = document.getElementById("questionCount").value;
+  const cat = document.getElementById("categorySelect").value;
 
-emailLoginBtn.onclick = async ()=>{
-  await auth.signInWithEmailAndPassword(emailInput.value,passwordInput.value);
-  location.reload();
-};
-
-emailRegisterSubmitBtn.onclick = async ()=>{
-  await auth.createUserWithEmailAndPassword(emailInput.value,passwordInput.value);
-  location.reload();
-};
-
-logoutBtn.onclick = async ()=>{ await auth.signOut(); location.reload(); };
-
-// ---------------- START QUIZ ----------------
-startBtn.onclick = startQuiz;
-
-async function startQuiz(){
-  const count = questionCount.value;
-  const cat = categorySelect.value;
-  const diff = difficultySelect.value;
-
-  const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${count}&categories=${cat}&difficulty=${diff}`);
+  const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${count}&categories=${cat}`);
   questions = await res.json();
 
-  current=0; score=0; ladderLevel=0;
-  fiftyUsed=friendUsed=audienceUsed=false;
-
   buildMoneyLadder(count);
-  document.getElementById("quiz-container").style.display="block";
   showQuestion();
-}
+};
 
-// ---------------- QUESTIONS ----------------
-function showQuestion(){
+// QUESTION
+function showQuestion() {
   clearInterval(timer);
   let timeLeft = timePerQuestion;
-  updateTimer(timeLeft);
 
   const q = questions[current];
-  quizDiv.innerHTML = `<h2>Q${current+1}: ${q.question}</h2>`;
+  quizDiv.innerHTML = `<h2>${q.question}</h2>`;
 
-  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(()=>Math.random()-0.5);
-
-  answers.forEach(a=>{
-    const btn=document.createElement("button");
-    btn.className="option-btn";
-    btn.textContent=a;
-    btn.onclick=()=>checkAnswer(a);
+  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
+  answers.forEach(ans => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.textContent = ans;
+    btn.onclick = () => checkAnswer(ans);
     quizDiv.appendChild(btn);
   });
 
-  timer = setInterval(()=>{
+  timer = setInterval(() => {
     timeLeft--;
-    updateTimer(timeLeft);
-    if(timeLeft<=5 && timeLeft>0 && soundToggle.value==="on") tickSound.play();
-    if(timeLeft<=0){ clearInterval(timer); nextQuestion(false); }
-  },1000);
+    timerText.textContent = timeLeft + "s";
+    timerBar.style.width = (timeLeft / timePerQuestion * 100) + "%";
+
+    if (timeLeft <= 5 && timeLeft > 0) tickSound.play();
+    if (timeLeft <= 0) nextQuestion(false);
+  }, 1000);
 }
 
-function updateTimer(t){
-  timerText.textContent=t+"s";
-  timerBar.style.width=(t/timePerQuestion*100)+"%";
-  if(t>10) timerBar.style.background="#00ff00";
-  else if(t>5) timerBar.style.background="#ffcc00";
-  else timerBar.style.background="#ff4d4d";
-}
-
-function checkAnswer(ans){
+// CHECK ANSWER
+function checkAnswer(ans) {
   clearInterval(timer);
   const correct = questions[current].correctAnswer;
 
-  document.querySelectorAll(".option-btn").forEach(b=>{
-    b.disabled=true;
-    if(b.textContent===correct) b.classList.add("correct");
-    if(b.textContent===ans && ans!==correct) b.classList.add("wrong");
+  document.querySelectorAll(".option-btn").forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add("correct");
+    if (b.textContent === ans && ans !== correct) b.classList.add("wrong");
   });
 
-  if(ans===correct){
-    score++; ladderLevel++;
+  if (ans === correct) {
+    score++;
+    correctSound.play();
     updateMoneyLadder();
-    if(soundToggle.value==="on") correctSound.play();
   } else {
-    if(soundToggle.value==="on") wrongSound.play();
+    wrongSound.play();
   }
 
-  setTimeout(nextQuestion,1500);
+  setTimeout(nextQuestion, 2000);
 }
 
-function nextQuestion(){
+// NEXT
+function nextQuestion() {
   current++;
-  if(current>=questions.length){
-    const safe = getSafeAmount(ladderLevel,questions.length);
-    quizDiv.innerHTML=`<h2>Finished!</h2><p>Score: ${score}</p><p>Safe Money: $${safe}</p>`;
+  if (current >= questions.length) {
+    bgMusic.src = "sounds/win.mp3";
+    bgMusic.play();
+    quizDiv.innerHTML = `<h2>🎉 You won $${score * 100}</h2>`;
     return;
   }
   showQuestion();
 }
 
-// ---------------- MONEY LADDER ----------------
-function buildMoneyLadder(count){
-  moneyList.innerHTML="";
-  for(let i=count;i>=1;i--){
-    const li=document.createElement("li");
-    li.textContent="$"+(i*100);
+// MONEY LADDER
+function buildMoneyLadder(q) {
+  moneyList.innerHTML = "";
+  for (let i = q; i > 0; i--) {
+    const li = document.createElement("li");
+    li.textContent = "$" + (i * 100);
     moneyList.appendChild(li);
   }
 }
 
-function updateMoneyLadder(){
-  const items = moneyList.children;
-  for(let li of items) li.classList.remove("current");
-  const idx = items.length - ladderLevel;
-  if(items[idx]) items[idx].classList.add("current");
+function updateMoneyLadder() {
+  const idx = moneyList.children.length - score;
+  moneyList.querySelectorAll("li").forEach(li => li.classList.remove("current"));
+  if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
 }
 
-// ---------------- LIFELINES ----------------
-fiftyBtn.onclick = ()=>{
-  if(fiftyUsed) return;
-  fiftyUsed=true;
-  const correct = questions[current].correctAnswer;
-  let removed=0;
-  document.querySelectorAll(".option-btn").forEach(b=>{
-    if(b.textContent!==correct && removed<2){
-      b.style.opacity=0.3;
-      removed++;
-    }
+// CALL A FRIEND
+callFriendBtn.onclick = () => {
+  callSound.play();
+  alert("📞 Your friend thinks the answer is: " + questions[current].correctAnswer);
+};
+
+// AUDIENCE
+audienceBtn.onclick = () => {
+  audienceSound.play();
+  audienceBox.innerHTML = "";
+  ["A","B","C","D"].forEach(() => {
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    bar.style.width = Math.random()*100 + "%";
+    audienceBox.appendChild(bar);
   });
 };
-
-callFriendBtn.onclick = ()=>{
-  if(friendUsed) return;
-  friendUsed=true;
-  callFriendBox.innerHTML=`<div class="phone-anim">📞</div><p>Your friend thinks the answer is:</p><b>${questions[current].correctAnswer}</b>`;
-};
-
-audienceBtn.onclick = ()=>{
-  if(audienceUsed) return;
-  audienceUsed=true;
-
-  const correct = questions[current].correctAnswer;
-  audienceVote.innerHTML="";
-
-  document.querySelectorAll(".option-btn").forEach(b=>{
-    const percent = b.textContent===correct ? 60+Math.random()*20 : Math.random()*30;
-    const div=document.createElement("div");
-    div.className="vote-bar";
-    div.innerHTML=`<span>${b.textContent}</span><div class="bar" style="width:${percent}%"></div>`;
-    audienceVote.appendChild(div);
-  });
-};
-
-// ---------------- PROFILE ----------------
-function showProfile(user){
-  document.getElementById("profileDiv").innerHTML=
-    `<img src="${user.photoURL}"><h3>${user.displayName}</h3>`;
-}
