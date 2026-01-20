@@ -12,7 +12,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
 <div class="container">
 
   <!-- LOGIN -->
@@ -32,9 +31,25 @@
     <button id="emailCancelBtn">Cancel</button>
   </div>
 
-  <!-- LOGOUT -->
-  <div id="logoutDiv" style="display:none;">
+  <!-- PROFILE -->
+  <div id="profileDiv" style="display:none;">
+    <img id="profilePic" />
+    <h3 id="profileName"></h3>
+    <p id="profileStats"></p>
     <button id="logoutBtn">Logout</button>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="settingsDiv" style="display:none;">
+    <label>Difficulty:</label>
+    <select id="difficultySelect">
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+
+    <label>Sounds:</label>
+    <input type="checkbox" id="soundToggle" checked> Enable Sounds
   </div>
 
   <!-- CATEGORY -->
@@ -45,10 +60,6 @@
       <option value="history">History</option>
       <option value="geography">Geography</option>
       <option value="music">Music</option>
-      <option value="film_and_tv">Film & TV</option>
-      <option value="sports">Sports</option>
-      <option value="food_and_drink">Food & Drink</option>
-      <option value="general_knowledge">General Knowledge</option>
     </select>
 
     <label>Questions:</label>
@@ -68,33 +79,28 @@
       <ul id="money-list"></ul>
     </div>
 
-    <!-- Lifelines -->
     <div id="lifelines">
-      <button id="fiftyBtn">50:50 ✂️</button>
-      <button id="callBtn">📞 Call a Friend</button>
-      <button id="audienceBtn">👥 Audience Vote</button>
+      <button id="fiftyBtn">50:50</button>
+      <button id="callBtn">📞 Call</button>
+      <button id="audienceBtn">👥 Audience</button>
     </div>
 
-    <!-- Timer -->
     <div id="timer-container">
       <div id="timer-bar"></div>
       <span id="timer-text">30s</span>
     </div>
-
-    <div id="audience-box"></div>
   </div>
 
-  <!-- Leaderboard -->
+  <!-- LEADERBOARD -->
   <h2>🏆 Leaderboard</h2>
   <ul id="leaderboard-list"></ul>
 
-  <!-- Sounds -->
-  <audio id="correct-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/correct.wav"></audio>
-  <audio id="wrong-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/wrong.wav"></audio>
-  <audio id="tick-sound" src="https://raw.githubusercontent.com/divinegrapx/quiz-app/main/tick.mp3"></audio>
+  <!-- SOUNDS -->
+  <audio id="correct-sound" src="correct.wav"></audio>
+  <audio id="wrong-sound" src="wrong.wav"></audio>
+  <audio id="tick-sound" src="tick.mp3"></audio>
 
 </div>
-
 <script src="script.js"></script>
 </body>
 </html>
