@@ -1,199 +1,122 @@
-// ===== FIREBASE =====
+// ==============================
+// FIREBASE (MODULAR v10)
+// ==============================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+// 🔥 YOUR REAL FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
   authDomain: "neon-quiz-app.firebaseapp.com",
-  projectId: "neon-quiz-app"
+  projectId: "neon-quiz-app",
+  storageBucket: "neon-quiz-app.firebasestorage.app",
+  messagingSenderId: "891061147021",
+  appId: "1:891061147021:web:7b3d80020f642da7b699c4"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+// INIT
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-// ===== DOM =====
-const $ = id => document.getElementById(id);
+// ==============================
+// ELEMENTS
+// ==============================
+const loginBtn = document.getElementById("googleLoginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const quizDiv = document.getElementById("quiz-and-ladder");
+const questionEl = document.getElementById("question");
+const answersEl = document.getElementById("answers");
+const timerBar = document.getElementById("timer-bar");
+const timerText = document.getElementById("timer-text");
+const tickSound = document.getElementById("tickSound");
 
-const authDiv = $("authDiv");
-const emailDiv = $("emailDiv");
-const logoutDiv = $("logoutDiv");
-const categoryDiv = $("categoryDiv");
-const quizContainer = $("quiz-container");
-const quizDiv = $("quiz");
-const moneyList = $("money-list");
-const lifelineResult = $("lifeline-result");
-
-const emailInput = $("emailInput");
-const passwordInput = $("passwordInput");
-
-const googleLoginBtn = $("googleLoginBtn");
-const facebookLoginBtn = $("facebookLoginBtn");
-const emailRegisterBtn = $("emailRegisterBtn");
-const emailLoginBtn = $("emailLoginBtn");
-const emailRegisterSubmitBtn = $("emailRegisterSubmitBtn");
-const emailCancelBtn = $("emailCancelBtn");
-const logoutBtn = $("logoutBtn");
-
-const startBtn = $("startBtn");
-const questionCount = $("questionCount");
-const categorySelect = $("categorySelect");
-
-const fiftyBtn = $("fiftyBtn");
-const callBtn = $("callBtn");
-const audienceBtn = $("audienceBtn");
-
-const timerBar = $("timer-bar");
-const timerText = $("timer-text");
-
-const correctSound = $("correct-sound");
-const wrongSound = $("wrong-sound");
-const tickSound = $("tick-sound");
-
-// ===== STATE =====
-let questions = [];
-let current = 0;
-let score = 0;
-let timer;
-let timeLeft = 20;
-
-// ===== AUTH =====
-googleLoginBtn.onclick = () =>
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-
-facebookLoginBtn.onclick = () =>
-  auth.signInWithPopup(new firebase.auth.FacebookAuthProvider());
-
-emailRegisterBtn.onclick = () => {
-  authDiv.style.display = "none";
-  emailDiv.style.display = "block";
+// ==============================
+// AUTH
+// ==============================
+loginBtn.onclick = async () => {
+  await signInWithPopup(auth, provider);
 };
 
-emailCancelBtn.onclick = () => {
-  emailDiv.style.display = "none";
-  authDiv.style.display = "block";
+logoutBtn.onclick = async () => {
+  await signOut(auth);
 };
 
-emailLoginBtn.onclick = () =>
-  auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
-
-emailRegisterSubmitBtn.onclick = () =>
-  auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
-
-logoutBtn.onclick = () => auth.signOut();
-
-auth.onAuthStateChanged(user => {
-  authDiv.style.display = user ? "none" : "block";
-  categoryDiv.style.display = user ? "block" : "none";
-  logoutDiv.style.display = user ? "block" : "none";
-  quizContainer.style.display = "none";
+onAuthStateChanged(auth, user => {
+  if (user) {
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+    quizDiv.style.display = "flex";
+    startQuiz();
+  } else {
+    loginBtn.style.display = "inline-block";
+    logoutBtn.style.display = "none";
+    quizDiv.style.display = "none";
+  }
 });
 
-// ===== QUIZ =====
-startBtn.onclick = async () => {
-  categoryDiv.style.display = "none";
-  quizContainer.style.display = "block";
-  current = score = 0;
+// ==============================
+// QUIZ DATA
+// ==============================
+const questions = [
+  { q: "Capital of France?", a: ["Paris", "Rome", "Berlin", "Madrid"], c: 0 },
+  { q: "2 + 2 = ?", a: ["3", "4", "5", "6"], c: 1 }
+];
 
-  buildMoney();
+let index = 0;
+let timer;
 
-  const res = await fetch(
-    `https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}`
-  );
-  questions = await res.json();
-  showQuestion();
-};
+// ==============================
+// QUIZ LOGIC
+// ==============================
+function startQuiz() {
+  index = 0;
+  loadQuestion();
+}
 
-function showQuestion() {
+function loadQuestion() {
   clearInterval(timer);
-  timeLeft = 20;
-  lifelineResult.textContent = "";
-  [fiftyBtn, callBtn, audienceBtn].forEach(b => b.disabled = false);
+  answersEl.innerHTML = "";
 
-  const q = questions[current];
-  quizDiv.innerHTML = `<h2>${q.question}</h2>`;
+  const q = questions[index];
+  questionEl.textContent = q.q;
 
-  shuffle([...q.incorrectAnswers, q.correctAnswer]).forEach(a => {
+  q.a.forEach((text, i) => {
     const btn = document.createElement("button");
     btn.className = "option-btn";
-    btn.textContent = a;
-    btn.onclick = () => checkAnswer(btn, a === q.correctAnswer);
-    quizDiv.appendChild(btn);
+    btn.textContent = text;
+    btn.onclick = () => selectAnswer(btn, i);
+    answersEl.appendChild(btn);
   });
 
-  timer = setInterval(() => {
-    timeLeft--;
-    updateTimer();
-    if (timeLeft <= 5) tickSound.play();
-    if (timeLeft === 0) next();
-  }, 1000);
+  startTimer();
 }
 
-function updateTimer() {
-  timerText.textContent = timeLeft + "s";
-  timerBar.style.width = (timeLeft / 20 * 100) + "%";
-  timerBar.style.background = timeLeft > 5 ? "#00ff00" : "#ff4d4d";
-}
-
-function checkAnswer(btn, correct) {
+function selectAnswer(btn, i) {
   clearInterval(timer);
   document.querySelectorAll(".option-btn").forEach(b => b.disabled = true);
 
-  if (correct) {
-    score++;
+  if (i === questions[index].c) {
     btn.classList.add("correct");
-    correctSound.play();
   } else {
     btn.classList.add("wrong");
-    wrongSound.play();
-  }
-
-  setTimeout(next, 1500);
-}
-
-function next() {
-  current++;
-  updateMoney();
-  if (current >= questions.length) {
-    quizDiv.innerHTML = `<h2>Finished!</h2><p>Score: ${score}</p>`;
-    return;
-  }
-  showQuestion();
-}
-
-// ===== LIFELINES =====
-fiftyBtn.onclick = () => {
-  document.querySelectorAll(".option-btn")
-    .forEach(b => b.textContent !== questions[current].correctAnswer && (b.disabled = Math.random() < 0.5));
-  fiftyBtn.disabled = true;
-};
-
-callBtn.onclick = () => {
-  lifelineResult.textContent =
-    Math.random() < 0.8
-      ? `Friend thinks: ${questions[current].correctAnswer}`
-      : `Friend unsure… maybe ${questions[current].incorrectAnswers[0]}`;
-  callBtn.disabled = true;
-};
-
-audienceBtn.onclick = () => {
-  lifelineResult.innerHTML = questions[current].incorrectAnswers
-    .concat(questions[current].correctAnswer)
-    .map(a => `${a}: ${Math.floor(Math.random()*30 + (a === questions[current].correctAnswer ? 40 : 5))}%`)
-    .join("<br>");
-  audienceBtn.disabled = true;
-};
-
-// ===== MONEY =====
-function buildMoney() {
-  moneyList.innerHTML = "";
-  for (let i = 1; i <= questionCount.value; i++) {
-    const li = document.createElement("li");
-    li.textContent = `$${i * 100}`;
-    moneyList.appendChild(li);
   }
 }
 
-function updateMoney() {
-  [...moneyList.children].forEach(li => li.classList.remove("current"));
-  moneyList.children[current - 1]?.classList.add("current");
-}
+// ==============================
+// TIMER
+// ==============================
+function startTimer() {
+  let time = 15;
+  timerText.textContent = time;
+  timerBar.style.width = "100%";
 
-// ===== UTIL =====
-const shuffle = arr => arr.sort(() => Math.random() - 0.5);
+  timer = setInterval(() => {
+    time--;
+    timerText.textContent = time;
+    timerBar.style.width = (time / 15) * 100 + "%";
+
+    if (time <= 5) tickSound.play();
+    if (time <= 0) clearInterval(timer);
+  }, 1000);
+}
