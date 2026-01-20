@@ -1,217 +1,52 @@
 * {
   box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
-  background: radial-gradient(circle at top, #0f2027, #000);
+  background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+  background-size: 400% 400%;
+  animation: bg 20s infinite;
   color: #fff;
   display: flex;
   justify-content: center;
-  align-items: center;
+  padding: 20px;
+}
+
+@keyframes bg {
+  0% { background-position: 0%; }
+  50% { background-position: 100%; }
+  100% { background-position: 0%; }
 }
 
 .container {
-  width: 95%;
   max-width: 900px;
-  background: rgba(0, 0, 0, 0.7);
+  width: 100%;
+  background: rgba(0, 0, 0, 0.75);
   border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 0 30px rgba(0, 242, 254, 0.3);
+  padding: 25px;
+  box-shadow: 0 0 30px #00f2fe;
   text-align: center;
 }
 
-/* ---------------- AUTH ---------------- */
+/* ---------------- BUTTONS ---------------- */
 
-#authDiv h1 {
-  margin-bottom: 20px;
-  color: #00f2fe;
-  text-shadow: 0 0 10px #00f2fe;
-}
-
-#authDiv button,
-#emailDiv button,
-#logoutBtn,
-#startBtn {
-  background: linear-gradient(135deg, #00f2fe, #4facfe);
-  border: none;
+button {
   padding: 12px 20px;
-  border-radius: 25px;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
-  margin: 8px;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-#authDiv button:hover,
-#emailDiv button:hover,
-#logoutBtn:hover,
-#startBtn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 15px #00f2fe;
-}
-
-#emailDiv input {
-  width: 80%;
-  padding: 10px;
-  margin: 6px 0;
-  border-radius: 8px;
+  margin: 6px;
   border: none;
-}
-
-/* ---------------- CATEGORY ---------------- */
-
-#categoryDiv {
-  margin: 20px 0;
-}
-
-#categoryDiv select {
-  padding: 10px;
-  border-radius: 8px;
-  margin: 5px;
-}
-
-/* ---------------- QUIZ ---------------- */
-
-#quiz-container {
-  margin-top: 20px;
-}
-
-#quiz h2 {
-  margin-bottom: 15px;
-}
-
-.option-btn {
-  width: 100%;
-  background: rgba(0, 242, 254, 0.15);
-  border: 2px solid #00f2fe;
-  color: #fff;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 10px;
+  border-radius: 12px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #00c6ff, #00f2fe);
+  color: #000;
   cursor: pointer;
   transition: 0.2s;
 }
 
-.option-btn:hover {
-  background: rgba(0, 242, 254, 0.3);
-}
-
-.option-btn.correct {
-  background: #00ff99;
-  color: #000;
-}
-
-.option-btn.wrong {
-  background: #ff4d4d;
-}
-
-.shake {
-  animation: shake 0.4s;
-}
-
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
-}
-
-/* ---------------- LIFELINES ---------------- */
-
-#lifelines {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 15px 0;
-}
-
-#lifelines button {
-  background: #222;
-  border: 2px solid #00f2fe;
-  color: #00f2fe;
-  padding: 10px 15px;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-/* ---------------- TIMER ---------------- */
-
-#timer-container {
-  width: 100%;
-  height: 22px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  overflow: hidden;
-  margin: 15px 0;
-  position: relative;
-  box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
-}
-
-#timer-bar {
-  height: 100%;
-  width: 100%;
-  background: #00ff00;
-  transition: width 1s linear, background 0.3s ease;
-  border-radius: 20px;
-}
-
-#timer-text {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-weight: bold;
-  font-size: 14px;
-  color: #00ff00;
-  text-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
-}
-
-/* ---------------- MONEY LADDER ---------------- */
-
-#money-list {
-  list-style: none;
-  padding: 0;
-  margin: 20px 0;
-  text-align: right;
-}
-
-#money-list li {
-  padding: 6px 10px;
-  border-radius: 8px;
-  margin: 4px 0;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-#money-list li.current {
-  background: #ffd700;
-  color: #000;
-  font-weight: bold;
-}
-
-/* ---------------- LEADERBOARD ---------------- */
-
-#leaderboard-list {
-  list-style: none;
-  padding: 0;
-}
-
-#leaderboard-list li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 6px 0;
-  background: rgba(255,255,255,0.05);
-  padding: 8px;
-  border-radius: 10px;
-}
-
-#leaderboard-list img {
-  border-radius: 50%;
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #00f2fe;
 }
 
 /* ---------------- PROFILE ---------------- */
@@ -220,6 +55,11 @@ body {
   width: 80px;
   border-radius: 50%;
   border: 2px solid #00f2fe;
+  margin-top: 10px;
+}
+
+#profileDiv h3 {
+  margin: 5px 0;
 }
 
 /* ---------------- SETTINGS ---------------- */
@@ -231,23 +71,174 @@ body {
 #settingsDiv select {
   padding: 8px;
   border-radius: 8px;
+  margin: 5px;
+  border: none;
 }
 
-/* ---------------- FEEDBACK ---------------- */
+/* ---------------- QUIZ LAYOUT ---------------- */
 
-#feedback {
-  margin: 10px 0;
+#quiz-and-ladder {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+#quiz {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 20px;
+}
+
+/* ---------------- OPTIONS ---------------- */
+
+.option-btn {
+  width: 90%;
+  margin: 8px auto;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #1c92d2, #f2fcfe);
+  color: #000;
+}
+
+.correct {
+  background: #00ff00 !important;
+  color: #000;
+}
+
+.wrong {
+  background: #ff4d4d !important;
+  color: #000;
+}
+
+/* ---------------- MONEY LADDER ---------------- */
+
+#money-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  min-width: 180px;
+}
+
+#money-list li {
+  padding: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  font-weight: bold;
+}
+
+#money-list li.current {
+  background: gold;
+  color: black;
+  border-radius: 8px;
+}
+
+/* ---------------- TIMER ---------------- */
+
+#timer-container {
+  width: 100%;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  margin: 15px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+#timer-bar {
+  height: 100%;
+  width: 100%;
+  background: #00ff00;
+  transition: width 1s linear, background 0.3s;
+}
+
+#timer-text {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+}
+
+/* ---------------- LIFELINES ---------------- */
+
+#lifelines {
+  margin-top: 15px;
+}
+
+#lifelines button {
+  background: linear-gradient(135deg, #ffdd00, #ffaa00);
+}
+
+/* ---------------- CALL A FRIEND ---------------- */
+
+#callFriendBox {
+  margin-top: 15px;
   font-size: 18px;
+}
+
+.phone-anim {
+  font-size: 50px;
+  animation: ring 1s infinite;
+}
+
+@keyframes ring {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* ---------------- AUDIENCE VOTE ---------------- */
+
+#audienceVote {
+  margin-top: 15px;
+}
+
+.vote-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+}
+
+.vote-bar span {
+  width: 30%;
+  text-align: left;
+}
+
+.vote-bar .bar {
+  height: 18px;
+  background: linear-gradient(90deg, #00f2fe, #4facfe);
+  border-radius: 10px;
+  transition: width 1s;
+}
+
+/* ---------------- LEADERBOARD ---------------- */
+
+#leaderboard-list {
+  list-style: none;
+  padding: 0;
+}
+
+#leaderboard-list li {
+  padding: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
 /* ---------------- MOBILE ---------------- */
 
-@media (max-width: 600px) {
-  .container {
-    padding: 15px;
+@media (max-width: 700px) {
+  #quiz-and-ladder {
+    flex-direction: column;
   }
 
-  .option-btn {
-    font-size: 14px;
+  #money-list {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  #money-list li {
+    min-width: 120px;
   }
 }
