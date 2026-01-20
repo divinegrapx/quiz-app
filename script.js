@@ -1,162 +1,122 @@
-// ===== CONFIG =====
-const TIME_PER_QUESTION = 20;
-const TICK_SOUND = document.getElementById("tick-sound");
+// ==============================
+// FIREBASE (MODULAR v10)
+// ==============================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// ===== STATE =====
-let currentQuestion = 0;
-let score = 0;
-let timer;
-let timeLeft;
-let maxQuestions = 10;
-let ladderMax = 1000;
+// 🔥 YOUR REAL FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
+  authDomain: "neon-quiz-app.firebaseapp.com",
+  projectId: "neon-quiz-app",
+  storageBucket: "neon-quiz-app.firebasestorage.app",
+  messagingSenderId: "891061147021",
+  appId: "1:891061147021:web:7b3d80020f642da7b699c4"
+};
 
-// ===== SAMPLE QUESTIONS =====
-const questions = [
-  {
-    q: "What is the capital of France?",
-    answers: ["Berlin", "Madrid", "Paris", "Rome"],
-    correct: 2,
-    audience: [10, 10, 70, 10],
-    friend: "I'm pretty sure it's Paris."
-  },
-  {
-    q: "2 + 2 = ?",
-    answers: ["3", "4", "5", "6"],
-    correct: 1,
-    audience: [5, 80, 10, 5],
-    friend: "Come on, that's 4 😄"
+// INIT
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// ==============================
+// ELEMENTS
+// ==============================
+const loginBtn = document.getElementById("googleLoginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const quizDiv = document.getElementById("quiz-and-ladder");
+const questionEl = document.getElementById("question");
+const answersEl = document.getElementById("answers");
+const timerBar = document.getElementById("timer-bar");
+const timerText = document.getElementById("timer-text");
+const tickSound = document.getElementById("tickSound");
+
+// ==============================
+// AUTH
+// ==============================
+loginBtn.onclick = async () => {
+  await signInWithPopup(auth, provider);
+};
+
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+    quizDiv.style.display = "flex";
+    startQuiz();
+  } else {
+    loginBtn.style.display = "inline-block";
+    logoutBtn.style.display = "none";
+    quizDiv.style.display = "none";
   }
+});
+
+// ==============================
+// QUIZ DATA
+// ==============================
+const questions = [
+  { q: "Capital of France?", a: ["Paris", "Rome", "Berlin", "Madrid"], c: 0 },
+  { q: "2 + 2 = ?", a: ["3", "4", "5", "6"], c: 1 }
 ];
 
-// ===== LOGIN =====
-function login() {
-  document.getElementById("auth").style.display = "none";
-  document.getElementById("game").style.display = "block";
-  startGame();
-}
+let index = 0;
+let timer;
 
-function logout() {
-  location.reload();
-}
-
-// ===== GAME SETUP =====
-function startGame() {
-  maxQuestions = Number(document.getElementById("questionCount").value);
-  ladderMax = maxQuestions * 100;
-  currentQuestion = 0;
-  score = 0;
-  renderLadder();
+// ==============================
+// QUIZ LOGIC
+// ==============================
+function startQuiz() {
+  index = 0;
   loadQuestion();
 }
 
-// ===== LADDER =====
-function renderLadder() {
-  document.getElementById("ladder").innerText =
-    `Prize: $${(currentQuestion) * 100} / $${ladderMax}`;
-}
-
-// ===== QUESTION =====
 function loadQuestion() {
   clearInterval(timer);
-  timeLeft = TIME_PER_QUESTION;
-  updateTimer();
+  answersEl.innerHTML = "";
 
-  const q = questions[currentQuestion % questions.length];
-  document.getElementById("question").innerText =
-    `${currentQuestion + 1}/${maxQuestions}. ${q.q}`;
+  const q = questions[index];
+  questionEl.textContent = q.q;
 
-  const answersDiv = document.getElementById("answers");
-  answersDiv.innerHTML = "";
-
-  q.answers.forEach((text, index) => {
+  q.a.forEach((text, i) => {
     const btn = document.createElement("button");
-    btn.className = "answer-btn";
-    btn.innerText = text;
-    btn.onclick = () => selectAnswer(btn, index, q.correct);
-    answersDiv.appendChild(btn);
+    btn.className = "option-btn";
+    btn.textContent = text;
+    btn.onclick = () => selectAnswer(btn, i);
+    answersEl.appendChild(btn);
   });
 
   startTimer();
 }
 
-// ===== TIMER =====
-function startTimer() {
-  timer = setInterval(() => {
-    timeLeft--;
-    updateTimer();
-
-    if (timeLeft <= 5) {
-      TICK_SOUND.currentTime = 0;
-      TICK_SOUND.play();
-    }
-
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      nextQuestion();
-    }
-  }, 1000);
-}
-
-function updateTimer() {
-  document.getElementById("time-bar").style.width =
-    (timeLeft / TIME_PER_QUESTION) * 100 + "%";
-}
-
-// ===== ANSWER =====
-function selectAnswer(button, index, correct) {
+function selectAnswer(btn, i) {
   clearInterval(timer);
-  const buttons = document.querySelectorAll(".answer-btn");
+  document.querySelectorAll(".option-btn").forEach(b => b.disabled = true);
 
-  buttons.forEach(b => b.disabled = true);
-
-  if (index === correct) {
-    button.classList.add("correct");
-    score++;
+  if (i === questions[index].c) {
+    btn.classList.add("correct");
   } else {
-    button.classList.add("wrong");
-    buttons[correct].classList.add("correct");
-  }
-
-  setTimeout(nextQuestion, 1200);
-}
-
-// ===== NEXT =====
-function nextQuestion() {
-  currentQuestion++;
-  renderLadder();
-
-  if (currentQuestion >= maxQuestions) {
-    alert(`Game Over! You won $${score * 100}`);
-    logout();
-  } else {
-    loadQuestion();
+    btn.classList.add("wrong");
   }
 }
 
-// ===== LIFELINES =====
-function fiftyFifty(btn) {
-  btn.disabled = true;
-  const q = questions[currentQuestion % questions.length];
-  const buttons = [...document.querySelectorAll(".answer-btn")];
-  let removed = 0;
+// ==============================
+// TIMER
+// ==============================
+function startTimer() {
+  let time = 15;
+  timerText.textContent = time;
+  timerBar.style.width = "100%";
 
-  buttons.forEach((b, i) => {
-    if (i !== q.correct && removed < 2) {
-      b.style.visibility = "hidden";
-      removed++;
-    }
-  });
-}
+  timer = setInterval(() => {
+    time--;
+    timerText.textContent = time;
+    timerBar.style.width = (time / 15) * 100 + "%";
 
-function callFriend(btn) {
-  btn.disabled = true;
-  alert(questions[currentQuestion % questions.length].friend);
-}
-
-function audienceVote(btn) {
-  btn.disabled = true;
-  const votes = questions[currentQuestion % questions.length].audience;
-  alert(
-    `Audience votes:\nA: ${votes[0]}%\nB: ${votes[1]}%\nC: ${votes[2]}%\nD: ${votes[3]}%`
-  );
+    if (time <= 5) tickSound.play();
+    if (time <= 0) clearInterval(timer);
+  }, 1000);
 }
