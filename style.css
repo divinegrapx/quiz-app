@@ -33,49 +33,91 @@ body {
   background: rgba(0,0,0,0.7);
   box-shadow: 0 0 40px #00f2fe;
   backdrop-filter: blur(8px);
+  animation: fadeIn 1s ease;
 }
 
-/* ---------------- BUTTONS ---------------- */
-button {
-  font-size: 1rem;
+/* ---------------- TITLES ---------------- */
+h1 {
+  font-size: 2.5rem;
+  text-shadow: 0 0 15px #00f2fe;
+  animation: glowPulse 2s infinite alternate;
+}
+
+@keyframes glowPulse {
+  from { text-shadow: 0 0 10px #00f2fe; }
+  to   { text-shadow: 0 0 25px #00f2fe; }
+}
+
+/* ---------------- LOGIN BUTTONS ---------------- */
+#authDiv button {
+  width: 80%;
+  max-width: 300px;
+  margin: 12px auto;
+  padding: 16px;
+  font-size: 1.1rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg,#00c6ff,#00f2fe);
+  color: #000;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.6),
+              0 0 20px #00f2fe inset;
+  transform-style: preserve-3d;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+#authDiv button:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.8),
+              0 0 35px #00f2fe inset;
+}
+
+/* ---------------- CATEGORY + DIFFICULTY ---------------- */
+#categoryDiv {
+  margin-top: 20px;
+  animation: fadeIn 1s ease;
+}
+
+#categoryDiv label {
+  display: block;
+  margin: 12px 0 5px;
   font-weight: bold;
-  border: none;
+  color: #00f2fe;
+}
+
+#categoryDiv select {
+  width: 80%;
+  max-width: 260px;
+  padding: 12px;
   border-radius: 14px;
-  cursor: pointer;
+  border: none;
+  background: rgba(0,0,0,0.6);
+  color: #00f2fe;
+  font-size: 1rem;
+  box-shadow: 0 0 15px #00f2fe;
   transition: transform 0.2s, box-shadow 0.3s;
 }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+#categoryDiv select:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px #00f2fe;
 }
 
-#authDiv button, 
-#emailDiv button, 
-#restartBtn, 
-#logoutBtn {
-  margin: 10px;
-  padding: 14px 28px;
-  background: linear-gradient(135deg,#00c6ff,#00f2fe);
-  color: #000;
-  box-shadow: 0 0 5px #00f2fe, 0 0 20px #00c6ff inset;
+#startBtn {
+  margin-top: 20px;
+  padding: 16px 40px;
+  font-size: 1.2rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg,#ffb347,#ff6a00);
+  color: #fff;
+  box-shadow: 0 0 20px #ffb347;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
-#authDiv button:hover,
-#emailDiv button:hover,
-#restartBtn:hover,
-#logoutBtn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 0 15px #00f2fe, 0 0 35px #00c6ff inset;
+#startBtn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 35px #ffb347;
 }
 
-/* ---------------- QUIZ + MONEY LADDER ---------------- */
-#quiz-and-ladder {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-}
-
+/* ---------------- QUIZ ---------------- */
 #quiz {
   background: rgba(255,255,255,0.05);
   padding: 25px;
@@ -86,24 +128,17 @@ button:disabled {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #fff;
   perspective: 1200px;
-}
-
-#quiz.fade-in {
-  animation: fadeIn 0.5s ease forwards;
-  opacity: 0;
 }
 
 /* ---------------- 3D ANSWER BUTTONS ---------------- */
 .option-btn {
-  display: block;
   width: 90%;
   margin: 12px auto;
   padding: 16px;
   font-size: 16px;
   font-weight: 600;
-  border-radius: 14px;
+  border-radius: 16px;
   background: linear-gradient(135deg,#00c6ff,#00f2fe);
   color: #000;
   box-shadow: 0 10px 20px rgba(0,0,0,0.5),
@@ -113,36 +148,34 @@ button:disabled {
 }
 
 .option-btn:hover:not(:disabled) {
-  transform: rotateX(8deg) scale(1.06);
+  transform: rotateX(10deg) scale(1.07);
   box-shadow: 0 15px 30px rgba(0,0,0,0.6),
               0 0 25px #00f2fe inset;
 }
 
 .option-btn.correct {
   background: linear-gradient(135deg,#00ff99,#00ff00) !important;
-  color: #000 !important;
-  box-shadow: 0 0 20px #00ff00 inset, 0 0 20px #00ff00;
+  box-shadow: 0 0 25px #00ff00;
 }
 
 .option-btn.wrong {
   background: linear-gradient(135deg,#ff4d4d,#ff0000) !important;
-  color: #fff !important;
-  box-shadow: 0 0 20px #ff0000 inset, 0 0 20px #ff0000;
+  box-shadow: 0 0 25px #ff0000;
 }
 
 /* ---------------- LIFELINES ---------------- */
 #lifelines button {
   margin: 6px;
-  padding: 10px 20px;
-  border-radius: 14px;
+  padding: 12px 22px;
+  border-radius: 16px;
   background: linear-gradient(135deg,#ff6a00,#ffb347);
-  box-shadow: 0 0 10px #ffb347 inset;
+  box-shadow: 0 0 15px #ffb347 inset;
   color: #fff;
   transition: transform 0.2s;
 }
 
 #lifelines button:hover:not(:disabled) {
-  transform: scale(1.08);
+  transform: scale(1.1);
 }
 
 /* ---------------- CALL A FRIEND ---------------- */
@@ -153,20 +186,20 @@ button:disabled {
 
 @keyframes phoneRing {
   0% { transform: rotate(0deg); }
-  20% { transform: rotate(-10deg); }
-  40% { transform: rotate(10deg); }
-  60% { transform: rotate(-10deg); }
-  80% { transform: rotate(10deg); }
+  20% { transform: rotate(-12deg); }
+  40% { transform: rotate(12deg); }
+  60% { transform: rotate(-12deg); }
+  80% { transform: rotate(12deg); }
   100% { transform: rotate(0deg); }
 }
 
-/* ---------------- AUDIENCE VOTE 3D ---------------- */
+/* ---------------- AUDIENCE VOTE ---------------- */
 .vote-bar {
   height: 28px;
-  border-radius: 12px;
+  border-radius: 14px;
   background: linear-gradient(90deg,#00f2fe,#00c6ff);
   box-shadow: inset 0 0 10px rgba(0,0,0,0.6),
-              0 0 10px #00f2fe;
+              0 0 15px #00f2fe;
   transform: perspective(600px) rotateX(10deg);
   transition: width 1s ease;
 }
@@ -201,28 +234,11 @@ button:disabled {
 }
 
 /* ---------------- MONEY LADDER ---------------- */
-#money-list {
-  display: flex;
-  flex-direction: column-reverse;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  width: 150px;
-}
-
-#money-list li {
-  padding: 10px 14px;
-  text-align: right;
-  font-size: 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-  transform: perspective(800px) rotateY(-8deg);
-}
-
 #money-list li.current {
   background: linear-gradient(90deg,#ffd200,#f7971e);
   color: #000;
   font-weight: bold;
-  box-shadow: 0 0 15px #ffd200 inset, 0 0 15px #f7971e;
+  box-shadow: 0 0 20px #ffd200;
 }
 
 /* ---------------- PROFILE ---------------- */
@@ -231,11 +247,6 @@ button:disabled {
   border-radius: 50%;
   border: 2px solid #00f2fe;
   box-shadow: 0 0 15px #00f2fe;
-}
-
-#settingsDiv select {
-  padding: 8px;
-  border-radius: 8px;
 }
 
 /* ---------------- ANIMATIONS ---------------- */
