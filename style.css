@@ -20,160 +20,143 @@ body {
   100% { background-position: 0%; }
 }
 
-/* ---------------- CONTAINER ---------------- */
-
 .container {
   max-width: 900px;
   width: 100%;
   background: rgba(0, 0, 0, 0.85);
   border-radius: 20px;
-  padding: 25px;
-  box-shadow: 0 0 40px #00f2fe;
+  padding: 20px;
+  box-shadow: 0 0 35px #00f2fe;
   text-align: center;
-  position: relative;
-  overflow: hidden;
 }
 
-/* ---------------- TITLE ---------------- */
+/* TITLE */
 
 .title {
-  font-size: 46px;
+  font-size: 42px;
   color: #00f2fe;
-  text-shadow: 
-    0 0 10px #00f2fe,
-    0 0 30px #00f2fe;
-  letter-spacing: 2px;
+  text-shadow: 0 0 20px #00f2fe;
 }
 
-/* ---------------- BUTTONS ---------------- */
+/* BUTTONS */
 
 button {
-  padding: 14px 22px;
-  margin: 8px;
+  padding: 12px 20px;
+  margin: 6px;
   border: none;
-  border-radius: 14px;
+  border-radius: 12px;
   font-weight: bold;
   background: linear-gradient(135deg, #00c6ff, #00f2fe);
   color: #000;
   cursor: pointer;
-  transition: 0.25s;
-  box-shadow: 0 0 12px rgba(0, 242, 254, 0.5);
+  transition: 0.2s;
 }
 
 button:hover {
-  transform: scale(1.06);
-  box-shadow: 0 0 20px #00f2fe;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #00f2fe;
 }
 
-button:disabled {
-  opacity: 0.5;
+/* USED LIFELINES */
+
+#lifelines button.used {
+  background: linear-gradient(135deg, #ff4d4d, #aa0000);
+  color: #fff;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* ---------------- QUIZ LAYOUT ---------------- */
+/* QUIZ LAYOUT */
 
 #quiz-and-ladder {
   display: flex;
-  gap: 20px;
-  margin-top: 20px;
-  align-items: stretch;
+  gap: 16px;
+  margin-top: 10px;
+  align-items: flex-start;
 }
-
-/* ---------------- QUIZ BOX ---------------- */
 
 #quiz {
   flex: 1;
-  background: rgba(255, 255, 255, 0.06);
-  padding: 24px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
   border-radius: 20px;
-  min-height: 320px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  min-height: 360px;
 }
 
-/* ---------------- QUESTION ---------------- */
+/* QUESTION */
 
 #quiz h2 {
-  min-height: 80px;
+  margin-bottom: 12px;
+  font-size: 20px;
 }
 
-/* ---------------- ANSWER BUTTONS (FIXED SIZE) ---------------- */
+/* ANSWER BUTTONS – FIXED SIZE */
 
 .option-btn {
   width: 100%;
-  max-width: 100%;
-  min-height: 55px;
-  margin: 8px 0;
-  padding: 14px;
-  border-radius: 14px;
+  height: 50px;
+  margin: 6px 0;
+  padding: 10px;
+  border-radius: 12px;
   font-weight: bold;
   background: linear-gradient(135deg, #1c92d2, #f2fcfe);
   color: #000;
-  transition: 0.2s;
-  white-space: normal;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* CORRECT / WRONG */
+
 .correct {
-  background: linear-gradient(135deg, #00ff88, #00ff00) !important;
+  background: #00ff00 !important;
   color: #000;
-  box-shadow: 0 0 20px #00ff00;
 }
 
 .wrong {
-  background: linear-gradient(135deg, #ff4d4d, #ff0000) !important;
+  background: #ff4d4d !important;
   color: #000;
-  box-shadow: 0 0 20px #ff0000;
 }
 
-/* ---------------- MONEY LADDER (STABLE BUTTONS) ---------------- */
+/* MONEY LADDER – SMALLER BUTTONS */
 
 #money-list {
   list-style: none;
   padding: 0;
-  min-width: 200px;
   display: flex;
   flex-direction: column-reverse;
-  gap: 8px;
+  min-width: 140px;
+  gap: 4px;
 }
 
-#money-list li {
-  display: block;
-}
-
-.ladder-btn,
-#money-list li {
-  padding: 10px;
-  border-radius: 12px;
+.ladder-btn {
+  width: 100%;
+  padding: 6px;
+  border-radius: 8px;
+  border: none;
   background: rgba(255,255,255,0.12);
   color: #fff;
   font-weight: bold;
-  box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
-  transition: 0.3s;
+  font-size: 14px;
+  cursor: default;
 }
 
-#money-list li.current {
+.ladder-btn.current {
   background: linear-gradient(135deg, gold, orange);
   color: #000;
-  box-shadow: 
-    0 0 15px gold,
-    0 0 30px orange;
+  box-shadow: 0 0 15px gold;
 }
 
-/* ---------------- TIMER ---------------- */
+/* TIMER */
 
 #timer-container {
   width: 100%;
-  height: 24px;
+  height: 20px;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 20px;
-  margin: 18px 0;
+  margin: 10px 0;
   position: relative;
   overflow: hidden;
-  box-shadow: inset 0 0 10px rgba(255,255,255,0.2);
 }
 
 #timer-bar {
@@ -185,98 +168,57 @@ button:disabled {
 
 #timer-text {
   position: absolute;
-  right: 12px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   font-weight: bold;
-  text-shadow: 0 0 5px #000;
+  font-size: 14px;
 }
 
-/* ---------------- LIFELINES ---------------- */
+/* LIFELINES */
+
+#lifelines {
+  margin-top: 10px;
+}
 
 #lifelines button {
   background: linear-gradient(135deg, #ffdd00, #ffaa00);
-  box-shadow: 0 0 12px rgba(255, 170, 0, 0.7);
 }
 
-#lifelines button:disabled {
-  background: #444;
-  box-shadow: none;
-  color: #999;
-}
+/* CALL + AUDIENCE */
 
-/* ---------------- CALL & AUDIENCE ---------------- */
-
-#callFriendBox, 
+#callFriendBox,
 #audienceVote {
-  margin: 15px 0;
-  font-size: 18px;
-  animation: fadeIn 0.4s ease-in-out;
+  margin: 10px 0;
+  font-size: 16px;
 }
 
-/* Audience bar animation */
-
-#audienceVote div {
-  background: linear-gradient(90deg, #00f2fe, #4facfe);
-  margin: 6px 0;
-  padding: 6px 10px;
-  border-radius: 10px;
-  width: 0%;
-  animation: growBar 1s forwards;
-}
-
-@keyframes growBar {
-  from { width: 0%; }
-  to { width: 100%; }
-}
-
-/* ---------------- FINAL SCREEN ---------------- */
+/* FINAL SCREEN */
 
 .final-screen {
-  padding: 50px;
+  padding: 40px;
   animation: fadeIn 0.6s ease-in-out;
 }
 
 .final-screen h1 {
-  font-size: 48px;
+  font-size: 42px;
   color: gold;
-  text-shadow: 
-    0 0 15px gold,
-    0 0 40px orange;
+  text-shadow: 0 0 20px gold;
 }
 
 .final-screen button {
-  font-size: 18px;
   margin-top: 20px;
+  font-size: 18px;
 }
 
-/* ---------------- SPOTLIGHT EFFECT ---------------- */
-
-.container::before {
-  content: "";
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
-  top: -50%;
-  left: -50%;
-  animation: spotlight 10s infinite linear;
-  pointer-events: none;
-}
-
-@keyframes spotlight {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* ---------------- FADE ANIM ---------------- */
+/* ANIMATIONS */
 
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
 
-/* ---------------- MOBILE ---------------- */
+/* MOBILE */
 
 @media (max-width: 700px) {
   #quiz-and-ladder {
@@ -288,7 +230,7 @@ button:disabled {
     overflow-x: auto;
   }
 
-  #money-list li {
-    min-width: 120px;
+  .ladder-btn {
+    min-width: 100px;
   }
 }
