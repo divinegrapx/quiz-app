@@ -26,21 +26,22 @@ body {
   background: rgba(0,0,0,0.85);
   border-radius: 20px;
   padding: 25px;
-  box-shadow: 0 0 30px #00f2fe;
+  box-shadow: 0 0 40px #00f2fe;
   text-align: center;
 }
 
-.neon-title {
+.title {
   font-size: 48px;
   color: #00f2fe;
-  text-shadow: 0 0 10px #00f2fe, 0 0 30px #00f2fe;
+  text-shadow: 0 0 30px #00f2fe;
 }
 
+/* BUTTONS */
 button {
-  padding: 12px 20px;
+  padding: 14px 24px;
   margin: 6px;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-weight: bold;
   background: linear-gradient(135deg, #00c6ff, #00f2fe);
   color: #000;
@@ -50,24 +51,29 @@ button {
 
 button:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 10px #00f2fe;
+  box-shadow: 0 0 15px #00f2fe;
 }
 
-.start-btn {
-  font-size: 20px;
-  padding: 14px 30px;
+/* SETTINGS */
+.settings-group p {
+  color: #00f2fe;
+  font-size: 18px;
+  margin: 10px 0;
 }
 
-.settings-group {
-  margin: 15px 0;
+.check-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
 .check-group label {
-  display: inline-block;
-  margin: 6px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.1);
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(0,242,254,0.15);
+  border: 1px solid #00f2fe;
+  box-shadow: 0 0 10px rgba(0,242,254,0.4);
   cursor: pointer;
 }
 
@@ -75,8 +81,13 @@ button:hover {
   margin-right: 6px;
 }
 
-/* QUIZ */
+.start-btn {
+  background: linear-gradient(135deg, gold, orange);
+  font-size: 22px;
+  box-shadow: 0 0 25px gold;
+}
 
+/* QUIZ */
 #quiz-and-ladder {
   display: flex;
   gap: 20px;
@@ -90,26 +101,18 @@ button:hover {
   border-radius: 20px;
 }
 
-.question-number {
-  color: #00f2fe;
-  font-size: 16px;
-}
-
 .option-btn {
   width: 90%;
   margin: 8px auto;
-  padding: 12px;
-  border-radius: 12px;
-  font-weight: bold;
+  padding: 14px;
+  border-radius: 14px;
   background: linear-gradient(135deg, #1c92d2, #f2fcfe);
-  color: #000;
 }
 
 .correct { background: #00ff00 !important; }
 .wrong { background: #ff4d4d !important; }
 
 /* MONEY */
-
 #money-list {
   list-style: none;
   padding: 0;
@@ -118,28 +121,20 @@ button:hover {
   min-width: 180px;
 }
 
-#money-list li {
-  padding: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
 #money-list li.current {
   background: gold;
   color: black;
-  border-radius: 8px;
-  box-shadow: 0 0 15px gold;
+  box-shadow: 0 0 20px gold;
 }
 
 /* TIMER */
-
 #timer-container {
   width: 100%;
   height: 22px;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.2);
   border-radius: 20px;
   margin: 15px 0;
   position: relative;
-  overflow: hidden;
 }
 
 #timer-bar {
@@ -157,15 +152,15 @@ button:hover {
   font-weight: bold;
 }
 
-/* LIFELINES */
-
-#lifelines button {
-  background: linear-gradient(135deg, #ffdd00, #ffaa00);
+/* LEADERBOARD */
+#leaderboard-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
 }
 
-/* CALL + AUDIENCE */
-
-#callFriendBox, #audienceVote {
-  margin-top: 15px;
-  font-size: 18px;
+#leaderboard-list img {
+  width: 40px;
+  border-radius: 50%;
 }
