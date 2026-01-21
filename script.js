@@ -1,4 +1,4 @@
-// ---------------- FIREBASE CONFIG ----------------
+// ---------------- FIREBASE ----------------
 const firebaseConfig = {
   apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
   authDomain: "neon-quiz-app.firebaseapp.com",
@@ -7,6 +7,7 @@ const firebaseConfig = {
   messagingSenderId: "891061147021",
   appId: "1:891061147021:web:7b3d80020f642da7b699c4"
 };
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -43,181 +44,194 @@ const wrongSound = document.getElementById("wrong-sound");
 const tickSound = document.getElementById("tick-sound");
 
 // ---------------- GLOBALS ----------------
-let questions=[], current=0, score=0, ladderLevel=0, timer;
-let fiftyUsed=false, friendUsed=false, audienceUsed=false;
+let questions = [], current = 0, score = 0, ladderLevel = 0, timer;
+let fiftyUsed = false, friendUsed = false, audienceUsed = false;
 const timePerQuestion = 30;
 
-// Safe Milestones (Real style)
-function getSafeAmount(level, total){
-  if(total===10 && level>=5) return 500;
-  if(total===20 && level>=10) return 1000;
-  if(total===30 && level>=15) return 1500;
-  return 0;
-}
-
 // ---------------- LOGIN ----------------
-googleLoginBtn.onclick = async ()=>{
+googleLoginBtn.onclick = async () => {
   await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-  document.getElementById("authDiv").style.display="none";
-  document.getElementById("categoryDiv").style.display="block";
+  document.getElementById("authDiv").style.display = "none";
+  document.getElementById("categoryDiv").style.display = "block";
   showProfile(auth.currentUser);
 };
 
-emailRegisterBtn.onclick = ()=> emailDiv.style.display="block";
-emailCancelBtn.onclick = ()=> emailDiv.style.display="none";
+emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
+emailCancelBtn.onclick = () => emailDiv.style.display = "none";
 
-emailLoginBtn.onclick = async ()=>{
-  await auth.signInWithEmailAndPassword(emailInput.value,passwordInput.value);
+emailLoginBtn.onclick = async () => {
+  await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
   location.reload();
 };
 
-emailRegisterSubmitBtn.onclick = async ()=>{
-  await auth.createUserWithEmailAndPassword(emailInput.value,passwordInput.value);
+emailRegisterSubmitBtn.onclick = async () => {
+  await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
   location.reload();
 };
 
-logoutBtn.onclick = async ()=>{ await auth.signOut(); location.reload(); };
+logoutBtn.onclick = async () => {
+  await auth.signOut();
+  location.reload();
+};
 
 // ---------------- START QUIZ ----------------
 startBtn.onclick = startQuiz;
 
-async function startQuiz(){
-  const count = questionCount.value;
-  const cat = categorySelect.value;
-  const diff = difficultySelect.value;
+async function startQuiz() {
+  const res = await fetch(
+    `https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`
+  );
 
-  const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${count}&categories=${cat}&difficulty=${diff}`);
   questions = await res.json();
 
-  current=0; score=0; ladderLevel=0;
-  fiftyUsed=friendUsed=audienceUsed=false;
+  current = 0;
+  score = 0;
+  ladderLevel = 0;
+  fiftyUsed = friendUsed = audienceUsed = false;
 
-  buildMoneyLadder(count);
-  document.getElementById("quiz-container").style.display="block";
+  fiftyBtn.classList.remove("used");
+  callFriendBtn.classList.remove("used");
+  audienceBtn.classList.remove("used");
+
+  buildMoneyLadder(questionCount.value);
+  document.getElementById("quiz-container").style.display = "block";
   showQuestion();
 }
 
 // ---------------- QUESTIONS ----------------
-function showQuestion(){
+function showQuestion() {
   clearInterval(timer);
   let timeLeft = timePerQuestion;
   updateTimer(timeLeft);
 
   const q = questions[current];
-  quizDiv.innerHTML = `<h2>Q${current+1}: ${q.question}</h2>`;
+  quizDiv.innerHTML = `<h2>Q${current + 1}: ${q.question}</h2>`;
 
-  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(()=>Math.random()-0.5);
+  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
 
-  answers.forEach(a=>{
-    const btn=document.createElement("button");
-    btn.className="option-btn";
-    btn.textContent=a;
-    btn.onclick=()=>checkAnswer(a);
+  answers.forEach(a => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.textContent = a;
+    btn.onclick = () => checkAnswer(a);
     quizDiv.appendChild(btn);
   });
 
-  timer = setInterval(()=>{
+  timer = setInterval(() => {
     timeLeft--;
     updateTimer(timeLeft);
-    if(timeLeft<=5 && timeLeft>0 && soundToggle.value==="on") tickSound.play();
-    if(timeLeft<=0){ clearInterval(timer); nextQuestion(false); }
-  },1000);
+    if (timeLeft <= 5 && soundToggle.value === "on") tickSound.play();
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      nextQuestion();
+    }
+  }, 1000);
 }
 
-function updateTimer(t){
-  timerText.textContent=t+"s";
-  timerBar.style.width=(t/timePerQuestion*100)+"%";
-  if(t>10) timerBar.style.background="#00ff00";
-  else if(t>5) timerBar.style.background="#ffcc00";
-  else timerBar.style.background="#ff4d4d";
+function updateTimer(t) {
+  timerText.textContent = t + "s";
+  timerBar.style.width = (t / timePerQuestion * 100) + "%";
 }
 
-function checkAnswer(ans){
+function checkAnswer(ans) {
   clearInterval(timer);
   const correct = questions[current].correctAnswer;
 
-  document.querySelectorAll(".option-btn").forEach(b=>{
-    b.disabled=true;
-    if(b.textContent===correct) b.classList.add("correct");
-    if(b.textContent===ans && ans!==correct) b.classList.add("wrong");
+  document.querySelectorAll(".option-btn").forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add("correct");
+    if (b.textContent === ans && ans !== correct) b.classList.add("wrong");
   });
 
-  if(ans===correct){
-    score++; ladderLevel++;
+  if (ans === correct) {
+    score++;
+    ladderLevel++;
     updateMoneyLadder();
-    if(soundToggle.value==="on") correctSound.play();
+    if (soundToggle.value === "on") correctSound.play();
   } else {
-    if(soundToggle.value==="on") wrongSound.play();
+    if (soundToggle.value === "on") wrongSound.play();
   }
 
-  setTimeout(nextQuestion,1500);
+  setTimeout(nextQuestion, 1500);
 }
 
-function nextQuestion(){
+function nextQuestion() {
   current++;
-  if(current>=questions.length){
-    const safe = getSafeAmount(ladderLevel,questions.length);
-    quizDiv.innerHTML=`<h2>Finished!</h2><p>Score: ${score}</p><p>Safe Money: $${safe}</p>`;
+  if (current >= questions.length) {
+    quizDiv.innerHTML = `<h2 class="result-win">You Finished!</h2><p>Score: ${score}</p>`;
     return;
   }
   showQuestion();
 }
 
 // ---------------- MONEY LADDER ----------------
-function buildMoneyLadder(count){
-  moneyList.innerHTML="";
-  for(let i=count;i>=1;i--){
-    const li=document.createElement("li");
-    li.textContent="$"+(i*100);
+function buildMoneyLadder(count) {
+  moneyList.innerHTML = "";
+  for (let i = count; i >= 1; i--) {
+    const li = document.createElement("li");
+    li.textContent = "$" + (i * 100);
     moneyList.appendChild(li);
   }
 }
 
-function updateMoneyLadder(){
-  const items = moneyList.children;
-  for(let li of items) li.classList.remove("current");
-  const idx = items.length - ladderLevel;
-  if(items[idx]) items[idx].classList.add("current");
+function updateMoneyLadder() {
+  [...moneyList.children].forEach(li => li.classList.remove("current"));
+  const idx = moneyList.children.length - ladderLevel;
+  if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
 }
 
 // ---------------- LIFELINES ----------------
-fiftyBtn.onclick = ()=>{
-  if(fiftyUsed) return;
-  fiftyUsed=true;
+fiftyBtn.onclick = () => {
+  if (fiftyUsed) return;
+  fiftyUsed = true;
+  fiftyBtn.classList.add("used");
+
   const correct = questions[current].correctAnswer;
-  let removed=0;
-  document.querySelectorAll(".option-btn").forEach(b=>{
-    if(b.textContent!==correct && removed<2){
-      b.style.opacity=0.3;
+  let removed = 0;
+
+  document.querySelectorAll(".option-btn").forEach(b => {
+    if (b.textContent !== correct && removed < 2) {
+      b.style.opacity = 0.3;
       removed++;
     }
   });
 };
 
-callFriendBtn.onclick = ()=>{
-  if(friendUsed) return;
-  friendUsed=true;
-  callFriendBox.innerHTML=`<div class="phone-anim">📞</div><p>Your friend thinks the answer is:</p><b>${questions[current].correctAnswer}</b>`;
+callFriendBtn.onclick = () => {
+  if (friendUsed) return;
+  friendUsed = true;
+  callFriendBtn.classList.add("used");
+
+  callFriendBox.innerHTML = `
+    <div class="phone-anim">📞</div>
+    <p>Your friend thinks the answer is:</p>
+    <b>${questions[current].correctAnswer}</b>
+  `;
 };
 
-audienceBtn.onclick = ()=>{
-  if(audienceUsed) return;
-  audienceUsed=true;
+audienceBtn.onclick = () => {
+  if (audienceUsed) return;
+  audienceUsed = true;
+  audienceBtn.classList.add("used");
 
   const correct = questions[current].correctAnswer;
-  audienceVote.innerHTML="";
+  audienceVote.innerHTML = "";
 
-  document.querySelectorAll(".option-btn").forEach(b=>{
-    const percent = b.textContent===correct ? 60+Math.random()*20 : Math.random()*30;
-    const div=document.createElement("div");
-    div.className="vote-bar";
-    div.innerHTML=`<span>${b.textContent}</span><div class="bar" style="width:${percent}%"></div>`;
+  document.querySelectorAll(".option-btn").forEach(b => {
+    const percent = b.textContent === correct ? 60 + Math.random() * 20 : Math.random() * 30;
+
+    const div = document.createElement("div");
+    div.className = "vote-bar";
+    div.innerHTML = `
+      <span>${b.textContent}</span>
+      <div class="bar" style="width:${percent}%"></div>
+    `;
     audienceVote.appendChild(div);
   });
 };
 
 // ---------------- PROFILE ----------------
-function showProfile(user){
-  document.getElementById("profileDiv").innerHTML=
+function showProfile(user) {
+  document.getElementById("profileDiv").innerHTML =
     `<img src="${user.photoURL}"><h3>${user.displayName}</h3>`;
 }
