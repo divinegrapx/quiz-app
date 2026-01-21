@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;500;700&display=swap');
+
 * {
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
@@ -20,26 +22,33 @@ body {
   100% { background-position: 0%; }
 }
 
+/* MAIN CONTAINER */
 .container {
   max-width: 900px;
   width: 100%;
   background: rgba(0, 0, 0, 0.85);
   border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 0 35px #00f2fe;
+  padding: 25px;
+  box-shadow: 0 0 40px #00f2fe;
   text-align: center;
+  animation: fadeIn 0.8s ease-in-out;
 }
 
-/* TITLE */
-
+/* QUIZ TITLE */
 .title {
-  font-size: 42px;
+  font-family: "Orbitron", sans-serif;
+  font-size: 44px;
   color: #00f2fe;
   text-shadow: 0 0 20px #00f2fe;
+  animation: glowPulse 2s infinite alternate;
+}
+
+@keyframes glowPulse {
+  from { text-shadow: 0 0 10px #00f2fe; }
+  to { text-shadow: 0 0 25px #00f2fe; }
 }
 
 /* BUTTONS */
-
 button {
   padding: 12px 20px;
   margin: 6px;
@@ -53,85 +62,179 @@ button {
 }
 
 button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px #00f2fe;
+  transform: scale(1.08);
+  box-shadow: 0 0 12px #00f2fe;
 }
 
-/* USED LIFELINES */
-
-#lifelines button.used {
-  background: linear-gradient(135deg, #ff4d4d, #aa0000);
-  color: #fff;
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* QUIZ LAYOUT */
-
+/* QUIZ + LADDER LAYOUT */
 #quiz-and-ladder {
   display: flex;
-  gap: 16px;
+  gap: 15px;
   margin-top: 10px;
-  align-items: flex-start;
 }
 
+/* QUIZ AREA */
 #quiz {
   flex: 1;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 20px;
   border-radius: 20px;
-  min-height: 340px;
 }
 
 /* QUESTION */
-
 #quiz h2 {
-  margin-bottom: 12px;
-  font-size: 20px;
+  margin-bottom: 10px;
+  min-height: 60px;
 }
 
 /* ANSWER BUTTONS */
-
 .option-btn {
-  width: 100%;
-  height: 50px;
-  margin: 6px 0;
+  width: 90%;
+  height: 52px;
+  margin: 6px auto;
   padding: 10px;
   border-radius: 12px;
   font-weight: bold;
   background: linear-gradient(135deg, #1c92d2, #f2fcfe);
   color: #000;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* CORRECT / WRONG */
-
-.correct {
-  background: #00ff00 !important;
-  color: #000;
-}
-
-.wrong {
-  background: #ff4d4d !important;
-  color: #000;
-}
+.correct { background: #00ff00 !important; }
+.wrong { background: #ff4d4d !important; }
 
 /* MONEY LADDER */
-
 #money-list {
   list-style: none;
   padding: 0;
   display: flex;
   flex-direction: column-reverse;
-  min-width: 140px;
-  gap: 4px;
+  min-width: 150px;
+  gap: 5px;
 }
 
 .ladder-btn {
   width: 100%;
   padding: 6px;
   border-radius: 8px;
-  border: none;
-  background: rgba(2
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.ladder-btn.current {
+  background: linear-gradient(135deg, gold, orange);
+  color: #000;
+  box-shadow: 0 0 15px gold;
+}
+
+/* TIMER */
+#timer-container {
+  width: 100%;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+#timer-bar {
+  height: 100%;
+  width: 100%;
+  background: #00ff00;
+  transition: width 1s linear, background 0.3s;
+}
+
+#timer-text {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+}
+
+/* LIFELINES */
+#lifelines {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+#lifelines button {
+  background: linear-gradient(135deg, #ffdd00, #ffaa00);
+}
+
+#lifelines button.used {
+  background: #444 !important;
+  color: #999;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+/* CALL + AUDIENCE */
+#callFriendBox, #audienceVote {
+  margin: 5px 0;
+  font-size: 16px;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+/* LEADERBOARD */
+#leaderboard {
+  margin-top: 20px;
+  background: rgba(255,255,255,0.05);
+  padding: 15px;
+  border-radius: 15px;
+}
+
+#leaderboard h3 {
+  color: gold;
+}
+
+#leaderboard-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+}
+
+#leaderboard-list img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+/* FINAL SCREEN */
+.final-screen {
+  padding: 40px;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.final-screen h1 {
+  font-size: 42px;
+  color: gold;
+  text-shadow: 0 0 20px gold;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* MOBILE */
+@media (max-width: 700px) {
+  #quiz-and-ladder {
+    flex-direction: column;
+  }
+
+  #money-list {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .ladder-btn {
+    min-width: 90px;
+  }
+}
