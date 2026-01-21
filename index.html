@@ -7,25 +7,20 @@
 
 <link rel="stylesheet" href="style.css">
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
-
 <body>
 
 <div class="container">
 
-  <h1 class="logo">NEON <span>MILLIONAIRE</span></h1>
-
-  <!-- PROFILE -->
-  <div id="profileDiv"></div>
-
   <!-- AUTH -->
   <div id="authDiv">
+    <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
-    <button id="emailRegisterBtn">Login / Register</button>
-    <button id="guestBtn">▶ Play as Guest</button>
+    <button id="emailRegisterBtn">Login / Register with Email</button>
   </div>
 
   <!-- EMAIL LOGIN -->
@@ -41,27 +36,36 @@
   <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
 
-    <div class="options">
-      <p>Difficulty:</p>
-      <label><input type="radio" name="difficulty" value="easy"> Easy</label>
-      <label><input type="radio" name="difficulty" value="medium" checked> Medium</label>
-      <label><input type="radio" name="difficulty" value="hard"> Hard</label>
-    </div>
+    <label>Category</label>
+    <select id="categorySelect">
+      <option value="general_knowledge">General</option>
+      <option value="science">Science</option>
+      <option value="history">History</option>
+      <option value="sports">Sports</option>
+      <option value="film_and_tv">Movies & TV</option>
+    </select>
 
-    <div class="options">
-      <p>Questions:</p>
-      <label><input type="radio" name="count" value="10" checked> 10</label>
-      <label><input type="radio" name="count" value="20"> 20</label>
-      <label><input type="radio" name="count" value="30"> 30</label>
-    </div>
+    <label>Difficulty</label>
+    <select id="difficultySelect">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+    </select>
 
-    <div class="options">
-      <p>Sound:</p>
-      <label><input type="radio" name="sound" value="on" checked> ON</label>
-      <label><input type="radio" name="sound" value="off"> OFF</label>
-    </div>
+    <label>Questions</label>
+    <select id="questionCount">
+      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="30">30</option>
+    </select>
 
-    <button id="startBtn" class="neon-btn">START GAME</button>
+    <label>Sound</label>
+    <select id="soundToggle">
+      <option value="on">On</option>
+      <option value="off">Off</option>
+    </select>
+
+    <button id="startBtn">Start Quiz</button>
   </div>
 
   <!-- QUIZ -->
@@ -88,15 +92,9 @@
   </div>
 
   <!-- SOUNDS -->
-  <audio id="introSound" src="intro.mp3"></audio>
-  <audio id="thinkingSound" src="thinking.mp3" loop></audio>
-  <audio id="correctSound" src="correct.wav"></audio>
-  <audio id="wrongSound" src="wrong.wav"></audio>
-  <audio id="callSound" src="call.mp3"></audio>
-  <audio id="audienceSound" src="audience.mp3"></audio>
-  <audio id="winSound" src="win.mp3"></audio>
-  <audio id="loseSound" src="lose.mp3"></audio>
-  <audio id="tickSound" src="tick.mp3"></audio>
+  <audio id="correct-sound" src="correct.wav"></audio>
+  <audio id="wrong-sound" src="wrong.wav"></audio>
+  <audio id="tick-sound" src="tick.mp3"></audio>
 
 </div>
 
