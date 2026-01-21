@@ -9,59 +9,78 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
 <div class="container">
+
+  <div id="profileDiv"></div>
 
   <!-- AUTH -->
   <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
     <button id="guestLoginBtn">Play as Guest</button>
+    <button id="emailRegisterBtn">Login / Register with Email</button>
+  </div>
+
+  <!-- EMAIL -->
+  <div id="emailDiv" style="display:none;">
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passwordInput" placeholder="Password">
+    <button id="emailLoginBtn">Login</button>
+    <button id="emailRegisterSubmitBtn">Register</button>
+    <button id="emailCancelBtn">Cancel</button>
   </div>
 
   <!-- SETTINGS -->
   <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
 
-    <div class="options">
-      <label>Category</label>
-      <select id="categorySelect">
-        <option value="general_knowledge">General</option>
-        <option value="science">Science</option>
-        <option value="history">History</option>
-        <option value="sports">Sports</option>
-        <option value="music">Music</option>
-      </select>
-
-      <label>Difficulty</label>
-      <select id="difficultySelect">
-        <option value="easy">Easy</option>
-        <option value="medium" selected>Medium</option>
-        <option value="hard">Hard</option>
-      </select>
-
-      <label>Questions</label>
-      <select id="questionCount">
-        <option value="10">10</option>
-        <option value="15">15</option>
-        <option value="20">20</option>
-      </select>
-
-      <label>Sound</label>
-      <select id="soundToggle">
-        <option value="on">On</option>
-        <option value="off">Off</option>
-      </select>
+    <div class="settings-group">
+      <p>Category</p>
+      <div class="check-group">
+        <label><input type="radio" name="category" value="general_knowledge" checked> General</label>
+        <label><input type="radio" name="category" value="science"> Science</label>
+        <label><input type="radio" name="category" value="history"> History</label>
+        <label><input type="radio" name="category" value="sports"> Sports</label>
+        <label><input type="radio" name="category" value="film_and_tv"> Movies & TV</label>
+        <label><input type="radio" name="category" value="music"> Music</label>
+      </div>
     </div>
 
-    <button id="startBtn">Start Quiz</button>
+    <div class="settings-group">
+      <p>Difficulty</p>
+      <div class="check-group">
+        <label><input type="radio" name="difficulty" value="easy"> Easy</label>
+        <label><input type="radio" name="difficulty" value="medium" checked> Medium</label>
+        <label><input type="radio" name="difficulty" value="hard"> Hard</label>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <p>Questions</p>
+      <div class="check-group">
+        <label><input type="radio" name="count" value="10" checked> 10</label>
+        <label><input type="radio" name="count" value="20"> 20</label>
+        <label><input type="radio" name="count" value="30"> 30</label>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <p>Sound</p>
+      <div class="check-group">
+        <label><input type="radio" name="sound" value="on" checked> ON</label>
+        <label><input type="radio" name="sound" value="off"> OFF</label>
+      </div>
+    </div>
+
+    <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
   <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
-
     <div id="timer-container">
       <div id="timer-bar"></div>
       <span id="timer-text">30s</span>
@@ -69,7 +88,7 @@
 
     <div id="quiz-and-ladder">
       <div id="quiz"></div>
-      <div id="money-list"></div>
+      <ul id="money-list"></ul>
     </div>
 
     <div id="lifelines">
@@ -82,14 +101,22 @@
     <div id="audienceVote"></div>
   </div>
 
-</div>
+  <!-- LEADERBOARD -->
+  <h2>🏆 Leaderboard</h2>
+  <ul id="leaderboard-list"></ul>
 
-<!-- SOUNDS -->
-<audio id="correct-sound" src="correct.wav"></audio>
-<audio id="wrong-sound" src="wrong.wav"></audio>
-<audio id="tick-sound" src="tick.mp3"></audio>
-<audio id="win-sound" src="win.mp3"></audio>
-<audio id="lose-sound" src="lose.mp3"></audio>
+  <!-- SOUNDS -->
+  <audio id="intro-sound" src="intro.mp3"></audio>
+  <audio id="thinking-sound" src="thinking.mp3"></audio>
+  <audio id="call-sound" src="call.mp3"></audio>
+  <audio id="audience-sound" src="audience.mp3"></audio>
+  <audio id="win-sound" src="win.mp3"></audio>
+  <audio id="lose-sound" src="lose.mp3"></audio>
+  <audio id="correct-sound" src="correct.wav"></audio>
+  <audio id="wrong-sound" src="wrong.wav"></audio>
+  <audio id="tick-sound" src="tick.mp3"></audio>
+
+</div>
 
 <script src="script.js"></script>
 </body>
