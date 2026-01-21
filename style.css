@@ -23,7 +23,7 @@ body {
 .container {
   max-width: 900px;
   width: 100%;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.8);
   border-radius: 20px;
   padding: 25px;
   box-shadow: 0 0 30px #00f2fe;
@@ -31,16 +31,18 @@ body {
 }
 
 .title {
-  font-size: 48px;
+  font-size: 42px;
   color: #00f2fe;
-  text-shadow: 0 0 25px #00f2fe;
+  text-shadow: 0 0 20px #00f2fe;
 }
 
+/* ---------------- BUTTONS ---------------- */
+
 button {
-  padding: 14px 24px;
-  margin: 8px;
+  padding: 12px 20px;
+  margin: 6px;
   border: none;
-  border-radius: 14px;
+  border-radius: 12px;
   font-weight: bold;
   background: linear-gradient(135deg, #00c6ff, #00f2fe);
   color: #000;
@@ -50,17 +52,10 @@ button {
 
 button:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 12px #00f2fe;
+  box-shadow: 0 0 10px #00f2fe;
 }
 
-select {
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  margin: 8px;
-}
-
-/* QUIZ */
+/* ---------------- QUIZ LAYOUT ---------------- */
 
 #quiz-and-ladder {
   display: flex;
@@ -75,6 +70,8 @@ select {
   border-radius: 20px;
 }
 
+/* ---------------- OPTIONS ---------------- */
+
 .option-btn {
   width: 90%;
   margin: 8px auto;
@@ -85,30 +82,45 @@ select {
   color: #000;
 }
 
-.correct { background: #00ff00 !important; }
-.wrong { background: #ff4d4d !important; }
+.correct {
+  background: #00ff00 !important;
+  color: #000;
+}
 
-/* MONEY LADDER BUTTONS */
+.wrong {
+  background: #ff4d4d !important;
+  color: #000;
+}
+
+/* ---------------- MONEY LADDER (BUTTON STYLE) ---------------- */
 
 #money-list {
+  list-style: none;
+  padding: 0;
   display: flex;
   flex-direction: column-reverse;
+  min-width: 180px;
   gap: 6px;
 }
 
 .ladder-btn {
-  background: linear-gradient(135deg, #ffd700, #ffb700);
-  color: #000;
+  width: 100%;
+  padding: 8px;
   border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
   font-weight: bold;
+  cursor: default;
 }
 
 .ladder-btn.current {
-  box-shadow: 0 0 20px gold;
-  transform: scale(1.05);
+  background: linear-gradient(135deg, gold, orange);
+  color: #000;
+  box-shadow: 0 0 15px gold;
 }
 
-/* TIMER */
+/* ---------------- TIMER ---------------- */
 
 #timer-container {
   width: 100%;
@@ -135,32 +147,61 @@ select {
   font-weight: bold;
 }
 
-/* PHONE UI */
+/* ---------------- LIFELINES ---------------- */
 
-.phone-ui {
-  width: 200px;
-  height: 350px;
-  background: #111;
-  border-radius: 30px;
-  border: 4px solid #00f2fe;
-  margin: 10px auto;
-  padding: 15px;
-  color: #0f0;
+#lifelines button {
+  background: linear-gradient(135deg, #ffdd00, #ffaa00);
 }
 
-/* AUDIENCE CHART */
+/* ---------------- CALL + AUDIENCE ---------------- */
 
-.vote-bar {
-  height: 18px;
-  background: #00f2fe;
-  border-radius: 10px;
-  margin: 6px 0;
-  transition: width 1s;
+#callFriendBox, #audienceVote {
+  margin: 15px 0;
+  font-size: 18px;
 }
 
-/* FINAL SCREEN */
+/* ---------------- FINAL CONGRATULATIONS SCREEN ---------------- */
+
+.final-screen {
+  padding: 40px;
+  animation: fadeIn 0.6s ease-in-out;
+}
 
 .final-screen h1 {
+  font-size: 42px;
   color: gold;
   text-shadow: 0 0 20px gold;
+}
+
+.final-screen h2 {
+  margin-top: 10px;
+}
+
+.final-screen button {
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+/* ---------------- ANIMATIONS ---------------- */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ---------------- MOBILE ---------------- */
+
+@media (max-width: 700px) {
+  #quiz-and-ladder {
+    flex-direction: column;
+  }
+
+  #money-list {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .ladder-btn {
+    min-width: 120px;
+  }
 }
