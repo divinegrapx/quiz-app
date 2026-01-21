@@ -3,13 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Quiz Challenge</title>
+<title>Neon Millionaire Quiz</title>
+
 <link rel="stylesheet" href="style.css">
 
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
+
 <body>
 
 <div class="container">
@@ -17,9 +19,8 @@
   <div id="profileDiv"></div>
 
   <div id="authDiv">
-    <h1>🎯 Neon Quiz Challenge</h1>
+    <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
-    <button id="facebookLoginBtn">Login with Facebook</button>
     <button id="emailRegisterBtn">Login / Register with Email</button>
   </div>
 
@@ -38,13 +39,11 @@
   <div id="categoryDiv" style="display:none;">
     <label>Category:</label>
     <select id="categorySelect">
+      <option value="general_knowledge">General</option>
       <option value="science">Science</option>
       <option value="history">History</option>
-      <option value="geography">Geography</option>
-      <option value="music">Music</option>
-      <option value="film_and_tv">Film & TV</option>
       <option value="sports">Sports</option>
-      <option value="general_knowledge">General</option>
+      <option value="film_and_tv">Film & TV</option>
     </select>
 
     <label>Questions:</label>
@@ -54,20 +53,18 @@
       <option value="30">30</option>
     </select>
 
-    <div id="settingsDiv">
-      <label>Difficulty:</label>
-      <select id="difficultySelect">
-        <option value="easy">Easy</option>
-        <option value="medium" selected>Medium</option>
-        <option value="hard">Hard</option>
-      </select>
+    <label>Difficulty:</label>
+    <select id="difficultySelect">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+    </select>
 
-      <label>Sound:</label>
-      <select id="soundToggle">
-        <option value="on">On</option>
-        <option value="off">Off</option>
-      </select>
-    </div>
+    <label>Sound:</label>
+    <select id="soundToggle">
+      <option value="on">On</option>
+      <option value="off">Off</option>
+    </select>
 
     <button id="startBtn">Start Quiz</button>
   </div>
