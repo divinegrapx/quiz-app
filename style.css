@@ -164,3 +164,41 @@ button:hover {
   width: 40px;
   border-radius: 50%;
 }
+.win-screen {
+  text-align: center;
+  padding: 40px;
+  animation: glow 2s infinite alternate;
+}
+
+.win-screen h1 {
+  font-size: 48px;
+  color: #00f2fe;
+  text-shadow: 0 0 25px #00f2fe;
+}
+
+.win-screen .gold {
+  color: gold;
+  font-size: 60px;
+  text-shadow: 0 0 30px gold;
+}
+
+.end-buttons {
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.end-buttons button {
+  font-size: 18px;
+  padding: 14px 26px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #00f2fe, #4facfe);
+  color: black;
+  font-weight: bold;
+}
+
+@keyframes glow {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
