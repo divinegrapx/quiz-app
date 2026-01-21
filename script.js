@@ -1,32 +1,4 @@
-// ---------------- FIREBASE ----------------
-const firebaseConfig = {
-  apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
-  authDomain: "neon-quiz-app.firebaseapp.com",
-  projectId: "neon-quiz-app",
-  storageBucket: "neon-quiz-app.appspot.com",
-  messagingSenderId: "891061147021",
-  appId: "1:891061147021:web:7b3d80020f642da7b699c4"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// ---------------- DOM ----------------
-const googleLoginBtn = document.getElementById("googleLoginBtn");
-const emailRegisterBtn = document.getElementById("emailRegisterBtn");
-const emailDiv = document.getElementById("emailDiv");
-const emailLoginBtn = document.getElementById("emailLoginBtn");
-const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
-const emailCancelBtn = document.getElementById("emailCancelBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-
 const startBtn = document.getElementById("startBtn");
-const categorySelect = document.getElementById("categorySelect");
-const questionCount = document.getElementById("questionCount");
-const difficultySelect = document.getElementById("difficultySelect");
-const soundToggle = document.getElementById("soundToggle");
-
 const quizDiv = document.getElementById("quiz");
 const moneyList = document.getElementById("money-list");
 const timerBar = document.getElementById("timer-bar");
@@ -39,73 +11,52 @@ const audienceBtn = document.getElementById("audienceBtn");
 const callFriendBox = document.getElementById("callFriendBox");
 const audienceVote = document.getElementById("audienceVote");
 
+const introSound = document.getElementById("intro-sound");
+const thinkingSound = document.getElementById("thinking-sound");
 const correctSound = document.getElementById("correct-sound");
 const wrongSound = document.getElementById("wrong-sound");
-const tickSound = document.getElementById("tick-sound");
+const callSound = document.getElementById("call-sound");
+const audienceSound = document.getElementById("audience-sound");
+const winSound = document.getElementById("win-sound");
+const loseSound = document.getElementById("lose-sound");
 
-// ---------------- GLOBALS ----------------
-let questions = [], current = 0, score = 0, ladderLevel = 0, timer;
+let questions = [], current = 0, timer;
 let fiftyUsed = false, friendUsed = false, audienceUsed = false;
 const timePerQuestion = 30;
 
-// ---------------- LOGIN ----------------
-googleLoginBtn.onclick = async () => {
-  await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-  document.getElementById("authDiv").style.display = "none";
-  document.getElementById("categoryDiv").style.display = "block";
-  showProfile(auth.currentUser);
-};
-
-emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
-emailCancelBtn.onclick = () => emailDiv.style.display = "none";
-
-emailLoginBtn.onclick = async () => {
-  await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
-  location.reload();
-};
-
-emailRegisterSubmitBtn.onclick = async () => {
-  await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
-  location.reload();
-};
-
-logoutBtn.onclick = async () => {
-  await auth.signOut();
-  location.reload();
-};
-
-// ---------------- START QUIZ ----------------
 startBtn.onclick = startQuiz;
 
 async function startQuiz() {
-  const res = await fetch(
-    `https://the-trivia-api.com/api/questions?limit=${questionCount.value}&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`
-  );
+  const difficulty = document.querySelector("input[name='difficulty']:checked").value;
+  const count = document.querySelector("input[name='count']:checked").value;
 
+  introSound.play();
+
+  const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${count}&difficulty=${difficulty}`);
   questions = await res.json();
 
   current = 0;
-  score = 0;
-  ladderLevel = 0;
   fiftyUsed = friendUsed = audienceUsed = false;
 
-  fiftyBtn.classList.remove("used");
-  callFriendBtn.classList.remove("used");
-  audienceBtn.classList.remove("used");
-
-  buildMoneyLadder(questionCount.value);
+  document.getElementById("settingsDiv").style.display = "none";
   document.getElementById("quiz-container").style.display = "block";
+
+  buildMoneyLadder(count);
   showQuestion();
 }
 
-// ---------------- QUESTIONS ----------------
 function showQuestion() {
   clearInterval(timer);
+  callFriendBox.innerHTML = "";
+  audienceVote.innerHTML = "";
+
   let timeLeft = timePerQuestion;
   updateTimer(timeLeft);
+  thinkingSound.currentTime = 0;
+  thinkingSound.play();
 
   const q = questions[current];
-  quizDiv.innerHTML = `<h2>Q${current + 1}: ${q.question}</h2>`;
+  quizDiv.innerHTML = `<h2>${q.question}</h2>`;
 
   const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
 
@@ -120,10 +71,9 @@ function showQuestion() {
   timer = setInterval(() => {
     timeLeft--;
     updateTimer(timeLeft);
-    if (timeLeft <= 5 && soundToggle.value === "on") tickSound.play();
     if (timeLeft <= 0) {
       clearInterval(timer);
-      nextQuestion();
+      loseGame();
     }
   }, 1000);
 }
@@ -131,10 +81,16 @@ function showQuestion() {
 function updateTimer(t) {
   timerText.textContent = t + "s";
   timerBar.style.width = (t / timePerQuestion * 100) + "%";
+
+  if (t > 10) timerBar.style.background = "#00ff00";
+  else if (t > 5) timerBar.style.background = "#ffcc00";
+  else timerBar.style.background = "#ff0000";
 }
 
 function checkAnswer(ans) {
   clearInterval(timer);
+  thinkingSound.pause();
+
   const correct = questions[current].correctAnswer;
 
   document.querySelectorAll(".option-btn").forEach(b => {
@@ -144,27 +100,35 @@ function checkAnswer(ans) {
   });
 
   if (ans === correct) {
-    score++;
-    ladderLevel++;
+    correctSound.play();
+    current++;
     updateMoneyLadder();
-    if (soundToggle.value === "on") correctSound.play();
+    setTimeout(nextQuestion, 1500);
   } else {
-    if (soundToggle.value === "on") wrongSound.play();
+    wrongSound.play();
+    loseGame();
   }
-
-  setTimeout(nextQuestion, 1500);
 }
 
 function nextQuestion() {
-  current++;
   if (current >= questions.length) {
-    quizDiv.innerHTML = `<h2 class="result-win">You Finished!</h2><p>Score: ${score}</p>`;
-    return;
+    winGame();
+  } else {
+    showQuestion();
   }
-  showQuestion();
 }
 
-// ---------------- MONEY LADDER ----------------
+function loseGame() {
+  loseSound.play();
+  quizDiv.innerHTML = "<h2>You Lost!</h2>";
+}
+
+function winGame() {
+  winSound.play();
+  quizDiv.innerHTML = "<h2>YOU ARE A MILLIONAIRE!</h2>";
+  launchConfetti();
+}
+
 function buildMoneyLadder(count) {
   moneyList.innerHTML = "";
   for (let i = count; i >= 1; i--) {
@@ -175,20 +139,18 @@ function buildMoneyLadder(count) {
 }
 
 function updateMoneyLadder() {
-  [...moneyList.children].forEach(li => li.classList.remove("current"));
-  const idx = moneyList.children.length - ladderLevel;
-  if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
+  const items = moneyList.children;
+  for (let li of items) li.classList.remove("current");
+  const idx = items.length - current;
+  if (items[idx]) items[idx].classList.add("current");
 }
 
-// ---------------- LIFELINES ----------------
+/* LIFELINES */
 fiftyBtn.onclick = () => {
   if (fiftyUsed) return;
   fiftyUsed = true;
-  fiftyBtn.classList.add("used");
-
   const correct = questions[current].correctAnswer;
   let removed = 0;
-
   document.querySelectorAll(".option-btn").forEach(b => {
     if (b.textContent !== correct && removed < 2) {
       b.style.opacity = 0.3;
@@ -200,38 +162,41 @@ fiftyBtn.onclick = () => {
 callFriendBtn.onclick = () => {
   if (friendUsed) return;
   friendUsed = true;
-  callFriendBtn.classList.add("used");
-
+  callSound.play();
   callFriendBox.innerHTML = `
-    <div class="phone-anim">📞</div>
-    <p>Your friend thinks the answer is:</p>
-    <b>${questions[current].correctAnswer}</b>
+    <div class="phone-ui">
+      <p>📞 Calling...</p>
+      <h3>Friend says:</h3>
+      <b>${questions[current].correctAnswer}</b>
+    </div>
   `;
 };
 
 audienceBtn.onclick = () => {
   if (audienceUsed) return;
   audienceUsed = true;
-  audienceBtn.classList.add("used");
+  audienceSound.play();
+  audienceVote.innerHTML = "";
 
   const correct = questions[current].correctAnswer;
-  audienceVote.innerHTML = "";
 
   document.querySelectorAll(".option-btn").forEach(b => {
     const percent = b.textContent === correct ? 60 + Math.random() * 20 : Math.random() * 30;
-
     const div = document.createElement("div");
     div.className = "vote-bar";
-    div.innerHTML = `
-      <span>${b.textContent}</span>
-      <div class="bar" style="width:${percent}%"></div>
-    `;
+    div.innerHTML = `<span>${b.textContent}</span><div class="bar" style="width:${percent}%"></div>`;
     audienceVote.appendChild(div);
   });
 };
 
-// ---------------- PROFILE ----------------
-function showProfile(user) {
-  document.getElementById("profileDiv").innerHTML =
-    `<img src="${user.photoURL}"><h3>${user.displayName}</h3>`;
+/* CONFETTI */
+function launchConfetti() {
+  for (let i = 0; i < 100; i++) {
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.animationDuration = 2 + Math.random() * 2 + "s";
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
 }
