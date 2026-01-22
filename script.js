@@ -17,6 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ================= ELEMENTS ================= */
 
+  const logoutBtn = document.getElementById("logoutBtn");
+
   const googleLoginBtn = document.getElementById("googleLoginBtn");
   const guestLoginBtn = document.getElementById("guestLoginBtn");
   const emailRegisterBtn = document.getElementById("emailRegisterBtn");
@@ -25,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
   const emailCancelBtn = document.getElementById("emailCancelBtn");
   const startBtn = document.getElementById("startBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
 
   const quizDiv = document.getElementById("quiz");
   const moneyList = document.getElementById("money-list");
@@ -45,15 +46,15 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ================= SOUNDS ================= */
 
   const sounds = {
-    intro: document.getElementById("intro-sound"),
-    thinking: document.getElementById("thinking-sound"),
-    call: document.getElementById("call-sound"),
-    audience: document.getElementById("audience-sound"),
-    correct: document.getElementById("correct-sound"),
-    wrong: document.getElementById("wrong-sound"),
-    win: document.getElementById("win-sound"),
-    lose: document.getElementById("lose-sound"),
-    tick: document.getElementById("tick-sound")
+    intro: introSound,
+    thinking: thinkingSound,
+    call: callSound,
+    audience: audienceSound,
+    correct: correctSound,
+    wrong: wrongSound,
+    win: winSound,
+    lose: loseSound,
+    tick: tickSound
   };
 
   let soundEnabled = true;
@@ -73,12 +74,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ================= AUTH ================= */
 
-  if (logoutBtn) {
-    logoutBtn.onclick = async () => {
-      await auth.signOut();
-      location.reload();
-    };
-  }
+  logoutBtn.style.display = "none";
+
+  logoutBtn.onclick = async () => {
+    await auth.signOut();
+    location.reload();
+  };
 
   googleLoginBtn.onclick = async () => {
     await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
@@ -102,22 +103,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   auth.onAuthStateChanged(user => {
     if (user) {
-      document.getElementById("profileDiv").innerHTML = `
+      profileDiv.innerHTML = `
         <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
         <h3>${user.displayName || "Guest"}</h3>
       `;
     }
   });
 
-  /* ================= SETTINGS ================= */
-
   function showSettings() {
-    document.getElementById("authDiv").style.display = "none";
-    document.getElementById("categoryDiv").style.display = "block";
+    authDiv.style.display = "none";
+    categoryDiv.style.display = "block";
     playSound("intro");
   }
 
-  /* ================= GAME STATE ================= */
+  /* ================= GAME ================= */
 
   let questions = [];
   let current = 0;
@@ -126,8 +125,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let fiftyUsed = false;
   let friendUsed = false;
   let audienceUsed = false;
+  const TOTAL = 20;
   const timePerQuestion = 30;
-  const TOTAL_QUESTIONS = 20;
 
   startBtn.onclick = startQuiz;
 
@@ -135,25 +134,21 @@ document.addEventListener("DOMContentLoaded", () => {
     soundEnabled = soundToggle.value === "on";
 
     const res = await fetch(
-      `https://the-trivia-api.com/api/questions?limit=${TOTAL_QUESTIONS}&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`
+      `https://the-trivia-api.com/api/questions?limit=${TOTAL}&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`
     );
 
     questions = await res.json();
 
-    document.getElementById("categoryDiv").style.display = "none";
-    document.getElementById("quiz-container").style.display = "block";
+    categoryDiv.style.display = "none";
+    quizContainer.style.display = "block";
 
-    buildMoneyLadder(TOTAL_QUESTIONS);
-
-    current = 0;
-    ladderLevel = 0;
+    buildMoneyLadder(TOTAL);
+    current = ladderLevel = 0;
     fiftyUsed = friendUsed = audienceUsed = false;
 
     playSound("thinking");
     showQuestion();
   }
-
-  /* ================= QUESTION ================= */
 
   function showQuestion() {
     clearInterval(timer);
@@ -161,33 +156,34 @@ document.addEventListener("DOMContentLoaded", () => {
     audienceVote.innerHTML = "";
 
     const q = questions[current];
-    quizDiv.innerHTML = `<h2>Q${current + 1} / ${TOTAL_QUESTIONS}: ${q.question}</h2>`;
+    quizDiv.innerHTML = `<h2>Q${current + 1} / ${TOTAL}: ${q.question}</h2>`;
 
-    const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
+    [...q.incorrectAnswers, q.correctAnswer]
+      .sort(() => Math.random() - 0.5)
+      .forEach(a => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.textContent = a;
+        btn.onclick = () => checkAnswer(a);
+        quizDiv.appendChild(btn);
+      });
 
-    answers.forEach(a => {
-      const btn = document.createElement("button");
-      btn.className = "option-btn";
-      btn.textContent = a;
-      btn.onclick = () => checkAnswer(a);
-      quizDiv.appendChild(btn);
-    });
+    quizDiv.appendChild(document.querySelector(".lifelines-inside"));
 
-    let timeLeft = timePerQuestion;
-    updateTimer(timeLeft);
+    let t = timePerQuestion;
+    updateTimer(t);
 
     timer = setInterval(() => {
-      timeLeft--;
-      updateTimer(timeLeft);
-      if (timeLeft <= 5) playSound("tick");
-      if (timeLeft <= 0) nextQuestion();
+      t--;
+      updateTimer(t);
+      if (t <= 5) playSound("tick");
+      if (t <= 0) nextQuestion();
     }, 1000);
   }
 
   function updateTimer(t) {
     timerText.textContent = t + "s";
     timerBar.style.width = (t / timePerQuestion * 100) + "%";
-    timerBar.style.background = t > 10 ? "#00ff00" : t > 5 ? "#ffcc00" : "#ff4d4d";
   }
 
   function checkAnswer(ans) {
@@ -210,27 +206,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     updateMoneyLadder();
-    setTimeout(nextQuestion, 2000);
+    setTimeout(nextQuestion, 1800);
   }
 
   function nextQuestion() {
     current++;
-    if (current >= questions.length) {
-      showFinalScreen();
-      return;
-    }
+    if (current >= TOTAL) return endGame();
     playSound("thinking");
     showQuestion();
   }
 
-  /* ================= MONEY LADDER ================= */
-
-  function buildMoneyLadder(count) {
+  function buildMoneyLadder(n) {
     moneyList.innerHTML = "";
-    for (let i = count; i >= 1; i--) {
+    for (let i = n; i >= 1; i--) {
       const li = document.createElement("li");
       li.className = "ladder-btn";
-      li.textContent = "$" + (i * 100);
+      li.textContent = "$" + i * 100;
       moneyList.appendChild(li);
     }
   }
@@ -241,58 +232,31 @@ document.addEventListener("DOMContentLoaded", () => {
     if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
   }
 
-  /* ================= LIFELINES ================= */
+  /* ================= END GAME ================= */
 
-  fiftyBtn.onclick = () => {
-    if (fiftyUsed) return;
-    fiftyUsed = true;
-    fiftyBtn.classList.add("used");
-
-    const correct = questions[current].correctAnswer;
-    let removed = 0;
-
-    document.querySelectorAll(".option-btn").forEach(b => {
-      if (b.textContent !== correct && removed < 2) {
-        b.style.opacity = 0.3;
-        removed++;
-      }
-    });
-  };
-
-  callFriendBtn.onclick = () => {
-    if (friendUsed) return;
-    friendUsed = true;
-    callFriendBtn.classList.add("used");
-    playSound("call");
-    callFriendBox.innerHTML = `📞 Friend says: <b>${questions[current].correctAnswer}</b>`;
-  };
-
-  audienceBtn.onclick = () => {
-    if (audienceUsed) return;
-    audienceUsed = true;
-    audienceBtn.classList.add("used");
-    playSound("audience");
-
-    audienceVote.innerHTML = "";
-    document.querySelectorAll(".option-btn").forEach(b => {
-      const percent = Math.floor(Math.random() * 80) + 10;
-      audienceVote.innerHTML += `<div>${b.textContent}: ${percent}%</div>`;
-    });
-  };
-
-  /* ================= FINAL ================= */
-
-  function showFinalScreen() {
+  async function endGame() {
     stopAllSounds();
     playSound("win");
 
-    if (logoutBtn) logoutBtn.style.display = "inline-block";
+    const user = auth.currentUser;
+    const winAmount = ladderLevel * 100;
+
+    if (user) {
+      const ref = db.collection("users").doc(user.uid);
+      await ref.set({
+        name: user.displayName,
+        photo: user.photoURL,
+        totalScore: firebase.firestore.FieldValue.increment(winAmount)
+      }, { merge: true });
+
+      logoutBtn.style.display = "block";
+    }
 
     quizDiv.innerHTML = `
       <div class="final-screen">
-        <h1>🎉 CONGRATULATIONS</h1>
-        <h2>You Won $${ladderLevel * 100}</h2>
-        <button onclick="location.reload()">Restart Quiz</button>
+        <h1>🎉 YOU WON</h1>
+        <h2>$${winAmount}</h2>
+        <button onclick="location.reload()">Play Again</button>
       </div>
     `;
   }
