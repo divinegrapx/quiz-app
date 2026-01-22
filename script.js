@@ -131,7 +131,7 @@ const res = await fetch(
     document.getElementById("categoryDiv").style.display = "none";
     document.getElementById("quiz-container").style.display = "block";
 
-    buildMoneyLadder(10);
+    buildMoneyLadder(questions.length);
 
     current = 0;
     ladderLevel = 0;
