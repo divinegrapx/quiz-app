@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
   const emailCancelBtn = document.getElementById("emailCancelBtn");
   const startBtn = document.getElementById("startBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+
 
   const quizDiv = document.getElementById("quiz");
   const moneyList = document.getElementById("money-list");
@@ -87,6 +89,14 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   guestLoginBtn.onclick = () => showSettings();
+  /* LOGOUT */
+if (logoutBtn) {
+  logoutBtn.onclick = async () => {
+    await auth.signOut();
+    location.reload();
+  };
+}
+
 
   emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
   emailCancelBtn.onclick = () => emailDiv.style.display = "none";
