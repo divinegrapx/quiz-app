@@ -1,17 +1,17 @@
 * {
   box-sizing: border-box;
-  font-family: "Inter", "Poppins", sans-serif;
+  font-family: "Orbitron", "Poppins", sans-serif;
 }
 
 body {
   margin: 0;
   background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
   background-size: 400% 400%;
-  animation: bg 18s infinite;
+  animation: bg 20s infinite;
   color: #fff;
   display: flex;
   justify-content: center;
-  padding: 15px;
+  padding: 20px;
 }
 
 @keyframes bg {
@@ -20,150 +20,249 @@ body {
   100% { background-position: 0%; }
 }
 
+/* ---------- CONTAINER ---------- */
+
 .container {
   max-width: 900px;
   width: 100%;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0, 0, 0, 0.85);
   border-radius: 20px;
-  padding: 20px;
+  padding: 25px;
   box-shadow: 0 0 30px #00f2fe;
   text-align: center;
-}
-
-.fade-in {
-  animation: fadeIn 0.6s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity:0; transform:translateY(10px); }
-  to { opacity:1; transform:translateY(0); }
+  animation: fadeIn 0.8s ease;
 }
 
 .title {
-  font-size: 40px;
-  margin-bottom: 15px;
-}
-
-.glow {
+  font-size: 46px;
   color: #00f2fe;
   text-shadow: 0 0 25px #00f2fe;
-  animation: pulse 2s infinite;
+  animation: neonPulse 2s infinite alternate;
 }
 
-@keyframes pulse {
-  0% { text-shadow: 0 0 15px #00f2fe; }
-  50% { text-shadow: 0 0 35px #00f2fe; }
-  100% { text-shadow: 0 0 15px #00f2fe; }
+@keyframes neonPulse {
+  from { text-shadow: 0 0 10px #00f2fe; }
+  to { text-shadow: 0 0 30px #00f2fe; }
 }
 
-button, select {
-  width: 100%;
-  max-width: 320px;
-  padding: 14px;
-  margin: 8px auto;
-  border-radius: 14px;
-  border: none;
-  font-weight: 600;
-  font-size: 16px;
-}
+/* ---------- BUTTONS ---------- */
 
 button {
-  background: linear-gradient(135deg,#00c6ff,#00f2fe);
+  padding: 12px 20px;
+  margin: 6px;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #00c6ff, #00f2fe);
   color: #000;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.start-btn {
-  font-size: 18px;
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px #00f2fe;
 }
+
+/* Disabled lifeline */
+button.used {
+  background: #444 !important;
+  color: #999 !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}
+
+/* ---------- QUIZ LAYOUT ---------- */
 
 #quiz-and-ladder {
   display: flex;
-  gap: 10px;
+  gap: 15px;
+  margin-top: 10px;
+  align-items: flex-start;
 }
 
 #quiz {
   flex: 1;
-  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 18px;
+  border-radius: 20px;
+  min-height: 320px;
 }
 
+/* ---------- QUESTION ---------- */
+
 #quiz h2 {
-  font-size: 24px;
-  line-height: 1.4;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
+
+/* ---------- ANSWER BUTTONS (FIXED SIZE) ---------- */
 
 .option-btn {
   width: 100%;
-  height: 56px;
-  font-size: 17px;
-  margin: 6px 0;
+  height: 48px;
+  margin: 6px auto;
+  padding: 10px;
+  border-radius: 12px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #1c92d2, #f2fcfe);
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.correct { background:#00ff00 !important; }
-.wrong { background:#ff4d4d !important; }
+/* ---------- ANSWER STATES ---------- */
+
+.correct {
+  background: #00ff00 !important;
+  color: #000;
+}
+
+.wrong {
+  background: #ff4d4d !important;
+  color: #000;
+}
+
+/* ---------- MONEY LADDER (SMALLER + STABLE) ---------- */
 
 #money-list {
-  list-style:none;
-  padding:0;
-  min-width:120px;
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  min-width: 140px;
+  gap: 5px;
 }
 
 .ladder-btn {
-  padding:6px;
-  margin:4px 0;
-  background:rgba(255,255,255,0.15);
-  border-radius:8px;
+  width: 100%;
+  padding: 6px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-weight: bold;
+  font-size: 13px;
 }
 
 .ladder-btn.current {
-  background:gold;
-  color:#000;
+  background: linear-gradient(135deg, gold, orange);
+  color: #000;
+  box-shadow: 0 0 10px gold;
 }
+
+/* ---------- TIMER ---------- */
+
+#timer-container {
+  width: 100%;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  margin: 10px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+#timer-bar {
+  height: 100%;
+  width: 100%;
+  background: #00ff00;
+  transition: width 1s linear, background 0.3s;
+}
+
+#timer-text {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* ---------- LIFELINES (MOVED UP + ANIMATED) ---------- */
 
 #lifelines {
   margin-top: 10px;
-  display:flex;
-  justify-content:center;
-  gap:8px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  animation: slideUp 0.6s ease;
 }
 
-.lifeline-used {
-  opacity:0.4;
-  pointer-events:none;
+#lifelines button {
+  background: linear-gradient(135deg, #ffdd00, #ffaa00);
+  font-size: 14px;
 }
 
-.phone-anim {
-  font-size:40px;
-  animation: shake 0.8s infinite;
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-@keyframes shake {
-  0%{transform:rotate(0)}
-  25%{transform:rotate(8deg)}
-  50%{transform:rotate(-8deg)}
-  100%{transform:rotate(0)}
+/* ---------- CALL & AUDIENCE ---------- */
+
+#callFriendBox, #audienceVote {
+  margin: 10px 0;
+  font-size: 16px;
+  animation: fadeIn 0.4s ease;
 }
 
-.vote-bar {
-  display:flex;
-  align-items:center;
-  gap:6px;
+/* ---------- LEADERBOARD (ALWAYS VISIBLE) ---------- */
+
+#leaderboard-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
 }
 
-.vote-bar .bar {
-  height:14px;
-  background:linear-gradient(90deg,#00f2fe,#4facfe);
-  border-radius:6px;
-  transition:width 1s;
+#leaderboard-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.1);
+  padding: 8px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+
+#leaderboard-list img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+/* ---------- FINAL SCREEN ---------- */
+
+.final-screen {
+  padding: 40px;
+  animation: fadeIn 0.6s ease-in-out;
 }
 
 .final-screen h1 {
-  font-size:36px;
-  color:gold;
+  font-size: 42px;
+  color: gold;
+  text-shadow: 0 0 20px gold;
 }
 
-@media(max-width:700px){
-  #quiz-and-ladder{flex-direction:column;}
-  #money-list{display:flex;overflow-x:auto;}
-  .ladder-btn{min-width:100px;}
+/* ---------- ANIMATIONS ---------- */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 700px) {
+  #quiz-and-ladder {
+    flex-direction: column;
+  }
+
+  #money-list {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .ladder-btn {
+    min-width: 100px;
+  }
 }
