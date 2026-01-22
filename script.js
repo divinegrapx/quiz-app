@@ -2,22 +2,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ================= FIREBASE ================= */
 
-  const firebaseConfig = {
+  firebase.initializeApp({
     apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
     authDomain: "neon-quiz-app.firebaseapp.com",
-    projectId: "neon-quiz-app",
-    storageBucket: "neon-quiz-app.appspot.com",
-    messagingSenderId: "891061147021",
-    appId: "1:891061147021:web:7b3d80020f642da7b699c4"
-  };
+    projectId: "neon-quiz-app"
+  });
 
-  firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
   /* ================= ELEMENTS ================= */
 
-  
+  const authDiv = document.getElementById("authDiv");
+  const categoryDiv = document.getElementById("categoryDiv");
+  const quizContainer = document.getElementById("quiz-container");
+  const profileDiv = document.getElementById("profileDiv");
+  const logoutBtn = document.getElementById("logoutBtn");
 
   const googleLoginBtn = document.getElementById("googleLoginBtn");
   const guestLoginBtn = document.getElementById("guestLoginBtn");
@@ -27,8 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
   const emailCancelBtn = document.getElementById("emailCancelBtn");
   const startBtn = document.getElementById("startBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
-
 
   const quizDiv = document.getElementById("quiz");
   const moneyList = document.getElementById("money-list");
@@ -48,36 +46,25 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ================= SOUNDS ================= */
 
   const sounds = {
-  intro: document.getElementById("intro-sound"),
-  thinking: document.getElementById("thinking-sound"),
-  call: document.getElementById("call-sound"),
-  audience: document.getElementById("audience-sound"),
-  correct: document.getElementById("correct-sound"),
-  wrong: document.getElementById("wrong-sound"),
-  win: document.getElementById("win-sound"),
-  lose: document.getElementById("lose-sound"),
-  tick: document.getElementById("tick-sound")
-};
-
+    intro: document.getElementById("intro-sound"),
+    thinking: document.getElementById("thinking-sound"),
+    call: document.getElementById("call-sound"),
+    audience: document.getElementById("audience-sound"),
+    correct: document.getElementById("correct-sound"),
+    wrong: document.getElementById("wrong-sound"),
+    win: document.getElementById("win-sound"),
+    tick: document.getElementById("tick-sound")
+  };
 
   let soundEnabled = true;
 
-  function stopAllSounds() {
-    Object.values(sounds).forEach(s => {
-      s.pause();
-      s.currentTime = 0;
-    });
-  }
-
-  function playSound(name) {
+  const playSound = name => {
     if (!soundEnabled || !sounds[name]) return;
-    stopAllSounds();
+    Object.values(sounds).forEach(s => { s.pause(); s.currentTime = 0; });
     sounds[name].play();
-  }
+  };
 
   /* ================= AUTH ================= */
-
-  logoutBtn.style.display = "none";
 
   logoutBtn.onclick = async () => {
     await auth.signOut();
@@ -89,15 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showSettings();
   };
 
-  guestLoginBtn.onclick = () => showSettings();
-  /* LOGOUT */
-if (logoutBtn) {
-  logoutBtn.onclick = async () => {
-    await auth.signOut();
-    location.reload();
-  };
-}
-
+  guestLoginBtn.onclick = showSettings;
 
   emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
   emailCancelBtn.onclick = () => emailDiv.style.display = "none";
@@ -129,15 +108,12 @@ if (logoutBtn) {
 
   /* ================= GAME ================= */
 
+  const TOTAL = 20;
+  const timePerQuestion = 30;
   let questions = [];
   let current = 0;
   let ladderLevel = 0;
   let timer;
-  let fiftyUsed = false;
-  let friendUsed = false;
-  let audienceUsed = false;
-  const TOTAL = 20;
-  const timePerQuestion = 30;
 
   startBtn.onclick = startQuiz;
 
@@ -149,13 +125,13 @@ if (logoutBtn) {
     );
 
     questions = await res.json();
+    if (!questions.length) return alert("No questions loaded.");
 
     categoryDiv.style.display = "none";
     quizContainer.style.display = "block";
 
-    buildMoneyLadder(TOTAL);
+    buildMoneyLadder();
     current = ladderLevel = 0;
-    fiftyUsed = friendUsed = audienceUsed = false;
 
     playSound("thinking");
     showQuestion();
@@ -179,8 +155,6 @@ if (logoutBtn) {
         quizDiv.appendChild(btn);
       });
 
-    quizDiv.appendChild(document.querySelector(".lifelines-inside"));
-
     let t = timePerQuestion;
     updateTimer(t);
 
@@ -199,7 +173,6 @@ if (logoutBtn) {
 
   function checkAnswer(ans) {
     clearInterval(timer);
-    stopAllSounds();
 
     const correct = questions[current].correctAnswer;
 
@@ -209,27 +182,19 @@ if (logoutBtn) {
       if (b.textContent === ans && ans !== correct) b.classList.add("wrong");
     });
 
-    if (ans === correct) {
-      ladderLevel++;
-      playSound("correct");
-    } else {
-      playSound("wrong");
-    }
-
+    ans === correct ? (ladderLevel++, playSound("correct")) : playSound("wrong");
     updateMoneyLadder();
-    setTimeout(nextQuestion, 1800);
+    setTimeout(nextQuestion, 1500);
   }
 
   function nextQuestion() {
     current++;
-    if (current >= TOTAL) return endGame();
-    playSound("thinking");
-    showQuestion();
+    current >= TOTAL ? endGame() : showQuestion();
   }
 
-  function buildMoneyLadder(n) {
+  function buildMoneyLadder() {
     moneyList.innerHTML = "";
-    for (let i = n; i >= 1; i--) {
+    for (let i = TOTAL; i >= 1; i--) {
       const li = document.createElement("li");
       li.className = "ladder-btn";
       li.textContent = "$" + i * 100;
@@ -243,30 +208,14 @@ if (logoutBtn) {
     if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
   }
 
-  /* ================= END GAME ================= */
-
-  async function endGame() {
-    stopAllSounds();
+  function endGame() {
     playSound("win");
-
-    const user = auth.currentUser;
-    const winAmount = ladderLevel * 100;
-
-    if (user) {
-      const ref = db.collection("users").doc(user.uid);
-      await ref.set({
-        name: user.displayName,
-        photo: user.photoURL,
-        totalScore: firebase.firestore.FieldValue.increment(winAmount)
-      }, { merge: true });
-
-      logoutBtn.style.display = "block";
-    }
+    logoutBtn.style.display = "block";
 
     quizDiv.innerHTML = `
       <div class="final-screen">
         <h1>🎉 YOU WON</h1>
-        <h2>$${winAmount}</h2>
+        <h2>$${ladderLevel * 100}</h2>
         <button onclick="location.reload()">Play Again</button>
       </div>
     `;
