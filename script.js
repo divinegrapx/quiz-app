@@ -1,5 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+  /* ================= UI NAV ================= */
+
+  function showSettings() {
+    document.getElementById("authDiv").style.display = "none";
+    document.getElementById("emailDiv").style.display = "none";
+    document.getElementById("categoryDiv").style.display = "block";
+  }
+
+  function showQuiz() {
+    document.getElementById("categoryDiv").style.display = "none";
+    document.getElementById("quiz-container").style.display = "block";
+  }
+
   /* ================= FIREBASE ================= */
 
   const firebaseConfig = {
@@ -11,36 +24,23 @@ document.addEventListener("DOMContentLoaded", () => {
     appId: "1:891061147021:web:7b3d80020f642da7b699c4"
   };
 
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
-
+  firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  /* ================= AUTH ELEMENTS ================= */
+  /* ================= AUTH ================= */
 
   const googleLoginBtn = document.getElementById("googleLoginBtn");
   const guestLoginBtn = document.getElementById("guestLoginBtn");
 
-  const emailRegisterBtn = document.getElementById("emailRegisterBtn");
   const emailDiv = document.getElementById("emailDiv");
+  const emailRegisterBtn = document.getElementById("emailRegisterBtn");
   const emailLoginBtn = document.getElementById("emailLoginBtn");
   const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
   const emailCancelBtn = document.getElementById("emailCancelBtn");
 
   const emailInput = document.getElementById("emailInput");
   const passwordInput = document.getElementById("passwordInput");
-
-  /* ================= UI NAVIGATION ================= */
-
-  function showSettings() {
-    document.getElementById("authDiv").style.display = "none";
-    document.getElementById("emailDiv").style.display = "none";
-    document.getElementById("categoryDiv").style.display = "block";
-  }
-
-  /* ================= AUTH LOGIC ================= */
 
   googleLoginBtn.onclick = async () => {
     try {
@@ -58,10 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   emailLoginBtn.onclick = async () => {
     try {
-      await auth.signInWithEmailAndPassword(
-        emailInput.value,
-        passwordInput.value
-      );
+      await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
       showSettings();
     } catch (e) {
       alert(e.message);
@@ -70,26 +67,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   emailRegisterSubmitBtn.onclick = async () => {
     try {
-      await auth.createUserWithEmailAndPassword(
-        emailInput.value,
-        passwordInput.value
-      );
+      await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
       showSettings();
     } catch (e) {
       alert(e.message);
     }
   };
 
-  auth.onAuthStateChanged(user => {
-    if (!user) return;
-
-    document.getElementById("profileDiv").innerHTML = `
-      <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
-      <h3>${user.displayName || user.email}</h3>
-    `;
-  });
-
-  /* ================= GAME ELEMENTS ================= */
+  /* ================= ELEMENTS ================= */
 
   const quizDiv = document.getElementById("quiz");
   const moneyList = document.getElementById("money-list");
@@ -104,12 +89,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const categorySelect = document.getElementById("categorySelect");
   const difficultySelect = document.getElementById("difficultySelect");
   const soundToggle = document.getElementById("soundToggle");
-  const modeSelect = document.getElementById("modeSelect"); // safe optional
+  const modeSelect = document.getElementById("modeSelect");
 
   /* ================= SOUNDS ================= */
 
   const sounds = {
-    thinking: document.getElementById("thinking-sound"),
     correct: document.getElementById("correct-sound"),
     wrong: document.getElementById("wrong-sound"),
     win: document.getElementById("win-sound"),
@@ -117,12 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tick: document.getElementById("tick-sound")
   };
 
-  function stopSounds() {
-    Object.values(sounds).forEach(s => {
-      s.pause();
-      s.currentTime = 0;
-    });
-  }
+  let soundEnabled = true;
 
   /* ================= GAME STATE ================= */
 
@@ -132,25 +111,27 @@ document.addEventListener("DOMContentLoaded", () => {
     64000, 125000, 250000, 500000, 1000000
   ];
 
+  const SAFE_LEVELS = { 4: 1000, 9: 32000 };
+
   let questions = [];
   let current = 0;
   let timer;
-  let answeringLocked = false;
   let timePerQuestion = 30;
+  let answeringLocked = false;
 
   let fiftyUsed = false;
   let friendUsed = false;
   let audienceUsed = false;
 
-  /* ================= START GAME ================= */
+  /* ================= START ================= */
 
   document.getElementById("startBtn").onclick = startQuiz;
 
   async function startQuiz() {
-    timePerQuestion =
-      modeSelect && modeSelect.value === "hardcore" ? 20 : 30;
+    soundEnabled = soundToggle.value === "on";
+    timePerQuestion = modeSelect.value === "hardcore" ? 20 : 30;
 
-    if (modeSelect && modeSelect.value === "hardcore") {
+    if (modeSelect.value === "hardcore") {
       fiftyBtn.disabled = callFriendBtn.disabled = audienceBtn.disabled = true;
     }
 
@@ -159,10 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     questions = await res.json();
-
-    document.getElementById("categoryDiv").style.display = "none";
-    document.getElementById("quiz-container").style.display = "block";
-
+    showQuiz();
     buildMoneyLadder();
     showQuestion();
   }
@@ -172,20 +150,20 @@ document.addEventListener("DOMContentLoaded", () => {
   function showQuestion() {
     answeringLocked = false;
     clearInterval(timer);
-    stopSounds();
 
     const q = questions[current];
     quizDiv.innerHTML = `<h2>Q${current + 1}: ${q.question}</h2>`;
 
-    [...q.incorrectAnswers, q.correctAnswer]
-      .sort(() => Math.random() - 0.5)
-      .forEach(a => {
-        const btn = document.createElement("button");
-        btn.className = "option-btn";
-        btn.textContent = a;
-        btn.onclick = () => checkAnswer(a);
-        quizDiv.appendChild(btn);
-      });
+    const answers = [...q.incorrectAnswers, q.correctAnswer]
+      .sort(() => Math.random() - 0.5);
+
+    answers.forEach(ans => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.textContent = ans;
+      btn.onclick = () => checkAnswer(ans);
+      quizDiv.appendChild(btn);
+    });
 
     startTimer();
   }
@@ -197,7 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
     timer = setInterval(() => {
       t--;
       updateTimer(t);
-      if (t <= 5) sounds.tick.play();
+
+      if (t <= 5 && soundEnabled) sounds.tick.play();
       if (t <= 0) gameOver();
     }, 1000);
   }
@@ -213,7 +192,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (answeringLocked) return;
     answeringLocked = true;
     clearInterval(timer);
-    stopSounds();
 
     const correct = questions[current].correctAnswer;
 
@@ -224,38 +202,37 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (ans === correct) {
-      sounds.correct.play();
+      if (soundEnabled) sounds.correct.play();
       current++;
       updateMoneyLadder();
+
       if (current === MONEY.length) return winGame();
       setTimeout(showQuestion, 1800);
     } else {
-      sounds.wrong.play();
+      if (soundEnabled) sounds.wrong.play();
       setTimeout(gameOver, 1800);
     }
   }
 
-  /* ================= GAME END ================= */
+  /* ================= END ================= */
 
   function gameOver() {
-    stopSounds();
-    sounds.lose.play();
+    clearInterval(timer);
 
-    const won = current >= 10 ? 32000 : current >= 5 ? 1000 : 0;
+    let won = 0;
+    if (SAFE_LEVELS[current - 1]) won = SAFE_LEVELS[current - 1];
+
     saveScore(won);
 
     quizDiv.innerHTML = `
       <div class="final-screen">
         <h1>❌ GAME OVER</h1>
-        <h2>You won $${won}</h2>
+        <h2>You won $${won.toLocaleString()}</h2>
         <button onclick="location.reload()">Play Again</button>
-      </div>
-    `;
+      </div>`;
   }
 
   function winGame() {
-    stopSounds();
-    sounds.win.play();
     saveScore(1000000);
 
     quizDiv.innerHTML = `
@@ -263,17 +240,15 @@ document.addEventListener("DOMContentLoaded", () => {
         <h1>🏆 MILLIONAIRE!</h1>
         <h2>$1,000,000</h2>
         <button onclick="location.reload()">Play Again</button>
-      </div>
-    `;
+      </div>`;
   }
 
-  /* ================= MONEY LADDER ================= */
+  /* ================= MONEY ================= */
 
   function buildMoneyLadder() {
     moneyList.innerHTML = "";
     MONEY.slice().reverse().forEach(v => {
       const li = document.createElement("li");
-      li.className = "ladder-btn";
       li.textContent = `$${v.toLocaleString()}`;
       moneyList.appendChild(li);
     });
@@ -311,23 +286,27 @@ document.addEventListener("DOMContentLoaded", () => {
     callFriendBtn.classList.add("used");
 
     const correct = questions[current].correctAnswer;
-    alert("📞 Friend thinks: " + (Math.random() < 0.8 ? correct : "Not sure…"));
+    alert("📞 Friend thinks the answer is: " + correct);
   };
 
   audienceBtn.onclick = () => {
     if (audienceUsed) return;
     audienceUsed = true;
     audienceBtn.classList.add("used");
-    alert("📊 Audience favors: " + questions[current].correctAnswer);
+
+    const correct = questions[current].correctAnswer;
+    alert("📊 Audience strongly favors: " + correct);
   };
 
   /* ================= LEADERBOARD ================= */
 
   function saveScore(score) {
+    const user = auth.currentUser;
+
     db.collection("scores").add({
-      name: auth.currentUser?.displayName || "Guest",
+      name: user?.displayName || "Guest",
       score,
-      time: firebase.firestore.FieldValue.serverTimestamp()
+      created: firebase.firestore.FieldValue.serverTimestamp()
     }).then(loadLeaderboard);
   }
 
@@ -341,7 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(snap => {
         snap.forEach(doc => {
           const li = document.createElement("li");
-          li.textContent = `${doc.data().name} — $${doc.data().score}`;
+          li.textContent = `${doc.data().name} — $${doc.data().score.toLocaleString()}`;
           leaderboardList.appendChild(li);
         });
       });
