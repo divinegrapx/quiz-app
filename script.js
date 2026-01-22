@@ -48,16 +48,17 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ================= SOUNDS ================= */
 
   const sounds = {
-    intro: introSound,
-    thinking: thinkingSound,
-    call: callSound,
-    audience: audienceSound,
-    correct: correctSound,
-    wrong: wrongSound,
-    win: winSound,
-    lose: loseSound,
-    tick: tickSound
-  };
+  intro: document.getElementById("intro-sound"),
+  thinking: document.getElementById("thinking-sound"),
+  call: document.getElementById("call-sound"),
+  audience: document.getElementById("audience-sound"),
+  correct: document.getElementById("correct-sound"),
+  wrong: document.getElementById("wrong-sound"),
+  win: document.getElementById("win-sound"),
+  lose: document.getElementById("lose-sound"),
+  tick: document.getElementById("tick-sound")
+};
+
 
   let soundEnabled = true;
 
