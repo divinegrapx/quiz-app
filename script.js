@@ -14,6 +14,17 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const googleLoginBtn = document.getElementById("googleLoginBtn");
+const guestLoginBtn = document.getElementById("guestLoginBtn");
+
+const emailRegisterBtn = document.getElementById("emailRegisterBtn");
+const emailDiv = document.getElementById("emailDiv");
+const emailLoginBtn = document.getElementById("emailLoginBtn");
+const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
+const emailCancelBtn = document.getElementById("emailCancelBtn");
+
+const emailInput = document.getElementById("emailInput");
+const passwordInput = document.getElementById("passwordInput");
 
 /* ================= ELEMENTS ================= */
 
