@@ -291,26 +291,31 @@ const res = await fetch(
 
   /* ================= LEADERBOARD ================= */
   async function saveScore(score) {
-    const user = auth.currentUser;
-    if (!user) return;
+  const user = auth.currentUser;
+  if (!user) return;
 
-    const ref = db.collection("leaderboard").doc(user.uid);
-    const doc = await ref.get();
+  const ref = db.collection("leaderboard").doc(user.uid);
+  const doc = await ref.get();
 
-    if (doc.exists) {
-      ref.update({
-        totalScore: firebase.firestore.FieldValue.increment(score),
-        games: firebase.firestore.FieldValue.increment(1)
-      });
-    } else {
-      ref.set({
-        name: user.displayName || "Guest",
-        photo: user.photoURL || "",
-        totalScore: score,
-        games: 1
-      });
-    }
+  const avatar =
+    user.photoURL ||
+    "https://i.imgur.com/6VBx3io.png";
+
+  if (doc.exists) {
+    await ref.update({
+      totalScore: firebase.firestore.FieldValue.increment(score),
+      games: firebase.firestore.FieldValue.increment(1),
+      photo: avatar
+    });
+  } else {
+    await ref.set({
+      name: user.displayName || "Guest",
+      photo: avatar,
+      totalScore: score,
+      games: 1
+    });
   }
+}
 
   async function loadLeaderboard() {
     leaderboardList.innerHTML = "";
