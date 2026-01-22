@@ -1,33 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>NEON MILLIONAIRE</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>NEON MILLIONAIRE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
-
 <body>
 
 <div class="container">
 
+  <button id="logoutBtn" class="logout-btn" style="display:none;">Logout</button>
+
   <div id="profileDiv"></div>
 
-  <button id="logoutBtn" class="logout-btn" style="display:none;">
-    Logout
-  </button>
-
-
-  <!-- PROFILE -->
-  <div id="profileDiv"></div>
-
-  <!-- AUTH -->
   <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
@@ -35,18 +26,14 @@
     <button id="emailRegisterBtn">Login / Register with Email</button>
   </div>
 
-
-  <!-- EMAIL LOGIN -->
   <div id="emailDiv" style="display:none;">
-    <input type="email" id="emailInput" placeholder="Email">
-    <input type="password" id="passwordInput" placeholder="Password">
-
+    <input id="emailInput" type="email" placeholder="Email">
+    <input id="passwordInput" type="password" placeholder="Password">
     <button id="emailLoginBtn">Login</button>
     <button id="emailRegisterSubmitBtn">Register</button>
     <button id="emailCancelBtn">Cancel</button>
   </div>
 
-  <!-- GAME SETTINGS -->
   <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
 
@@ -70,63 +57,42 @@
       <option value="off">Sound OFF</option>
     </select>
 
-    <button id="startBtn" class="start-btn">
-      START QUIZ
-    </button>
+    <button id="startBtn">START QUIZ</button>
   </div>
 
-  <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
-
-    <!-- TIMER -->
     <div id="timer-container">
       <div id="timer-bar"></div>
       <span id="timer-text">30s</span>
     </div>
 
-    <!-- QUIZ + MONEY LADDER -->
     <div id="quiz-and-ladder">
-
-      <!-- QUESTION + ANSWERS -->
-      <div id="quiz">
-        <!-- Question & answers injected by JS -->
-
-        <!-- LIFELINES (INSIDE QUIZ, UNDER ANSWERS) -->
-        <div id="lifelines" class="lifelines-inside">
-          <button id="fiftyBtn">50:50</button>
-          <button id="callFriendBtn">📞 Call</button>
-          <button id="audienceBtn">📊 Audience</button>
-        </div>
-      </div>
-
-      <!-- MONEY LADDER -->
+      <div id="quiz"></div>
       <ul id="money-list"></ul>
     </div>
 
-    <!-- LIFELINE OUTPUT -->
+    <div id="lifelines">
+      <button id="fiftyBtn">50:50</button>
+      <button id="callFriendBtn">📞 Call</button>
+      <button id="audienceBtn">📊 Audience</button>
+    </div>
+
     <div id="callFriendBox"></div>
     <div id="audienceVote"></div>
-
   </div>
-
-  <!-- LEADERBOARD -->
-  <ul id="leaderboard-list"></ul>
 
   <!-- SOUNDS -->
   <audio id="intro-sound" src="intro.mp3"></audio>
   <audio id="thinking-sound" src="thinking.mp3"></audio>
   <audio id="call-sound" src="call.mp3"></audio>
   <audio id="audience-sound" src="audience.mp3"></audio>
-  <audio id="win-sound" src="win.mp3"></audio>
-  <audio id="lose-sound" src="lose.mp3"></audio>
   <audio id="correct-sound" src="correct.wav"></audio>
   <audio id="wrong-sound" src="wrong.wav"></audio>
+  <audio id="win-sound" src="win.mp3"></audio>
   <audio id="tick-sound" src="tick.mp3"></audio>
 
 </div>
 
-<!-- MAIN SCRIPT -->
 <script src="script.js"></script>
-
 </body>
 </html>
