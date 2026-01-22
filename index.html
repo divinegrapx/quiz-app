@@ -15,8 +15,6 @@
 
 <div class="container">
 
-  <button id="logoutBtn" class="logout-btn" style="display:none;">Logout</button>
-
   <div id="profileDiv"></div>
 
   <div id="authDiv">
@@ -27,8 +25,8 @@
   </div>
 
   <div id="emailDiv" style="display:none;">
-    <input id="emailInput" type="email" placeholder="Email">
-    <input id="passwordInput" type="password" placeholder="Password">
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passwordInput" placeholder="Password">
     <button id="emailLoginBtn">Login</button>
     <button id="emailRegisterSubmitBtn">Register</button>
     <button id="emailCancelBtn">Cancel</button>
@@ -57,7 +55,7 @@
       <option value="off">Sound OFF</option>
     </select>
 
-    <button id="startBtn">START QUIZ</button>
+    <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
   <div id="quiz-container" style="display:none;">
@@ -81,14 +79,17 @@
     <div id="audienceVote"></div>
   </div>
 
+  <ul id="leaderboard-list"></ul>
+
   <!-- SOUNDS -->
   <audio id="intro-sound" src="intro.mp3"></audio>
   <audio id="thinking-sound" src="thinking.mp3"></audio>
   <audio id="call-sound" src="call.mp3"></audio>
   <audio id="audience-sound" src="audience.mp3"></audio>
+  <audio id="win-sound" src="win.mp3"></audio>
+  <audio id="lose-sound" src="lose.mp3"></audio>
   <audio id="correct-sound" src="correct.wav"></audio>
   <audio id="wrong-sound" src="wrong.wav"></audio>
-  <audio id="win-sound" src="win.mp3"></audio>
   <audio id="tick-sound" src="tick.mp3"></audio>
 
 </div>
