@@ -29,6 +29,7 @@ const quizDiv = document.getElementById("quiz");
 const moneyList = document.getElementById("money-list");
 const timerBar = document.getElementById("timer-bar");
 const timerText = document.getElementById("timer-text");
+const logoutBtn = document.getElementById("logoutBtn");
 
 const fiftyBtn = document.getElementById("fiftyBtn");
 const callFriendBtn = document.getElementById("callFriendBtn");
@@ -75,6 +76,10 @@ googleLoginBtn.onclick = async () => {
 };
 
 guestLoginBtn.onclick = () => showSettings();
+logoutBtn.onclick = async () => {
+  await auth.signOut();
+  location.reload();
+};
 
 emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
 emailCancelBtn.onclick = () => emailDiv.style.display = "none";
