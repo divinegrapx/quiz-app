@@ -181,17 +181,22 @@ button.used {
 /* ---------- LIFELINES (MOVED UP + ANIMATED) ---------- */
 
 #lifelines {
-  margin-top: 10px;
   display: flex;
   justify-content: center;
-  gap: 10px;
-  animation: slideUp 0.6s ease;
+  gap: 12px;
+  margin-top: 12px;
+  margin-bottom: 10px;
 }
 
-#lifelines button {
-  background: linear-gradient(135deg, #ffdd00, #ffaa00);
-  font-size: 14px;
+#quiz {
+  display: flex;
+  flex-direction: column;
 }
+
+.option-btn {
+  margin-bottom: 10px;
+}
+
 
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
@@ -264,5 +269,14 @@ button.used {
 
   .ladder-btn {
     min-width: 100px;
+  }
+}
+@media (max-width: 600px) {
+  #lifelines {
+    flex-wrap: wrap;
+  }
+
+  .option-btn {
+    font-size: 16px;
   }
 }
