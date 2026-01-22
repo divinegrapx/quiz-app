@@ -95,8 +95,7 @@ auth.onAuthStateChanged(user => {
       <img src="${user.photoURL || 'https://www.gravatar.com/avatar/?d=mp'}">
       <h3>${user.displayName || "Guest"}</h3>
     `;
-    logoutBtn.style.display = "block";
-  }
+      }
 });
 logoutBtn.onclick = async () => {
   await auth.signOut();
@@ -139,6 +138,9 @@ async function startQuiz() {
   current = 0;
   ladderLevel = 0;
   fiftyUsed = friendUsed = audienceUsed = false;
+document.getElementById("quiz-container").appendChild(
+  document.getElementById("lifelines")
+);
 
   playSound("thinking");
   showQuestion();
@@ -213,6 +215,7 @@ function nextQuestion() {
   playSound("thinking");
   showQuestion();
 }
+quizDiv.appendChild(document.getElementById("lifelines"));
 
 /* MONEY LADDER */
 function buildMoneyLadder(count) {
@@ -270,6 +273,7 @@ audienceBtn.onclick = () => {
 };
 
 /* FINAL SCREEN */
+logoutBtn.style.display = "block";
 function showFinalScreen() {
   stopAllSounds();
   playSound("win");
