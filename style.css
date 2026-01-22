@@ -266,3 +266,23 @@ button.used {
     min-width: 100px;
   }
 }
+.option-btn.correct {
+  animation: pulse 0.6s ease;
+}
+
+.option-btn.wrong {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-6px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes pulse {
+  from { box-shadow: 0 0 5px lime; }
+  to { box-shadow: 0 0 30px lime; }
+}
