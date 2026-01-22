@@ -120,9 +120,12 @@ document.addEventListener("DOMContentLoaded", () => {
   async function startQuiz() {
     soundEnabled = soundToggle.value === "on";
 
-    const res = await fetch(
-      `https://the-trivia-api.com/api/questions?limit=10&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`
-    );
+    const QUESTION_COUNT = 20;
+
+const res = await fetch(
+  `https://the-trivia-api.com/api/questions?limit=${QUESTION_COUNT}&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`
+);
+
     questions = await res.json();
 
     document.getElementById("categoryDiv").style.display = "none";
@@ -146,8 +149,15 @@ document.addEventListener("DOMContentLoaded", () => {
     audienceVote.innerHTML = "";
 
     const q = questions[current];
-    quizDiv.innerHTML = `<h2 style="font-size:20px;">${q.question}</h2>`;
-
+    quizDiv.innerHTML = `
+  <h2 style="font-size:18px; opacity:0.8;">
+    Question ${current + 1} / ${questions.length}
+  </h2>
+  <h2 style="font-size:22px; margin-top:6px;">
+    ${q.question}
+  </h2>
+`;
+    
     const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
 
     answers.forEach(a => {
