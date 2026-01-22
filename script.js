@@ -22,6 +22,8 @@ const emailLoginBtn = document.getElementById("emailLoginBtn");
 const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
 const emailCancelBtn = document.getElementById("emailCancelBtn");
 const startBtn = document.getElementById("startBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
 
 const quizDiv = document.getElementById("quiz");
 const moneyList = document.getElementById("money-list");
@@ -90,11 +92,17 @@ emailRegisterSubmitBtn.onclick = async () => {
 auth.onAuthStateChanged(user => {
   if (user) {
     document.getElementById("profileDiv").innerHTML = `
-      <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
+      <img src="${user.photoURL || 'https://www.gravatar.com/avatar/?d=mp'}">
       <h3>${user.displayName || "Guest"}</h3>
     `;
+    logoutBtn.style.display = "block";
   }
 });
+logoutBtn.onclick = async () => {
+  await auth.signOut();
+  location.reload();
+};
+
 
 /* SETTINGS */
 function showSettings() {
