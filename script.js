@@ -34,11 +34,7 @@ const audienceBtn = document.getElementById("audienceBtn");
 const callFriendBox = document.getElementById("callFriendBox");
 const audienceVote = document.getElementById("audienceVote");
 
-const categorySelect = document.getElementById("categorySelect");
-const difficultySelect = document.getElementById("difficultySelect");
-const soundToggle = document.getElementById("soundToggle");
-
-/* SOUNDS */
+/* SOUND SYSTEM */
 const sounds = {
   intro: document.getElementById("intro-sound"),
   thinking: document.getElementById("thinking-sound"),
@@ -103,7 +99,11 @@ function showSettings() {
   playSound("intro");
 }
 
-/* GAME */
+function getChecked(name) {
+  return document.querySelector(`input[name="${name}"]:checked`).value;
+}
+
+/* GAME STATE */
 let questions = [];
 let current = 0;
 let ladderLevel = 0;
@@ -113,20 +113,22 @@ let friendUsed = false;
 let audienceUsed = false;
 const timePerQuestion = 30;
 
+/* START QUIZ */
 startBtn.onclick = startQuiz;
 
 async function startQuiz() {
-  const category = categorySelect.value;
-  const difficulty = difficultySelect.value;
-  soundEnabled = soundToggle.value === "on";
+  const category = getChecked("category");
+  const difficulty = getChecked("difficulty");
+  const count = getChecked("count");
+  soundEnabled = getChecked("sound") === "on";
 
-  const res = await fetch(`https://the-trivia-api.com/api/questions?limit=20&categories=${category}&difficulty=${difficulty}`);
+  const res = await fetch(`https://the-trivia-api.com/api/questions?limit=${count}&categories=${category}&difficulty=${difficulty}`);
   questions = await res.json();
 
   document.getElementById("categoryDiv").style.display = "none";
   document.getElementById("quiz-container").style.display = "block";
 
-  buildMoneyLadder(20);
+  buildMoneyLadder(count);
 
   current = 0;
   ladderLevel = 0;
@@ -138,6 +140,7 @@ async function startQuiz() {
 
 function showQuestion() {
   clearInterval(timer);
+
   callFriendBox.innerHTML = "";
   audienceVote.innerHTML = "";
 
@@ -168,7 +171,10 @@ function showQuestion() {
 function updateTimer(t) {
   timerText.textContent = t + "s";
   timerBar.style.width = (t / timePerQuestion * 100) + "%";
-  timerBar.style.background = t > 10 ? "#00ff00" : t > 5 ? "#ffcc00" : "#ff4d4d";
+
+  if (t > 10) timerBar.style.background = "#00ff00";
+  else if (t > 5) timerBar.style.background = "#ffcc00";
+  else timerBar.style.background = "#ff4d4d";
 }
 
 function checkAnswer(ans) {
@@ -198,7 +204,9 @@ function nextQuestion() {
   current++;
 
   if (current >= questions.length) {
-    showFinalScreen();
+    quizDiv.innerHTML = `<h2>🎉 YOU WON $${ladderLevel * 100}</h2>`;
+    saveScore(ladderLevel * 100);
+    playSound(ladderLevel > 0 ? "win" : "lose");
     return;
   }
 
@@ -211,7 +219,6 @@ function buildMoneyLadder(count) {
   moneyList.innerHTML = "";
   for (let i = count; i >= 1; i--) {
     const li = document.createElement("li");
-    li.className = "ladder-btn";
     li.textContent = "$" + (i * 100);
     moneyList.appendChild(li);
   }
@@ -227,7 +234,6 @@ function updateMoneyLadder() {
 fiftyBtn.onclick = () => {
   if (fiftyUsed) return;
   fiftyUsed = true;
-  fiftyBtn.classList.add("used");
 
   const correct = questions[current].correctAnswer;
   let removed = 0;
@@ -243,7 +249,6 @@ fiftyBtn.onclick = () => {
 callFriendBtn.onclick = () => {
   if (friendUsed) return;
   friendUsed = true;
-  callFriendBtn.classList.add("used");
   playSound("call");
   callFriendBox.innerHTML = `📞 Friend says: <b>${questions[current].correctAnswer}</b>`;
 };
@@ -251,7 +256,6 @@ callFriendBtn.onclick = () => {
 audienceBtn.onclick = () => {
   if (audienceUsed) return;
   audienceUsed = true;
-  audienceBtn.classList.add("used");
   playSound("audience");
 
   audienceVote.innerHTML = "";
@@ -260,21 +264,6 @@ audienceBtn.onclick = () => {
     audienceVote.innerHTML += `<div>${b.textContent}: ${percent}%</div>`;
   });
 };
-
-/* FINAL SCREEN */
-function showFinalScreen() {
-  stopAllSounds();
-  playSound("win");
-
-  quizDiv.innerHTML = `
-    <div class="final-screen">
-      <h1>🎉 CONGRATULATIONS</h1>
-      <h2>You Won $${ladderLevel * 100}</h2>
-      <button onclick="location.reload()">Restart Quiz</button>
-      <button onclick="navigator.share({text:'I won $${ladderLevel * 100} in NEON MILLIONAIRE!'})">Share Score</button>
-    </div>
-  `;
-}
 
 /* LEADERBOARD */
 function saveScore(score) {
@@ -288,5 +277,23 @@ function saveScore(score) {
     time: new Date()
   });
 }
+
+function loadLeaderboard() {
+  db.collection("scores").orderBy("score", "desc").limit(10)
+    .onSnapshot(snapshot => {
+      const list = document.getElementById("leaderboard-list");
+      list.innerHTML = "";
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        list.innerHTML += `
+          <li>
+            <img src="${d.photo || 'https://i.imgur.com/6VBx3io.png'}">
+            ${d.name} - $${d.score}
+          </li>`;
+      });
+    });
+}
+
+loadLeaderboard();
 
 });
