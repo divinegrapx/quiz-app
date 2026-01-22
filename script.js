@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ================= ELEMENTS ================= */
 
-  const logoutBtn = document.getElementById("logoutBtn");
+  
 
   const googleLoginBtn = document.getElementById("googleLoginBtn");
   const guestLoginBtn = document.getElementById("guestLoginBtn");
