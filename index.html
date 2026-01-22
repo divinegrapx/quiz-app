@@ -1,43 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>NEON MILLIONAIRE</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>NEON MILLIONAIRE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
 
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
+
 <body>
 
 <div class="container">
 
-  <div id="profileDiv"></div>
-
+  <!-- LOGOUT (hidden by default, shown only after quiz ends) -->
   <button id="logoutBtn" class="logout-btn" style="display:none;">
     Logout
   </button>
 
+  <!-- PROFILE -->
+  <div id="profileDiv"></div>
 
-
+  <!-- AUTH -->
   <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
+
     <button id="googleLoginBtn">Login with Google</button>
     <button id="guestLoginBtn">Play as Guest</button>
     <button id="emailRegisterBtn">Login / Register with Email</button>
   </div>
 
+  <!-- EMAIL LOGIN -->
   <div id="emailDiv" style="display:none;">
     <input type="email" id="emailInput" placeholder="Email">
     <input type="password" id="passwordInput" placeholder="Password">
+
     <button id="emailLoginBtn">Login</button>
     <button id="emailRegisterSubmitBtn">Register</button>
     <button id="emailCancelBtn">Cancel</button>
   </div>
 
+  <!-- GAME SETTINGS -->
   <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
 
@@ -61,30 +68,46 @@
       <option value="off">Sound OFF</option>
     </select>
 
-    <button id="startBtn" class="start-btn">START QUIZ</button>
+    <button id="startBtn" class="start-btn">
+      START QUIZ
+    </button>
   </div>
 
+  <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
+
+    <!-- TIMER -->
     <div id="timer-container">
       <div id="timer-bar"></div>
       <span id="timer-text">30s</span>
     </div>
 
+    <!-- QUIZ + MONEY LADDER -->
     <div id="quiz-and-ladder">
-      <div id="quiz"></div>
+
+      <!-- QUESTION + ANSWERS -->
+      <div id="quiz">
+        <!-- Question & answers injected by JS -->
+
+        <!-- LIFELINES (INSIDE QUIZ, UNDER ANSWERS) -->
+        <div id="lifelines" class="lifelines-inside">
+          <button id="fiftyBtn">50:50</button>
+          <button id="callFriendBtn">📞 Call</button>
+          <button id="audienceBtn">📊 Audience</button>
+        </div>
+      </div>
+
+      <!-- MONEY LADDER -->
       <ul id="money-list"></ul>
     </div>
 
-    <div id="lifelines">
-      <button id="fiftyBtn">50:50</button>
-      <button id="callFriendBtn">📞 Call</button>
-      <button id="audienceBtn">📊 Audience</button>
-    </div>
-
+    <!-- LIFELINE OUTPUT -->
     <div id="callFriendBox"></div>
     <div id="audienceVote"></div>
+
   </div>
 
+  <!-- LEADERBOARD -->
   <ul id="leaderboard-list"></ul>
 
   <!-- SOUNDS -->
@@ -100,6 +123,8 @@
 
 </div>
 
+<!-- MAIN SCRIPT -->
 <script src="script.js"></script>
+
 </body>
 </html>
