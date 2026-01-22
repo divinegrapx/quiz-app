@@ -25,6 +25,50 @@ const emailCancelBtn = document.getElementById("emailCancelBtn");
 
 const emailInput = document.getElementById("emailInput");
 const passwordInput = document.getElementById("passwordInput");
+googleLoginBtn.onclick = async () => {
+  try {
+    await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    showSettings();
+  } catch (e) {
+    alert(e.message);
+  }
+};
+
+guestLoginBtn.onclick = () => {
+  showSettings();
+};
+
+emailRegisterBtn.onclick = () => {
+  emailDiv.style.display = "block";
+};
+
+emailCancelBtn.onclick = () => {
+  emailDiv.style.display = "none";
+};
+
+emailLoginBtn.onclick = async () => {
+  try {
+    await auth.signInWithEmailAndPassword(
+      emailInput.value,
+      passwordInput.value
+    );
+    showSettings();
+  } catch (e) {
+    alert(e.message);
+  }
+};
+
+emailRegisterSubmitBtn.onclick = async () => {
+  try {
+    await auth.createUserWithEmailAndPassword(
+      emailInput.value,
+      passwordInput.value
+    );
+    showSettings();
+  } catch (e) {
+    alert(e.message);
+  }
+};
 
 /* ================= ELEMENTS ================= */
 
