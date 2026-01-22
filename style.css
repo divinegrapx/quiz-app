@@ -292,3 +292,42 @@ button.used {
     font-size: 16px;
   }
 }
+/* ---------- LIFELINES INSIDE QUIZ ---------- */
+
+.lifelines-inside {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.lifelines-inside button {
+  background: linear-gradient(135deg, #ffdd00, #ffaa00);
+  font-size: 14px;
+  min-width: 90px;
+}
+
+/* ---------- MOBILE POLISH ---------- */
+
+@media (max-width: 600px) {
+  .option-btn {
+    height: auto;
+    padding: 14px;
+    font-size: 16px;
+  }
+
+  .lifelines-inside {
+    gap: 8px;
+  }
+}
+
+/* ---------- LOGOUT ---------- */
+
+.logout-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: #ff4d4d;
+  color: #000;
+}
