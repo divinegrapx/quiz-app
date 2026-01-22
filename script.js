@@ -1,18 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-/* ================= UI ================= */
-
-function showSettings() {
-  authDiv.style.display = "none";
-  emailDiv.style.display = "none";
-  categoryDiv.style.display = "block";
-}
-
-function showQuiz() {
-  categoryDiv.style.display = "none";
-  quizContainer.style.display = "block";
-}
-
 /* ================= FIREBASE ================= */
 
 firebase.initializeApp({
@@ -30,39 +17,57 @@ const db = firebase.firestore();
 /* ================= ELEMENTS ================= */
 
 const authDiv = document.getElementById("authDiv");
-const emailDiv = document.getElementById("emailDiv");
 const categoryDiv = document.getElementById("categoryDiv");
 const quizContainer = document.getElementById("quiz-container");
+const profileDiv = document.getElementById("profileDiv");
 
+const startBtn = document.getElementById("startBtn");
 const quizDiv = document.getElementById("quiz");
 const moneyList = document.getElementById("money-list");
 const timerBar = document.getElementById("timer-bar");
 const timerText = document.getElementById("timer-text");
-const leaderboardList = document.getElementById("leaderboard-list");
 
-/* ================= AUTH ================= */
+const categorySelect = document.getElementById("categorySelect");
+const difficultySelect = document.getElementById("difficultySelect");
+const soundToggle = document.getElementById("soundToggle");
+const modeSelect = document.getElementById("modeSelect");
+
+/* ================= AUTH BUTTONS ================= */
 
 googleLoginBtn.onclick = async () => {
   await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-  showSettings();
 };
 
-guestLoginBtn.onclick = showSettings;
-
-emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
-emailCancelBtn.onclick = () => emailDiv.style.display = "none";
+guestLoginBtn.onclick = () => showSettings();
 
 emailLoginBtn.onclick = async () => {
   await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
-  showSettings();
 };
 
 emailRegisterSubmitBtn.onclick = async () => {
   await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
-  showSettings();
 };
 
-/* ================= SOUNDS ================= */
+/* ================= AUTH STATE ================= */
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    profileDiv.innerHTML = `
+      <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
+      <h3>${user.displayName || user.email || "Guest"}</h3>
+    `;
+    showSettings();
+  }
+});
+
+/* ================= UI ================= */
+
+function showSettings() {
+  authDiv.style.display = "none";
+  categoryDiv.style.display = "block";
+}
+
+/* ================= SOUND ENGINE ================= */
 
 const S = {
   intro: document.getElementById("intro-sound"),
@@ -77,6 +82,32 @@ const S = {
 };
 
 let soundEnabled = true;
+let audioUnlocked = false;
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  Object.values(S).forEach(a => {
+    a.volume = 1;
+    a.load();
+  });
+  audioUnlocked = true;
+}
+
+document.body.addEventListener("click", unlockAudio, { once: true });
+
+function play(name, loop = false) {
+  if (!soundEnabled || !audioUnlocked || !S[name]) return;
+  S[name].pause();
+  S[name].currentTime = 0;
+  S[name].loop = loop;
+  S[name].play().catch(()=>{});
+}
+
+function stop(name) {
+  if (!S[name]) return;
+  S[name].pause();
+  S[name].currentTime = 0;
+}
 
 /* ================= GAME ================= */
 
@@ -95,20 +126,22 @@ let locked = false;
 /* ================= START ================= */
 
 startBtn.onclick = async () => {
+  unlockAudio();
+
   soundEnabled = soundToggle.value === "on";
   timePerQuestion = modeSelect.value === "hardcore" ? 20 : 30;
 
-  if (soundEnabled) {
-    S.intro.currentTime = 0;
-    S.intro.play();
-  }
+  play("intro");
 
   const res = await fetch(
     `https://the-trivia-api.com/api/questions?limit=15&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`
   );
 
   questions = await res.json();
-  showQuiz();
+
+  categoryDiv.style.display = "none";
+  quizContainer.style.display = "block";
+
   buildMoney();
   showQuestion();
 };
@@ -118,17 +151,13 @@ startBtn.onclick = async () => {
 function showQuestion() {
   locked = false;
   clearInterval(timer);
-
-  if (soundEnabled) {
-    S.thinking.loop = true;
-    S.thinking.play();
-  }
+  play("thinking", true);
 
   const q = questions[current];
-  quizDiv.innerHTML = `<h2>Q${current+1}: ${q.question}</h2>`;
+  quizDiv.innerHTML = `<h2>Q${current + 1}: ${q.question}</h2>`;
 
   [...q.incorrectAnswers, q.correctAnswer]
-    .sort(() => Math.random()-0.5)
+    .sort(() => Math.random() - 0.5)
     .forEach(a => {
       const b = document.createElement("button");
       b.className = "option-btn";
@@ -148,20 +177,19 @@ function startTimer() {
   timer = setInterval(() => {
     t--;
     timerText.textContent = t + "s";
-    timerBar.style.width = `${(t/timePerQuestion)*100}%`;
-
-    if (t <= 5 && soundEnabled) S.tick.play();
-    if (t <= 0) timeOut();
+    timerBar.style.width = `${(t / timePerQuestion) * 100}%`;
+    if (t <= 5) play("tick");
+    if (t <= 0) endGame(getWinnings());
   }, 1000);
 }
 
-/* ================= ANSWER LOGIC ================= */
+/* ================= ANSWER ================= */
 
 function answer(a) {
   if (locked) return;
   locked = true;
   clearInterval(timer);
-  S.thinking.pause();
+  stop("thinking");
 
   const correct = questions[current].correctAnswer;
 
@@ -172,87 +200,52 @@ function answer(a) {
   });
 
   if (a === correct) {
-    if (soundEnabled) S.correct.play();
-    current++;
-    updateMoney();
+    play("correct");
   } else {
-    if (soundEnabled) S.wrong.play();
-    current++; // 🔥 continue game, no money gained
+    play("wrong");
   }
+
+  current++;
 
   setTimeout(() => {
     if (current === MONEY.length) win();
     else showQuestion();
-  }, 1800);
+  }, 1600);
 }
 
-/* ================= END CONDITIONS ================= */
-
-function timeOut() {
-  if (soundEnabled) S.lose.play();
-  endGame(getCurrentWinnings());
-}
+/* ================= END ================= */
 
 function win() {
-  if (soundEnabled) S.win.play();
+  play("win");
   endGame(1000000);
 }
 
 function endGame(score) {
+  stop("thinking");
   saveScore(score);
   quizDiv.innerHTML = `
     <div class="final-screen">
       <h1>🏁 GAME FINISHED</h1>
       <h2>$${score.toLocaleString()}</h2>
       <button onclick="location.reload()">Play Again</button>
-    </div>`;
+    </div>
+  `;
 }
 
 /* ================= MONEY ================= */
 
 function buildMoney() {
   moneyList.innerHTML = "";
-  MONEY.slice().reverse().forEach(v=>{
-    const li=document.createElement("li");
-    li.textContent="$"+v.toLocaleString();
+  MONEY.slice().reverse().forEach(v => {
+    const li = document.createElement("li");
+    li.textContent = "$" + v.toLocaleString();
     moneyList.appendChild(li);
   });
-  updateMoney();
 }
 
-function updateMoney() {
-  [...moneyList.children].forEach(li=>li.classList.remove("current"));
-  const i = MONEY.length-current-1;
-  if (moneyList.children[i]) moneyList.children[i].classList.add("current");
+function getWinnings() {
+  return current > 0 ? MONEY[current - 1] : 0;
 }
-
-function getCurrentWinnings() {
-  return current > 0 ? MONEY[current-1] : 0;
-}
-
-/* ================= LIFELINES ================= */
-
-fiftyBtn.onclick = () => {
-  const correct = questions[current].correctAnswer;
-  let removed = 0;
-  document.querySelectorAll(".option-btn").forEach(b=>{
-    if(b.textContent!==correct && removed<2){
-      b.disabled=true;
-      b.style.visibility="hidden";
-      removed++;
-    }
-  });
-};
-
-callFriendBtn.onclick = () => {
-  if (soundEnabled) S.call.play();
-  alert("📞 Friend thinks: " + questions[current].correctAnswer);
-};
-
-audienceBtn.onclick = () => {
-  if (soundEnabled) S.audience.play();
-  alert("📊 Audience votes strongly for: " + questions[current].correctAnswer);
-};
 
 /* ================= LEADERBOARD ================= */
 
@@ -261,21 +254,7 @@ function saveScore(score) {
     name: auth.currentUser?.displayName || "Guest",
     score,
     time: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(loadLeaderboard);
+  });
 }
-
-function loadLeaderboard() {
-  leaderboardList.innerHTML="<h3>🏆 Top 10</h3>";
-  db.collection("scores").orderBy("score","desc").limit(10).get()
-    .then(snap=>{
-      snap.forEach(d=>{
-        const li=document.createElement("li");
-        li.textContent=`${d.data().name} — $${d.data().score.toLocaleString()}`;
-        leaderboardList.appendChild(li);
-      });
-    });
-}
-
-loadLeaderboard();
 
 });
