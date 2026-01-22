@@ -17,15 +17,22 @@
 
   <div id="profileDiv"></div>
 
-  <!-- AUTH -->
-  <div id="authDiv" class="fade-in">
-    <h1 class="title glow">NEON MILLIONAIRE</h1>
+  <div id="authDiv">
+    <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
     <button id="guestLoginBtn">Play as Guest</button>
+    <button id="emailRegisterBtn">Login / Register with Email</button>
   </div>
 
-  <!-- SETTINGS -->
-  <div id="categoryDiv" style="display:none;" class="fade-in">
+  <div id="emailDiv" style="display:none;">
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passwordInput" placeholder="Password">
+    <button id="emailLoginBtn">Login</button>
+    <button id="emailRegisterSubmitBtn">Register</button>
+    <button id="emailCancelBtn">Cancel</button>
+  </div>
+
+  <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
 
     <select id="categorySelect">
@@ -34,6 +41,7 @@
       <option value="history">History</option>
       <option value="sports">Sports</option>
       <option value="film_and_tv">Movies & TV</option>
+      <option value="music">Music</option>
     </select>
 
     <select id="difficultySelect">
@@ -50,7 +58,6 @@
     <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
-  <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
     <div id="timer-container">
       <div id="timer-bar"></div>
@@ -72,8 +79,6 @@
     <div id="audienceVote"></div>
   </div>
 
-  <!-- LEADERBOARD -->
-  <h2 class="leader-title">🏆 Leaderboard</h2>
   <ul id="leaderboard-list"></ul>
 
   <!-- SOUNDS -->
