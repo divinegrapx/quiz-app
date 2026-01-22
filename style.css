@@ -179,6 +179,18 @@ button.used {
 }
 
 /* ---------- LIFELINES (MOVED UP + ANIMATED) ---------- */
+#lifelines {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  #lifelines {
+    flex-wrap: wrap;
+  }
+}
 
 #lifelines {
   display: flex;
