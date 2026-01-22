@@ -179,36 +179,19 @@ button.used {
 }
 
 /* ---------- LIFELINES (MOVED UP + ANIMATED) ---------- */
+
 #lifelines {
   margin-top: 10px;
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
+  animation: slideUp 0.6s ease;
 }
 
-@media (max-width: 600px) {
-  #lifelines {
-    flex-wrap: wrap;
-  }
+#lifelines button {
+  background: linear-gradient(135deg, #ffdd00, #ffaa00);
+  font-size: 14px;
 }
-
-#lifelines {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 12px;
-  margin-bottom: 10px;
-}
-
-#quiz {
-  display: flex;
-  flex-direction: column;
-}
-
-.option-btn {
-  margin-bottom: 10px;
-}
-
 
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
@@ -282,52 +265,4 @@ button.used {
   .ladder-btn {
     min-width: 100px;
   }
-}
-@media (max-width: 600px) {
-  #lifelines {
-    flex-wrap: wrap;
-  }
-
-  .option-btn {
-    font-size: 16px;
-  }
-}
-/* ---------- LIFELINES INSIDE QUIZ ---------- */
-
-.lifelines-inside {
-  margin-top: 14px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.lifelines-inside button {
-  background: linear-gradient(135deg, #ffdd00, #ffaa00);
-  font-size: 14px;
-  min-width: 90px;
-}
-
-/* ---------- MOBILE POLISH ---------- */
-
-@media (max-width: 600px) {
-  .option-btn {
-    height: auto;
-    padding: 14px;
-    font-size: 16px;
-  }
-
-  .lifelines-inside {
-    gap: 8px;
-  }
-}
-
-/* ---------- LOGOUT ---------- */
-
-.logout-btn {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  background: #ff4d4d;
-  color: #000;
 }
