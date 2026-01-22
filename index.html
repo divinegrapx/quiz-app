@@ -11,13 +11,12 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
-
 <body>
+
 <div class="container">
 
   <div id="profileDiv"></div>
 
-  <!-- AUTH -->
   <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
@@ -25,16 +24,14 @@
     <button id="emailRegisterBtn">Login / Register with Email</button>
   </div>
 
-  <!-- EMAIL -->
   <div id="emailDiv" style="display:none;">
-    <input id="emailInput" type="email" placeholder="Email">
-    <input id="passwordInput" type="password" placeholder="Password">
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passwordInput" placeholder="Password">
     <button id="emailLoginBtn">Login</button>
     <button id="emailRegisterSubmitBtn">Register</button>
     <button id="emailCancelBtn">Cancel</button>
   </div>
 
-  <!-- SETTINGS -->
   <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
 
@@ -61,7 +58,6 @@
     <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
-  <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
     <div id="timer-container">
       <div id="timer-bar"></div>
@@ -69,25 +65,20 @@
     </div>
 
     <div id="quiz-and-ladder">
-      <div id="quiz">
-        <div id="question-area"></div>
-
-        <div id="lifelines">
-          <button id="fiftyBtn">50:50</button>
-          <button id="callFriendBtn">📞 Call</button>
-          <button id="audienceBtn">📊 Audience</button>
-        </div>
-
-        <div id="callFriendBox"></div>
-        <div id="audienceVote"></div>
-      </div>
-
+      <div id="quiz"></div>
       <ul id="money-list"></ul>
     </div>
+
+    <div id="lifelines">
+      <button id="fiftyBtn">50:50</button>
+      <button id="callFriendBtn">📞 Call</button>
+      <button id="audienceBtn">📊 Audience</button>
+    </div>
+
+    <div id="callFriendBox"></div>
+    <div id="audienceVote"></div>
   </div>
 
-  <!-- LEADERBOARD -->
-  <h2>🏆 Leaderboard</h2>
   <ul id="leaderboard-list"></ul>
 
   <!-- SOUNDS -->
@@ -95,9 +86,10 @@
   <audio id="thinking-sound" src="thinking.mp3"></audio>
   <audio id="call-sound" src="call.mp3"></audio>
   <audio id="audience-sound" src="audience.mp3"></audio>
+  <audio id="win-sound" src="win.mp3"></audio>
+  <audio id="lose-sound" src="lose.mp3"></audio>
   <audio id="correct-sound" src="correct.wav"></audio>
   <audio id="wrong-sound" src="wrong.wav"></audio>
-  <audio id="win-sound" src="win.mp3"></audio>
   <audio id="tick-sound" src="tick.mp3"></audio>
 
 </div>
