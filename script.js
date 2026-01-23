@@ -54,7 +54,7 @@ const soundToggle = document.getElementById("soundToggle");
 
 const leaderboardList = document.getElementById("leaderboard-list");
 
-/* ================= SOUNDS ================= */
+/* ================= SOUNDS (FIXED) ================= */
 
 const sounds = {
   intro: document.getElementById("intro-sound"),
@@ -130,8 +130,7 @@ googleLoginBtn.onclick = async () => {
 };
 
 guestLoginBtn.onclick = () => {
-  localStorage.setItem("guestId", localStorage.getItem("guestId") || Math.random().toString(36).slice(2));
-  profileDiv.innerHTML = `<img src="https://i.imgur.com/6VBx3io.png"><h3>Guest</h3>`;
+  profileDiv.innerHTML = `<h3>👤 Guest</h3>`;
   showSettings();
 };
 
@@ -139,18 +138,26 @@ emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
 emailCancelBtn.onclick = () => emailDiv.style.display = "none";
 
 emailLoginBtn.onclick = async () => {
-  await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+  try {
+    await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+  } catch (e) {
+    alert(e.message);
+  }
 };
 
 emailRegisterSubmitBtn.onclick = async () => {
-  await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+  try {
+    await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+  } catch (e) {
+    alert(e.message);
+  }
 };
 
 auth.onAuthStateChanged(user => {
   if (user) {
     profileDiv.innerHTML = `
       <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
-      <h3>${user.displayName || "Player"}</h3>
+      <h3>${user.displayName || "User"}</h3>
     `;
     showSettings();
   }
@@ -174,29 +181,34 @@ let fiftyUsed = false;
 let friendUsed = false;
 let audienceUsed = false;
 
-/* ================= START QUIZ ================= */
+/* ================= START QUIZ (INTRO FIXED) ================= */
 
 startBtn.onclick = async () => {
   unlockAudio();
+  soundEnabled = soundToggle.value === "on";
+
   stopSounds();
 
-  soundEnabled = soundToggle.value === "on";
-  timePerQuestion = difficultySelect.value === "hardcore" ? 20 : 30;
+  // ✅ INTRO PLAYS HERE – guaranteed
+  if (soundEnabled) {
+    sounds.intro.currentTime = 0;
+    sounds.intro.loop = false;
+    sounds.intro.play().catch(() => {});
+  }
 
   categoryDiv.style.display = "none";
   quizContainer.style.display = "block";
 
+  current = 0;
+  earnedIndex = -1;
+  fiftyUsed = friendUsed = audienceUsed = false;
+
   buildMoney();
-  playSound("intro");
 
   const res = await fetch(
     `https://the-trivia-api.com/api/questions?limit=15&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`
   );
   questions = await res.json();
-
-  current = 0;
-  earnedIndex = -1;
-  fiftyUsed = friendUsed = audienceUsed = false;
 
   setTimeout(showQuestion, 1200);
 };
@@ -237,6 +249,7 @@ function startTimer() {
     if (t === 5) playSound("tick", true);
     if (t <= 0) {
       clearInterval(timer);
+      stopSounds();
       nextQuestion();
     }
   }, 1000);
@@ -274,7 +287,7 @@ function checkAnswer(ans) {
 
 function nextQuestion() {
   current++;
-  if (current >= questions.length) return endGame();
+  if (current >= questions.length) return winGame();
   showQuestion();
 }
 
@@ -284,6 +297,7 @@ function buildMoney() {
   moneyList.innerHTML = "";
   MONEY.slice().reverse().forEach(v => {
     const li = document.createElement("li");
+    li.className = "ladder-btn";
     li.textContent = `$${v.toLocaleString()}`;
     moneyList.appendChild(li);
   });
@@ -292,7 +306,10 @@ function buildMoney() {
 function updateMoney() {
   [...moneyList.children].forEach(li => li.classList.remove("current"));
   if (earnedIndex >= 0) {
-    moneyList.children[MONEY.length - earnedIndex - 1]?.classList.add("current");
+    const idx = MONEY.length - earnedIndex - 1;
+    if (moneyList.children[idx]) {
+      moneyList.children[idx].classList.add("current");
+    }
   }
 }
 
@@ -308,8 +325,8 @@ fiftyBtn.onclick = () => {
 
   document.querySelectorAll(".option-btn").forEach(b => {
     if (b.textContent !== correct && removed < 2) {
-      b.style.visibility = "hidden";
       b.disabled = true;
+      b.style.visibility = "hidden";
       removed++;
     }
   });
@@ -336,75 +353,21 @@ audienceBtn.onclick = () => {
   });
 };
 
-/* ================= END GAME ================= */
+/* ================= END ================= */
 
-function endGame() {
+function winGame() {
   stopSounds();
   playSound("win");
 
-  const score = earnedIndex >= 0 ? MONEY[earnedIndex] : 0;
-  saveScore(score);
+  const prize = earnedIndex >= 0 ? MONEY[earnedIndex] : 0;
 
   quizDiv.innerHTML = `
     <div class="final-screen">
-      <h1>🏆 GAME FINISHED</h1>
-      <h2>You won $${score.toLocaleString()}</h2>
+      <h1>🏆 FINISHED</h1>
+      <h2>You won $${prize.toLocaleString()}</h2>
       <button onclick="location.reload()">Play Again</button>
     </div>
   `;
 }
-
-/* ================= LEADERBOARD (TOTAL SCORE) ================= */
-
-function saveScore(score) {
-  const user = auth.currentUser;
-  const uid = user ? user.uid : "guest_" + localStorage.getItem("guestId");
-
-  const ref = db.collection("leaderboard").doc(uid);
-
-  ref.get().then(doc => {
-    if (!doc.exists) {
-      ref.set({
-        name: user?.displayName || "Guest",
-        photo: user?.photoURL || "",
-        totalScore: score,
-        gamesPlayed: 1,
-        updated: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } else {
-      ref.update({
-        totalScore: firebase.firestore.FieldValue.increment(score),
-        gamesPlayed: firebase.firestore.FieldValue.increment(1),
-        updated: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }
-  }).then(loadLeaderboard);
-}
-
-function loadLeaderboard() {
-  leaderboardList.innerHTML = "<h3>🏆 Top Players</h3>";
-
-  db.collection("leaderboard")
-    .orderBy("totalScore", "desc")
-    .limit(10)
-    .get()
-    .then(snap => {
-      snap.forEach(doc => {
-        const d = doc.data();
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <img src="${d.photo || 'https://i.imgur.com/6VBx3io.png'}">
-          <div>
-            <b>${d.name}</b><br>
-            <small>${d.gamesPlayed} games</small>
-          </div>
-          <b>$${d.totalScore.toLocaleString()}</b>
-        `;
-        leaderboardList.appendChild(li);
-      });
-    });
-}
-
-loadLeaderboard();
 
 });
