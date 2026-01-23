@@ -1,10 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   /* ================= FIREBASE ================= */
-  if (!window.firebaseConfig) {
-    console.error("Firebase config missing");
-    return;
-  }
+  const firebaseConfig = {
+    apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
+    authDomain: "neon-quiz-app.firebaseapp.com",
+    projectId: "neon-quiz-app",
+    storageBucket: "neon-quiz-app.appspot.com",
+    messagingSenderId: "891061147021",
+    appId: "1:891061147021:web:7b3d80020f642da7b699c4"
+  };
 
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
@@ -18,82 +22,92 @@ document.addEventListener("DOMContentLoaded", () => {
   const profileDiv = document.getElementById("profileDiv");
   const leaderboardList = document.getElementById("leaderboard-list");
 
-  /* ================= SOUNDS ================= */
-  const introSound = document.getElementById("intro-sound");
+  const googleBtn = document.getElementById("googleLoginBtn");
+  const guestBtn = document.getElementById("guestLoginBtn");
+  const emailBtn = document.getElementById("emailRegisterBtn");
+  const emailLoginBtn = document.getElementById("emailLoginBtn");
+  const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
+  const emailCancelBtn = document.getElementById("emailCancelBtn");
 
+  /* ================= SOUND ================= */
+  const intro = document.getElementById("intro-sound");
   let audioUnlocked = false;
 
-  function unlockAudioOnce() {
+  function unlockAudio() {
     if (audioUnlocked) return;
-    introSound.volume = 0.8;
-    introSound.play().then(() => {
+    intro.volume = 0.8;
+    intro.play().then(() => {
+      intro.pause();
+      intro.currentTime = 0;
       audioUnlocked = true;
+      playIntro();
     }).catch(() => {});
   }
 
-  document.body.addEventListener("click", unlockAudioOnce, { once: true });
-
   function playIntro() {
     if (!audioUnlocked) return;
-    introSound.currentTime = 0;
-    introSound.play().catch(() => {});
+    intro.currentTime = 0;
+    intro.loop = true;
+    intro.play().catch(() => {});
   }
 
-  /* ================= AUTH BUTTONS ================= */
-  document.getElementById("googleLoginBtn").addEventListener("click", () => {
+  document.body.addEventListener("click", unlockAudio, { once: true });
+
+  /* ================= BUTTONS ================= */
+  googleBtn.onclick = () => {
     auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-      .catch(err => alert(err.message));
-  });
+      .catch(e => alert(e.message));
+  };
 
-  document.getElementById("guestLoginBtn").addEventListener("click", () => {
+  guestBtn.onclick = () => {
     auth.signInAnonymously()
-      .catch(err => alert(err.message));
-  });
+      .catch(e => alert(e.message));
+  };
 
-  document.getElementById("emailRegisterBtn").addEventListener("click", () => {
+  emailBtn.onclick = () => {
     authDiv.style.display = "none";
     emailDiv.style.display = "block";
-  });
+  };
 
-  document.getElementById("emailCancelBtn").addEventListener("click", () => {
+  emailCancelBtn.onclick = () => {
     emailDiv.style.display = "none";
     authDiv.style.display = "block";
-  });
+  };
 
-  document.getElementById("emailLoginBtn").addEventListener("click", () => {
+  emailLoginBtn.onclick = () => {
     auth.signInWithEmailAndPassword(
       emailInput.value,
       passwordInput.value
-    ).catch(err => alert(err.message));
-  });
+    ).catch(e => alert(e.message));
+  };
 
-  document.getElementById("emailRegisterSubmitBtn").addEventListener("click", () => {
+  emailRegisterSubmitBtn.onclick = () => {
     auth.createUserWithEmailAndPassword(
       emailInput.value,
       passwordInput.value
-    ).catch(err => alert(err.message));
-  });
+    ).catch(e => alert(e.message));
+  };
 
   /* ================= AUTH STATE ================= */
   auth.onAuthStateChanged(user => {
 
     if (!user) {
+      profileDiv.innerHTML = "";
       authDiv.style.display = "block";
       emailDiv.style.display = "none";
       categoryDiv.style.display = "none";
       quizContainer.style.display = "none";
-      profileDiv.innerHTML = "";
-      playIntro();
       loadLeaderboard();
+      playIntro();
       return;
     }
 
-    introSound.pause();
-    introSound.currentTime = 0;
+    intro.pause();
+    intro.currentTime = 0;
 
     profileDiv.innerHTML = `
       <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
-      <span>${user.displayName || "Guest"}</span>
+      <b>${user.displayName || "Guest"}</b>
     `;
 
     authDiv.style.display = "none";
@@ -103,31 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* ================= LEADERBOARD ================= */
-  function saveScore(score) {
-    const user = auth.currentUser;
-    const uid = user.uid;
-
-    const ref = db.collection("leaderboard").doc(uid);
-
-    ref.get().then(doc => {
-      if (!doc.exists) {
-        ref.set({
-          name: user.displayName || "Guest",
-          photo: user.photoURL || "",
-          totalScore: score,
-          gamesPlayed: 1,
-          updated: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      } else {
-        ref.update({
-          totalScore: firebase.firestore.FieldValue.increment(score),
-          gamesPlayed: firebase.firestore.FieldValue.increment(1),
-          updated: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
-    }).then(loadLeaderboard);
-  }
-
   function loadLeaderboard() {
     leaderboardList.innerHTML = "<h3>🏆 Top Players</h3>";
 
@@ -142,11 +131,11 @@ document.addEventListener("DOMContentLoaded", () => {
           li.innerHTML = `
             <img src="${d.photo || 'https://i.imgur.com/6VBx3io.png'}">
             <span>${d.name}</span>
-            <b>$${d.totalScore.toLocaleString()}</b>
+            <b>$${(d.totalScore || 0).toLocaleString()}</b>
           `;
           leaderboardList.appendChild(li);
         });
       });
-  }
+  };
 
 });
