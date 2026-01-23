@@ -64,57 +64,53 @@ const sounds = {
   correct: document.getElementById("correct-sound"),
   wrong: document.getElementById("wrong-sound"),
   win: document.getElementById("win-sound"),
-  lose: document.getElementById("lose-sound"),
   tick: document.getElementById("tick-sound")
 };
 
 let soundEnabled = true;
-let audioReady = false;
-let currentLoop = null;
-
-/* ================= SOUND ENGINE ================= */
+let audioUnlocked = false;
+let loopSound = null;
 
 function unlockAudio() {
-  if (audioReady) return;
+  if (audioUnlocked) return;
   Object.values(sounds).forEach(s => {
+    if (!s) return;
     s.volume = 0.8;
     s.play().then(() => {
       s.pause();
       s.currentTime = 0;
     }).catch(() => {});
   });
-  audioReady = true;
+  audioUnlocked = true;
 }
 
 document.body.addEventListener("click", unlockAudio, { once: true });
 
-function stopAllSounds() {
+function stopSounds() {
   Object.values(sounds).forEach(s => {
+    if (!s) return;
     s.pause();
     s.currentTime = 0;
     s.loop = false;
   });
-  currentLoop = null;
+  loopSound = null;
 }
 
-function play(name, loop = false) {
-  if (!soundEnabled || !audioReady) return;
+function playSound(name, loop = false) {
+  if (!soundEnabled || !audioUnlocked) return;
   const s = sounds[name];
   if (!s) return;
 
-  if (currentLoop && currentLoop !== s) {
-    currentLoop.pause();
-    currentLoop.currentTime = 0;
+  if (loopSound && loopSound !== s) {
+    loopSound.pause();
+    loopSound.currentTime = 0;
   }
 
-  if (!loop) {
-    s.pause();
-    s.currentTime = 0;
-  }
-
+  s.pause();
+  s.currentTime = 0;
   s.loop = loop;
   s.play().catch(() => {});
-  if (loop) currentLoop = s;
+  if (loop) loopSound = s;
 }
 
 /* ================= AUTH ================= */
@@ -134,7 +130,8 @@ googleLoginBtn.onclick = async () => {
 };
 
 guestLoginBtn.onclick = () => {
-  profileDiv.innerHTML = `<h3>👤 Guest</h3>`;
+  localStorage.setItem("guestId", localStorage.getItem("guestId") || Math.random().toString(36).slice(2));
+  profileDiv.innerHTML = `<img src="https://i.imgur.com/6VBx3io.png"><h3>Guest</h3>`;
   showSettings();
 };
 
@@ -142,26 +139,18 @@ emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
 emailCancelBtn.onclick = () => emailDiv.style.display = "none";
 
 emailLoginBtn.onclick = async () => {
-  try {
-    await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
-  } catch (e) {
-    alert(e.message);
-  }
+  await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
 };
 
 emailRegisterSubmitBtn.onclick = async () => {
-  try {
-    await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
-  } catch (e) {
-    alert(e.message);
-  }
+  await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
 };
 
 auth.onAuthStateChanged(user => {
   if (user) {
     profileDiv.innerHTML = `
       <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
-      <h3>${user.displayName || "User"}</h3>
+      <h3>${user.displayName || "Player"}</h3>
     `;
     showSettings();
   }
@@ -177,28 +166,28 @@ const MONEY = [
 
 let questions = [];
 let current = 0;
-let earned = -1;
+let earnedIndex = -1;
 let timer;
 let timePerQuestion = 30;
 
 let fiftyUsed = false;
 let friendUsed = false;
 let audienceUsed = false;
-let tickStarted = false;
 
 /* ================= START QUIZ ================= */
 
 startBtn.onclick = async () => {
   unlockAudio();
-  stopAllSounds();
+  stopSounds();
 
   soundEnabled = soundToggle.value === "on";
+  timePerQuestion = difficultySelect.value === "hardcore" ? 20 : 30;
 
   categoryDiv.style.display = "none";
   quizContainer.style.display = "block";
 
   buildMoney();
-  play("intro");
+  playSound("intro");
 
   const res = await fetch(
     `https://the-trivia-api.com/api/questions?limit=15&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`
@@ -206,7 +195,7 @@ startBtn.onclick = async () => {
   questions = await res.json();
 
   current = 0;
-  earned = -1;
+  earnedIndex = -1;
   fiftyUsed = friendUsed = audienceUsed = false;
 
   setTimeout(showQuestion, 1200);
@@ -215,9 +204,8 @@ startBtn.onclick = async () => {
 /* ================= QUESTIONS ================= */
 
 function showQuestion() {
-  stopAllSounds();
-  play("thinking", true);
-  tickStarted = false;
+  stopSounds();
+  playSound("thinking", true);
 
   clearInterval(timer);
   callFriendBox.innerHTML = "";
@@ -226,15 +214,15 @@ function showQuestion() {
   const q = questions[current];
   quizDiv.innerHTML = `<h2>Q${current + 1}: ${q.question}</h2>`;
 
-  const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
-
-  answers.forEach(a => {
-    const btn = document.createElement("button");
-    btn.className = "option-btn";
-    btn.textContent = a;
-    btn.onclick = () => checkAnswer(a);
-    quizDiv.appendChild(btn);
-  });
+  [...q.incorrectAnswers, q.correctAnswer]
+    .sort(() => Math.random() - 0.5)
+    .forEach(a => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.textContent = a;
+      btn.onclick = () => checkAnswer(a);
+      quizDiv.appendChild(btn);
+    });
 
   startTimer();
 }
@@ -246,15 +234,9 @@ function startTimer() {
   timer = setInterval(() => {
     t--;
     updateTimer(t);
-
-    if (t === 5 && !tickStarted) {
-      play("tick", true);
-      tickStarted = true;
-    }
-
+    if (t === 5) playSound("tick", true);
     if (t <= 0) {
       clearInterval(timer);
-      stopAllSounds();
       nextQuestion();
     }
   }, 1000);
@@ -269,7 +251,7 @@ function updateTimer(t) {
 
 function checkAnswer(ans) {
   clearInterval(timer);
-  stopAllSounds();
+  stopSounds();
 
   const correct = questions[current].correctAnswer;
 
@@ -280,11 +262,11 @@ function checkAnswer(ans) {
   });
 
   if (ans === correct) {
-    earned++;
-    play("correct");
+    earnedIndex++;
+    playSound("correct");
     updateMoney();
   } else {
-    play("wrong");
+    playSound("wrong");
   }
 
   setTimeout(nextQuestion, 1800);
@@ -292,7 +274,7 @@ function checkAnswer(ans) {
 
 function nextQuestion() {
   current++;
-  if (current >= questions.length) return winGame();
+  if (current >= questions.length) return endGame();
   showQuestion();
 }
 
@@ -302,18 +284,15 @@ function buildMoney() {
   moneyList.innerHTML = "";
   MONEY.slice().reverse().forEach(v => {
     const li = document.createElement("li");
-    li.className = "ladder-btn";
     li.textContent = `$${v.toLocaleString()}`;
     moneyList.appendChild(li);
   });
-  updateMoney();
 }
 
 function updateMoney() {
   [...moneyList.children].forEach(li => li.classList.remove("current"));
-  if (earned >= 0) {
-    const idx = MONEY.length - earned - 1;
-    if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
+  if (earnedIndex >= 0) {
+    moneyList.children[MONEY.length - earnedIndex - 1]?.classList.add("current");
   }
 }
 
@@ -329,8 +308,8 @@ fiftyBtn.onclick = () => {
 
   document.querySelectorAll(".option-btn").forEach(b => {
     if (b.textContent !== correct && removed < 2) {
-      b.disabled = true;
       b.style.visibility = "hidden";
+      b.disabled = true;
       removed++;
     }
   });
@@ -340,8 +319,7 @@ callFriendBtn.onclick = () => {
   if (friendUsed) return;
   friendUsed = true;
   callFriendBtn.classList.add("used");
-  play("call");
-
+  playSound("call");
   callFriendBox.innerHTML = `📞 Friend thinks: <b>${questions[current].correctAnswer}</b>`;
 };
 
@@ -349,7 +327,7 @@ audienceBtn.onclick = () => {
   if (audienceUsed) return;
   audienceUsed = true;
   audienceBtn.classList.add("used");
-  play("audience");
+  playSound("audience");
 
   audienceVote.innerHTML = "";
   document.querySelectorAll(".option-btn").forEach(b => {
@@ -358,42 +336,73 @@ audienceBtn.onclick = () => {
   });
 };
 
-/* ================= END ================= */
+/* ================= END GAME ================= */
 
-function winGame() {
-  stopAllSounds();
-  play("win");
-  saveScore(earned >= 0 ? MONEY[earned] : 0);
+function endGame() {
+  stopSounds();
+  playSound("win");
+
+  const score = earnedIndex >= 0 ? MONEY[earnedIndex] : 0;
+  saveScore(score);
 
   quizDiv.innerHTML = `
     <div class="final-screen">
-      <h1>🏆 FINISHED</h1>
-      <h2>You won $${earned >= 0 ? MONEY[earned] : 0}</h2>
+      <h1>🏆 GAME FINISHED</h1>
+      <h2>You won $${score.toLocaleString()}</h2>
       <button onclick="location.reload()">Play Again</button>
     </div>
   `;
 }
 
-/* ================= LEADERBOARD ================= */
+/* ================= LEADERBOARD (TOTAL SCORE) ================= */
 
 function saveScore(score) {
   const user = auth.currentUser;
-  db.collection("scores").add({
-    name: user?.displayName || "Guest",
-    score,
-    time: firebase.firestore.FieldValue.serverTimestamp()
+  const uid = user ? user.uid : "guest_" + localStorage.getItem("guestId");
+
+  const ref = db.collection("leaderboard").doc(uid);
+
+  ref.get().then(doc => {
+    if (!doc.exists) {
+      ref.set({
+        name: user?.displayName || "Guest",
+        photo: user?.photoURL || "",
+        totalScore: score,
+        gamesPlayed: 1,
+        updated: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      ref.update({
+        totalScore: firebase.firestore.FieldValue.increment(score),
+        gamesPlayed: firebase.firestore.FieldValue.increment(1),
+        updated: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
   }).then(loadLeaderboard);
 }
 
 function loadLeaderboard() {
-  leaderboardList.innerHTML = "<h3>🏆 Top 10</h3>";
-  db.collection("scores").orderBy("score", "desc").limit(10).get().then(snap => {
-    snap.forEach(doc => {
-      const li = document.createElement("li");
-      li.textContent = `${doc.data().name} — $${doc.data().score}`;
-      leaderboardList.appendChild(li);
+  leaderboardList.innerHTML = "<h3>🏆 Top Players</h3>";
+
+  db.collection("leaderboard")
+    .orderBy("totalScore", "desc")
+    .limit(10)
+    .get()
+    .then(snap => {
+      snap.forEach(doc => {
+        const d = doc.data();
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <img src="${d.photo || 'https://i.imgur.com/6VBx3io.png'}">
+          <div>
+            <b>${d.name}</b><br>
+            <small>${d.gamesPlayed} games</small>
+          </div>
+          <b>$${d.totalScore.toLocaleString()}</b>
+        `;
+        leaderboardList.appendChild(li);
+      });
     });
-  });
 }
 
 loadLeaderboard();
