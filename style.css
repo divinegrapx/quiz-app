@@ -82,7 +82,9 @@ button.used {
   min-height: 320px;
 }
 
-#quiz h2 { margin-bottom: 10px; }
+#quiz h2 {
+  margin-bottom: 10px;
+}
 
 .option-btn {
   width: 100%;
@@ -93,31 +95,30 @@ button.used {
   font-weight: bold;
   background: linear-gradient(135deg, #1c92d2, #f2fcfe);
   color: #000;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .correct.glow {
-  animation: glowPulse 1s infinite alternate;
   background: #00ff00 !important;
+  color: #000;
+  animation: pulse 0.7s infinite alternate;
+}
+
+@keyframes pulse {
+  from { box-shadow: 0 0 10px #00ff00; }
+  to { box-shadow: 0 0 25px #00ff00; }
 }
 
 .wrong.shake {
-  animation: shake 0.5s;
   background: #ff4d4d !important;
-}
-
-@keyframes glowPulse {
-  from { box-shadow: 0 0 10px #00ff00; }
-  to { box-shadow: 0 0 30px #00ff00; }
+  color: #000;
+  animation: shake 0.3s;
 }
 
 @keyframes shake {
   0% { transform: translateX(0); }
-  25% { transform: translateX(-8px); }
-  50% { transform: translateX(8px); }
-  75% { transform: translateX(-8px); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
   100% { transform: translateX(0); }
 }
 
@@ -177,13 +178,11 @@ button.used {
   display: flex;
   justify-content: center;
   gap: 10px;
-  animation: slideUp 0.6s ease;
 }
 
 #callFriendBox, #audienceVote {
   margin: 10px 0;
   font-size: 16px;
-  animation: fadeIn 0.4s ease;
 }
 
 #leaderboard-list {
@@ -210,7 +209,6 @@ button.used {
 
 .final-screen {
   padding: 40px;
-  animation: fadeIn 0.6s ease-in-out;
 }
 
 .final-screen h1 {
@@ -224,13 +222,17 @@ button.used {
   to { opacity: 1; transform: scale(1); }
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
 @media (max-width: 700px) {
-  #quiz-and-ladder { flex-direction: column; }
-  #money-list { flex-direction: row; overflow-x: auto; }
-  .ladder-btn { min-width: 100px; }
+  #quiz-and-ladder {
+    flex-direction: column;
+  }
+
+  #money-list {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .ladder-btn {
+    min-width: 100px;
+  }
 }
