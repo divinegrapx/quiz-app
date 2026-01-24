@@ -21,15 +21,41 @@
     <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
     <button id="guestLoginBtn">Play as Guest</button>
+    <button id="emailRegisterBtn">Login / Register with Email</button>
+  </div>
+
+  <div id="emailDiv" style="display:none;">
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passwordInput" placeholder="Password">
+    <button id="emailLoginBtn">Login</button>
+    <button id="emailRegisterSubmitBtn">Register</button>
+    <button id="emailCancelBtn">Cancel</button>
   </div>
 
   <div id="categoryDiv" style="display:none;">
-    <h2>Game Mode</h2>
-    <select id="modeSelect">
-      <option value="normal">Normal</option>
-      <option value="hardcore">Hardcore 🔥</option>
+    <h2>Game Settings</h2>
+
+    <select id="categorySelect">
+      <option value="general_knowledge">General</option>
+      <option value="science">Science</option>
+      <option value="history">History</option>
+      <option value="sports">Sports</option>
+      <option value="film_and_tv">Movies & TV</option>
+      <option value="music">Music</option>
     </select>
-    <button id="startBtn">START</button>
+
+    <select id="difficultySelect">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+
+    <select id="soundToggle">
+      <option value="on">Sound ON</option>
+      <option value="off">Sound OFF</option>
+    </select>
+
+    <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
   <div id="quiz-container" style="display:none;">
@@ -47,20 +73,21 @@
       <button id="fiftyBtn">50:50</button>
       <button id="callFriendBtn">📞 Call</button>
       <button id="audienceBtn">📊 Audience</button>
-      <button id="secondChanceBtn">❤️ Second</button>
     </div>
-
-    <button id="walkAwayBtn" class="walk">💰 Walk Away</button>
 
     <div id="callFriendBox"></div>
     <div id="audienceVote"></div>
   </div>
 
-  <h3>🏆 TOP 10 LIFETIME</h3>
   <ul id="leaderboard-list"></ul>
 
   <!-- SOUNDS -->
+  <audio id="intro-sound" src="intro.mp3"></audio>
   <audio id="thinking-sound" src="thinking.mp3"></audio>
+  <audio id="call-sound" src="call.mp3"></audio>
+  <audio id="audience-sound" src="audience.mp3"></audio>
+  <audio id="win-sound" src="win.mp3"></audio>
+  <audio id="lose-sound" src="lose.mp3"></audio>
   <audio id="correct-sound" src="correct.wav"></audio>
   <audio id="wrong-sound" src="wrong.wav"></audio>
   <audio id="tick-sound" src="tick.mp3"></audio>
