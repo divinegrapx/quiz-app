@@ -70,9 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
       showSettings();
-    } catch (err) {
-      alert("Google Login failed: " + err.message);
-    }
+    } catch (err) { alert("Google Login failed: " + err.message); }
   };
 
   guestLoginBtn.onclick = () => showSettings();
@@ -84,18 +82,14 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
       showSettings();
-    } catch (err) {
-      alert("Email login failed: " + err.message);
-    }
+    } catch (err) { alert("Email login failed: " + err.message); }
   };
 
   emailRegisterSubmitBtn.onclick = async () => {
     try {
       await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
       showSettings();
-    } catch (err) {
-      alert("Email registration failed: " + err.message);
-    }
+    } catch (err) { alert("Email registration failed: " + err.message); }
   };
 
   auth.onAuthStateChanged(user => {
@@ -186,53 +180,55 @@ document.addEventListener("DOMContentLoaded", () => {
     timerBar.style.background = t > 10 ? "#00ff00" : t > 5 ? "#ffcc00" : "#ff4d4d";
   }
 
+  /* ================= CHECK ANSWER ================= */
   function checkAnswer(ans) {
     clearInterval(timer);
     stopAllSounds();
 
     const correct = questions[current].correctAnswer;
 
-    document.querySelectorAll(".option-btn").forEach(b => {
-      b.disabled = true;
-      if (b.textContent === correct) b.classList.add("pulse-glow");
-      if (b.textContent === ans && ans !== correct) b.classList.add("shake-red");
-    });
+    document.querySelectorAll(".option-btn").forEach(b => b.disabled = true);
 
     if (ans === correct) {
+      // Correct answer selected
       score += 100;
       ladderLevel++;
+      const clickedBtn = Array.from(document.querySelectorAll(".option-btn")).find(b => b.textContent === ans);
+      clickedBtn.style.background = "#00ff00"; // 100% green
+      clickedBtn.classList.add("pulse-glow");
       playSound("correct");
       updateMoneyLadder();
       setTimeout(nextQuestion, 1500);
     } else {
+      // Wrong answer selected
       if (!secondChanceUsed) {
         secondChanceUsed = true;
-        alert("❤️ Second Chance used! Try again!");
+        alert("❤️ Second Chance activated! Try again!");
         document.querySelectorAll(".option-btn").forEach(b => b.disabled = false);
         return;
-      } else {
-        playSound("wrong");
-        updateMoneyLadder();
-        highlightCorrectAnswer(correct);
-        setTimeout(() => nextQuestion(false), 2000);
       }
+
+      const clickedBtn = Array.from(document.querySelectorAll(".option-btn")).find(b => b.textContent === ans);
+      clickedBtn.style.background = "#ff4d4d"; // 100% red
+      clickedBtn.classList.add("shake-red");
+
+      // Highlight correct
+      const correctBtn = Array.from(document.querySelectorAll(".option-btn")).find(b => b.textContent === correct);
+      correctBtn.style.background = "#00ff00"; // 100% green
+      correctBtn.classList.add("pulse-glow");
+
+      playSound("wrong");
+      updateMoneyLadder();
+      setTimeout(nextQuestion, 2000);
     }
   }
 
-  function highlightCorrectAnswer(correct) {
-    document.querySelectorAll(".option-btn").forEach(b => {
-      if (b.textContent === correct) b.classList.add("pulse-glow");
-    });
-  }
-
-  function nextQuestion(isCorrect=true) {
+  function nextQuestion(isCorrect = true) {
     current++;
-
     if (current >= questions.length) {
       showFinalScreen();
       return;
     }
-
     playSound("thinking");
     showQuestion();
   }
@@ -275,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (secondChanceUsed) return;
     secondChanceUsed = true;
     secondChanceBtn.classList.add("used");
-    alert("❤️ Second Chance activated! You will survive one wrong answer.");
+    alert("❤️ Second Chance activated! One wrong answer forgiven.");
   };
 
   callFriendBtn.onclick = () => {
@@ -296,7 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const correct = questions[current].correctAnswer;
     audienceVote.innerHTML = "";
     document.querySelectorAll(".option-btn").forEach(b => {
-      let percent = Math.floor(Math.random() * 50) + 25; // 25-75% correct bias
+      let percent = Math.floor(Math.random() * 50) + 25;
       if (b.textContent === correct) percent += 15;
       audienceVote.innerHTML += `<div>${b.textContent}: ${percent}%</div>`;
     });
