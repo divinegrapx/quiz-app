@@ -1,198 +1,163 @@
-document.addEventListener("DOMContentLoaded", () => {
-
-  /* ================= FIREBASE ================= */
-  const firebaseConfig = {
-    apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
-    authDomain: "neon-quiz-app.firebaseapp.com",
-    projectId: "neon-quiz-app",
-    storageBucket: "neon-quiz-app.appspot.com",
-    messagingSenderId: "891061147021",
-    appId: "1:891061147021:web:7b3d80020f642da7b699c4"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  /* ================= ELEMENTS ================= */
-  const quizDiv = document.getElementById("quiz");
-  const moneyList = document.getElementById("money-list");
-  const leaderboardList = document.getElementById("leaderboard-list");
-
-  const fiftyBtn = document.getElementById("fiftyBtn");
-  const secondChanceBtn = document.getElementById("secondChanceBtn");
-
-  /* ================= STATE ================= */
-  let questions = [];
-  let current = 0;
-  let score = 0;
-  let ladderLevel = 0;
-
-  let secondChanceActive = false;
-  let secondChanceUsed = false;
-  let fiftyUsed = false;
-
-  /* ================= MONEY LADDER ================= */
-  function buildMoneyLadder() {
-    moneyList.innerHTML = "";
-    for (let i = 20; i >= 1; i--) {
-      const li = document.createElement("li");
-      li.className = "ladder-btn";
-      li.textContent = "$" + (i * 100);
-      moneyList.appendChild(li);
-    }
-  }
-
-  function updateMoneyLadder() {
-    [...moneyList.children].forEach(li => li.classList.remove("current"));
-    const index = moneyList.children.length - ladderLevel;
-    if (moneyList.children[index]) {
-      moneyList.children[index].classList.add("current");
-    }
-  }
-
-  /* ================= START QUIZ ================= */
-  async function startQuiz() {
-    const res = await fetch("https://the-trivia-api.com/api/questions?limit=20");
-    questions = await res.json();
-
-    current = 0;
-    score = 0;
-    ladderLevel = 0;
-    secondChanceActive = false;
-    secondChanceUsed = false;
-    fiftyUsed = false;
-
-    buildMoneyLadder();
-    showQuestion();
-  }
-
-  /* ================= QUESTION ================= */
-  function showQuestion() {
-    quizDiv.innerHTML = "";
-
-    const q = questions[current];
-    quizDiv.innerHTML = `<h2>Q${current + 1}: ${q.question}</h2>`;
-
-    const answers = [...q.incorrectAnswers, q.correctAnswer]
-      .sort(() => Math.random() - 0.5);
-
-    answers.forEach(ans => {
-      const btn = document.createElement("button");
-      btn.className = "option-btn";
-      btn.textContent = ans;
-      btn.onclick = () => handleAnswer(btn, ans);
-      quizDiv.appendChild(btn);
-    });
-  }
-
-  /* ================= ANSWERS ================= */
-  function handleAnswer(btn, answer) {
-    const correct = questions[current].correctAnswer;
-    const buttons = document.querySelectorAll(".option-btn");
-
-    buttons.forEach(b => {
-      b.disabled = true;
-      if (b.textContent === correct) b.classList.add("correct");
-    });
-
-    if (answer === correct) {
-      btn.classList.add("correct");
-      score += 100;
-      ladderLevel++;
-      updateMoneyLadder();
-      nextQuestion();
-    } else {
-      btn.classList.add("wrong");
-
-      if (secondChanceActive) {
-        secondChanceActive = false;
-        return; // forgiven, NO game over
-      }
-
-      score = Math.max(0, score - 100);
-      nextQuestion(); // continue game
-    }
-  }
-
-  function nextQuestion() {
-    setTimeout(() => {
-      current++;
-      if (current >= questions.length) endGame();
-      else showQuestion();
-    }, 1200);
-  }
-
-  /* ================= LIFELINES ================= */
-  fiftyBtn.onclick = () => {
-    if (fiftyUsed || score < 100) return;
-    score -= 100;
-    fiftyUsed = true;
-    fiftyBtn.classList.add("used");
-
-    const correct = questions[current].correctAnswer;
-    let removed = 0;
-    document.querySelectorAll(".option-btn").forEach(b => {
-      if (b.textContent !== correct && removed < 2) {
-        b.style.opacity = 0.25;
-        removed++;
-      }
-    });
-  };
-
-  secondChanceBtn.onclick = () => {
-    if (secondChanceUsed || score < 200) return;
-    score -= 200;
-    secondChanceActive = true;
-    secondChanceUsed = true;
-    secondChanceBtn.classList.add("used");
-  };
-
-  /* ================= LEADERBOARD ================= */
-  async function saveScore() {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const ref = db.collection("leaderboard").doc(user.uid);
-    const doc = await ref.get();
-
-    const total = doc.exists ? doc.data().total + score : score;
-    const games = doc.exists ? doc.data().games + 1 : 1;
-
-    await ref.set({
-      name: user.displayName || "Guest",
-      total,
-      games
-    });
-  }
-
-  async function loadLeaderboard() {
-    leaderboardList.innerHTML = "";
-    const snap = await db.collection("leaderboard")
-      .orderBy("total", "desc")
-      .limit(10)
-      .get();
-
-    snap.forEach(doc => {
-      const li = document.createElement("li");
-      li.textContent = `${doc.data().name} — $${doc.data().total}`;
-      leaderboardList.appendChild(li);
-    });
-  }
-
-  /* ================= END ================= */
-  async function endGame() {
-    await saveScore();
-    await loadLeaderboard();
-
-    quizDiv.innerHTML = `
-      <div class="final-screen">
-        <h1>🎉 Finished</h1>
-        <h2>Total: $${score}</h2>
-        <button onclick="location.reload()">Play Again</button>
-      </div>
-    `;
-  }
-
-  /* AUTO START FOR TESTING */
-  startQuiz();
+// 🔥 FIREBASE CONFIG (PUT YOUR REAL KEYS)
+firebase.initializeApp({
+  apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
+  authDomain: "neon-quiz-app.firebaseapp.com",
+  projectId: "neon-quiz-app"
 });
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let user = null;
+let score = 0;
+let questionIndex = 0;
+let secondChanceUsed = false;
+
+const questions = [
+  {
+    q: "Capital of France?",
+    answers: ["Paris", "London", "Berlin", "Rome"],
+    correct: 0
+  },
+  {
+    q: "5 + 5?",
+    answers: ["5", "10", "15", "20"],
+    correct: 1
+  }
+];
+
+const checkpoints = [5, 10, 15, 20];
+
+const authDiv = document.getElementById("authDiv");
+const emailDiv = document.getElementById("emailDiv");
+const categoryDiv = document.getElementById("categoryDiv");
+const quizContainer = document.getElementById("quiz-container");
+const quizDiv = document.getElementById("quiz");
+const scoreBox = document.getElementById("scoreBox");
+const moneyList = document.getElementById("money-list");
+
+document.getElementById("guestLoginBtn").onclick = () => {
+  user = { uid: "guest_" + Date.now(), displayName: "Guest" };
+  showCategory();
+};
+
+document.getElementById("googleLoginBtn").onclick = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).then(res => {
+    user = res.user;
+    showCategory();
+  });
+};
+
+document.getElementById("emailRegisterBtn").onclick = () => {
+  authDiv.classList.add("hidden");
+  emailDiv.classList.remove("hidden");
+};
+
+document.getElementById("emailLoginBtn").onclick = () => {
+  auth.signInWithEmailAndPassword(
+    emailInput.value,
+    passwordInput.value
+  ).then(res => {
+    user = res.user;
+    emailDiv.classList.add("hidden");
+    showCategory();
+  });
+};
+
+document.getElementById("emailRegisterSubmitBtn").onclick = () => {
+  auth.createUserWithEmailAndPassword(
+    emailInput.value,
+    passwordInput.value
+  ).then(res => {
+    user = res.user;
+    emailDiv.classList.add("hidden");
+    showCategory();
+  });
+};
+
+document.getElementById("emailCancelBtn").onclick = () => {
+  emailDiv.classList.add("hidden");
+  authDiv.classList.remove("hidden");
+};
+
+function showCategory() {
+  authDiv.classList.add("hidden");
+  categoryDiv.classList.remove("hidden");
+}
+
+document.getElementById("startBtn").onclick = () => {
+  categoryDiv.classList.add("hidden");
+  quizContainer.classList.remove("hidden");
+  renderLadder();
+  showQuestion();
+};
+
+function renderLadder() {
+  moneyList.innerHTML = "";
+  for (let i = 1; i <= 20; i++) {
+    const li = document.createElement("li");
+    li.textContent = `Q${i} - $${i * 100}`;
+    if (i === questionIndex + 1) li.classList.add("active");
+    moneyList.appendChild(li);
+  }
+}
+
+function showQuestion() {
+  quizDiv.innerHTML = "";
+  const q = questions[questionIndex];
+  const h2 = document.createElement("h2");
+  h2.textContent = q.q;
+  quizDiv.appendChild(h2);
+
+  q.answers.forEach((a, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = a;
+    btn.onclick = () => handleAnswer(btn, i);
+    quizDiv.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, index) {
+  const q = questions[questionIndex];
+  const buttons = quizDiv.querySelectorAll("button");
+
+  buttons.forEach(b => b.disabled = true);
+
+  if (index === q.correct) {
+    btn.classList.add("correct");
+    document.getElementById("correct-sound").play();
+    score += 100;
+    scoreBox.textContent = `$${score}`;
+    questionIndex++;
+    setTimeout(() => {
+      renderLadder();
+      showQuestion();
+    }, 1000);
+  } else {
+    btn.classList.add("wrong");
+    buttons[q.correct].classList.add("correct");
+    document.getElementById("wrong-sound").play();
+
+    if (!secondChanceUsed) {
+      secondChanceUsed = true;
+      score = Math.max(0, score - 100);
+      scoreBox.textContent = `$${score}`;
+    } else {
+      endGame();
+    }
+  }
+}
+
+function endGame() {
+  quizDiv.innerHTML = `<h2>Game Over</h2><p>You won $${score}</p>`;
+  saveScore();
+}
+
+function saveScore() {
+  if (!user) return;
+  db.collection("leaderboard").doc(user.uid).set({
+    name: user.displayName || "Guest",
+    score: firebase.firestore.FieldValue.increment(score)
+  }, { merge: true });
+}
