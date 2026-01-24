@@ -67,33 +67,77 @@ function stopAllSounds(){Object.values(sounds).forEach(s=>{s.pause();s.currentTi
 function playSound(name){if(!soundEnabled||!sounds[name])return;stopAllSounds();sounds[name].play();}
 
 // ================= AUTH =================
-googleLoginBtn.onclick = async()=>{
-  await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+// ================= LOGIN =================
+
+// Get email/password inputs
+const emailInput = document.getElementById("emailInput");
+const passwordInput = document.getElementById("passwordInput");
+
+// Google Login
+googleLoginBtn.onclick = async () => {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+    showSettings();
+  } catch (err) {
+    alert("Google login failed: " + err.message);
+  }
+};
+
+// Guest Login
+guestLoginBtn.onclick = () => {
   showSettings();
 };
-guestLoginBtn.onclick = ()=>showSettings();
 
-emailRegisterBtn.onclick = ()=>emailDiv.style.display="block";
-emailCancelBtn.onclick = ()=>emailDiv.style.display="none";
-
-emailLoginBtn.onclick = async()=>{
-  await auth.signInWithEmailAndPassword(emailInput.value,passwordInput.value);
-  location.reload();
-};
-emailRegisterSubmitBtn.onclick = async()=>{
-  await auth.createUserWithEmailAndPassword(emailInput.value,passwordInput.value);
-  location.reload();
+// Show Email login form
+emailRegisterBtn.onclick = () => {
+  emailDiv.style.display = "block";
 };
 
-auth.onAuthStateChanged(user=>{
-  if(user){
-    document.getElementById("profileDiv").innerHTML=`
-      <img src="${user.photoURL||'https://i.imgur.com/6VBx3io.png'}">
-      <h3>${user.displayName||"Guest"}</h3>
+// Cancel Email login
+emailCancelBtn.onclick = () => {
+  emailDiv.style.display = "none";
+};
+
+// Email login
+emailLoginBtn.onclick = async () => {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
+  if (!email || !password) { alert("Enter email and password"); return; }
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+    showSettings();
+  } catch (err) {
+    alert("Email login failed: " + err.message);
+  }
+};
+
+// Email register
+emailRegisterSubmitBtn.onclick = async () => {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
+  if (!email || !password) { alert("Enter email and password"); return; }
+  try {
+    await auth.createUserWithEmailAndPassword(email, password);
+    showSettings();
+  } catch (err) {
+    alert("Email registration failed: " + err.message);
+  }
+};
+
+// Update profile display on login
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById("profileDiv").innerHTML = `
+      <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}" width="48" height="48">
+      <h3>${user.displayName || "Guest"}</h3>
     `;
-    loadLeaderboard();
+    loadLeaderboard(); // show top 10 cumulative scores
+  } else {
+    document.getElementById("profileDiv").innerHTML = "";
   }
 });
+
 
 // ================= SETTINGS =================
 function showSettings(){
