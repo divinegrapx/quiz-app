@@ -1,105 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>NEON MILLIONAIRE</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Neon Millionaire</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<link rel="stylesheet" href="style.css">
-
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-<div class="container">
+  <div class="container">
 
-  <!-- PROFILE -->
-  <div id="profileDiv"></div>
-
-  <!-- AUTH -->
-  <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
-    <button id="googleLoginBtn">Login with Google</button>
-    <button id="guestLoginBtn">Play as Guest</button>
-    <button id="emailRegisterBtn">Login / Register with Email</button>
-  </div>
 
-  <!-- EMAIL LOGIN -->
-  <div id="emailDiv" style="display:none;">
-    <input id="emailInput" type="email" placeholder="Email">
-    <input id="passwordInput" type="password" placeholder="Password">
-    <button id="emailLoginBtn">Login</button>
-    <button id="emailRegisterSubmitBtn">Register</button>
-    <button id="emailCancelBtn">Cancel</button>
-  </div>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div id="question-counter">Question 1 / 20</div>
+      <button id="walk-away-btn">🚪 Walk Away</button>
+    </div>
 
-  <!-- SETTINGS -->
-  <div id="categoryDiv" style="display:none;">
-    <h2>Game Settings</h2>
-
-    <select id="categorySelect">
-      <option value="general_knowledge">General</option>
-      <option value="science">Science</option>
-      <option value="history">History</option>
-      <option value="sports">Sports</option>
-      <option value="film_and_tv">Movies & TV</option>
-      <option value="music">Music</option>
-    </select>
-
-    <select id="difficultySelect">
-      <option value="easy">Easy</option>
-      <option value="medium" selected>Medium</option>
-      <option value="hard">Hard</option>
-    </select>
-
-    <select id="soundToggle">
-      <option value="on">Sound ON</option>
-      <option value="off">Sound OFF</option>
-    </select>
-
-    <button id="startBtn">START QUIZ</button>
-  </div>
-
-  <!-- QUIZ -->
-  <div id="quiz-container" style="display:none;">
-
+    <!-- TIMER -->
     <div id="timer-container">
       <div id="timer-bar"></div>
-      <span id="timer-text">30s</span>
+      <div id="timer-text">30</div>
     </div>
 
     <div id="quiz-and-ladder">
-      <div id="quiz"></div>
+
+      <!-- QUIZ -->
+      <div id="quiz">
+        <h2 id="question-text">Question text</h2>
+
+        <div id="answers">
+          <button class="option-btn" data-index="0"></button>
+          <button class="option-btn" data-index="1"></button>
+          <button class="option-btn" data-index="2"></button>
+          <button class="option-btn" data-index="3"></button>
+        </div>
+      </div>
+
+      <!-- MONEY LADDER -->
       <ul id="money-list"></ul>
+
     </div>
 
-    <div id="lifelines">
-      <button id="fiftyBtn">50:50</button>
-      <button id="callFriendBtn">📞 Call</button>
-      <button id="audienceBtn">📊 Audience</button>
+    <!-- FINAL SCREEN -->
+    <div id="final-screen" class="hidden">
+      <h1 id="final-title"></h1>
+      <p id="final-money"></p>
+
+      <button onclick="location.reload()">🔁 Play Again</button>
     </div>
 
-    <div id="callFriendBox"></div>
-    <div id="audienceVote"></div>
   </div>
 
-  <!-- LEADERBOARD -->
-  <ul id="leaderboard-list"></ul>
-
-  <!-- SOUNDS -->
-  <audio id="intro-sound" src="intro.mp3"></audio>
-  <audio id="thinking-sound" src="thinking.mp3"></audio>
-  <audio id="call-sound" src="call.mp3"></audio>
-  <audio id="audience-sound" src="audience.mp3"></audio>
-  <audio id="correct-sound" src="correct.wav"></audio>
-  <audio id="wrong-sound" src="wrong.wav"></audio>
-  <audio id="win-sound" src="win.mp3"></audio>
-  <audio id="tick-sound" src="tick.mp3"></audio>
-
-</div>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
