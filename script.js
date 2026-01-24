@@ -1,192 +1,169 @@
-/* ================= GAME DATA ================= */
+document.addEventListener("DOMContentLoaded", () => {
 
-const MONEY = [
-  0,100,200,300,500,
-  1000,2000,4000,8000,16000,
-  32000,64000,125000,250000,500000,
-  1000000,2000000,4000000,8000000,16000000
-];
-
-const CHECKPOINTS = [5, 10, 15, 20];
-
-const QUESTIONS = Array.from({ length: 20 }, (_, i) => ({
-  q: `Sample Question ${i + 1}?`,
-  answers: [
-    "Correct Answer",
-    "Wrong Answer",
-    "Wrong Answer",
-    "Wrong Answer"
-  ],
-  correct: 0
-}));
-
-/* ================= GAME STATE ================= */
-
-let state = {
-  index: 0,
-  locked: false,
-  timer: 30,
-  interval: null,
-  guaranteed: 0,
-  currentMoney: 0
-};
-
-/* ================= DOM ================= */
-
-const qText = document.getElementById("question-text");
-const buttons = document.querySelectorAll(".option-btn");
-const timerBar = document.getElementById("timer-bar");
-const timerText = document.getElementById("timer-text");
-const counter = document.getElementById("question-counter");
-const ladder = document.getElementById("money-list");
-const walkAwayBtn = document.getElementById("walk-away-btn");
-
-/* ================= SOUND SYSTEM ================= */
-
-const sounds = {
-  tick: new Audio(""),
-  correct: new Audio(""),
-  wrong: new Audio("")
-};
-
-function stopAllSounds() {
-  Object.values(sounds).forEach(s => {
-    s.pause();
-    s.currentTime = 0;
-  });
-}
-
-/* ================= INIT ================= */
-
-function initLadder() {
-  ladder.innerHTML = "";
-  MONEY.forEach((m, i) => {
-    const li = document.createElement("li");
-    li.textContent = "$" + m.toLocaleString();
-    if (CHECKPOINTS.includes(i)) li.classList.add("checkpoint");
-    ladder.appendChild(li);
-  });
-}
-
-function loadQuestion() {
-  state.locked = false;
-  const q = QUESTIONS[state.index];
-
-  counter.textContent = `Question ${state.index + 1} / 20`;
-  qText.textContent = q.q;
-
-  buttons.forEach((btn, i) => {
-    btn.textContent = q.answers[i];
-    btn.className = "option-btn";
-  });
-
-  updateLadder();
-  startTimer();
-}
-
-/* ================= TIMER ================= */
-
-function startTimer() {
-  clearInterval(state.interval);
-  state.timer = 30;
-  timerBar.style.width = "100%";
-  timerBar.style.background = "#00ff00";
-
-  state.interval = setInterval(() => {
-    state.timer--;
-    timerText.textContent = state.timer;
-
-    const percent = (state.timer / 30) * 100;
-    timerBar.style.width = percent + "%";
-
-    if (percent < 30) timerBar.style.background = "orange";
-    if (percent < 15) timerBar.style.background = "red";
-
-    if (state.timer <= 0) {
-      clearInterval(state.interval);
-      handleWrong();
-    }
-  }, 1000);
-}
-
-/* ================= ANSWERS ================= */
-
-buttons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    if (state.locked) return;
-    state.locked = true;
-
-    stopAllSounds();
-    clearInterval(state.interval);
-
-    const idx = Number(btn.dataset.index);
-    const correct = QUESTIONS[state.index].correct;
-
-    buttons.forEach(b => b.classList.add("locked"));
-
-    if (idx === correct) {
-      btn.classList.add("correct");
-      handleCorrect();
-    } else {
-      btn.classList.add("wrong");
-      buttons[correct].classList.add("correct");
-      handleWrong();
-    }
-  });
+firebase.initializeApp({
+  apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
+  authDomain: "neon-quiz-app.firebaseapp.com",
+  projectId: "neon-quiz-app"
 });
 
-/* ================= GAME FLOW ================= */
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-function handleCorrect() {
-  state.currentMoney = MONEY[state.index + 1];
+const quiz = document.getElementById("quiz");
+const moneyList = document.getElementById("money-list");
+const timerBar = document.getElementById("timer-bar");
+const timerText = document.getElementById("timer-text");
 
-  if (CHECKPOINTS.includes(state.index + 1)) {
-    state.guaranteed = state.currentMoney;
+let questions = [];
+let current = 0;
+let level = 0;
+let timer;
+let timePerQ = 30;
+let secondChance = true;
+let used = {fifty:false, call:false, audience:false};
+
+const checkpoints = [5,10,15,20];
+
+document.getElementById("googleLoginBtn").onclick = () =>
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(showSettings);
+
+document.getElementById("guestLoginBtn").onclick = showSettings;
+
+function showSettings() {
+  auth.onAuthStateChanged(user=>{
+    document.getElementById("profileDiv").innerHTML =
+      `<h3>${user?.displayName || "Guest"}</h3>`;
+  });
+  authDiv.style.display="none";
+  categoryDiv.style.display="block";
+  loadLeaderboard();
+}
+
+startBtn.onclick = startGame;
+
+async function startGame(){
+  quizContainer.style.display="block";
+  categoryDiv.style.display="none";
+  timePerQ = modeSelect.value==="hardcore"?20:30;
+
+  const res = await fetch("https://the-trivia-api.com/api/questions?limit=20");
+  questions = await res.json();
+
+  buildLadder();
+  showQuestion();
+}
+
+function showQuestion(){
+  clearInterval(timer);
+  const q = questions[current];
+  quiz.innerHTML = `<h2>Q${current+1}: ${q.question}</h2>`;
+
+  [...q.incorrectAnswers, q.correctAnswer]
+    .sort(()=>Math.random()-0.5)
+    .forEach(a=>{
+      const b=document.createElement("button");
+      b.className="option-btn";
+      b.textContent=a;
+      b.onclick=()=>answer(b,a);
+      quiz.appendChild(b);
+    });
+
+  let t=timePerQ;
+  timerBar.style.width="100%";
+  timer=setInterval(()=>{
+    t--;
+    timerBar.style.width=(t/timePerQ*100)+"%";
+    timerText.textContent=t+"s";
+    if(t<=0) lose();
+  },1000);
+}
+
+function answer(btn,ans){
+  clearInterval(timer);
+  document.querySelectorAll(".option-btn").forEach(b=>b.classList.add("locked"));
+  const correct=questions[current].correctAnswer;
+
+  if(ans===correct){
+    btn.classList.add("correct");
+    level++;
+    updateLadder();
+    setTimeout(next,1200);
+  } else {
+    if(secondChance){
+      secondChance=false;
+      btn.classList.add("wrong");
+      setTimeout(showQuestion,800);
+    } else {
+      btn.classList.add("wrong");
+      lose();
+    }
   }
-
-  setTimeout(() => {
-    state.index++;
-    if (state.index === 20) endGame(true);
-    else loadQuestion();
-  }, 1200);
 }
 
-function handleWrong() {
-  endGame(false);
+function next(){
+  current++;
+  if(current>=20) win();
+  else showQuestion();
 }
 
-function walkAway() {
-  endGame(true, true);
+function lose(){
+  const safe = checkpoints.filter(c=>c<=level).pop()||0;
+  endGame(safe*100);
 }
 
-walkAwayBtn.onclick = walkAway;
-
-/* ================= END ================= */
-
-function endGame(won, walked = false) {
-  clearInterval(state.interval);
-
-  document.getElementById("quiz-and-ladder").style.display = "none";
-  document.getElementById("final-screen").classList.remove("hidden");
-
-  let money = walked ? state.currentMoney : state.guaranteed;
-
-  document.getElementById("final-title").textContent =
-    won ? "🎉 Congratulations!" : "❌ Game Over";
-
-  document.getElementById("final-money").textContent =
-    "You won $" + money.toLocaleString();
+function win(){
+  endGame(level*100);
 }
 
-/* ================= LADDER ================= */
+function endGame(amount){
+  saveScore(amount);
+  quiz.innerHTML=`
+    <h1>🎉 GAME OVER</h1>
+    <h2>You keep $${amount}</h2>
+    <button onclick="location.reload()">Play Again</button>
+  `;
+}
 
-function updateLadder() {
-  [...ladder.children].forEach((li, i) => {
-    li.classList.toggle("current", i === state.index);
+function buildLadder(){
+  moneyList.innerHTML="";
+  for(let i=20;i>=1;i--){
+    const li=document.createElement("li");
+    li.className="ladder";
+    if(checkpoints.includes(i)) li.classList.add("safe");
+    li.textContent="$"+(i*100);
+    moneyList.appendChild(li);
+  }
+}
+
+function updateLadder(){
+  [...moneyList.children].forEach(l=>l.classList.remove("current"));
+  const idx=moneyList.children.length-level;
+  moneyList.children[idx]?.classList.add("current");
+}
+
+function saveScore(score){
+  const u=auth.currentUser;
+  if(!u) return;
+  const ref=db.collection("leaderboard").doc(u.uid);
+  ref.get().then(d=>{
+    const prev=d.exists?d.data():{total:0,games:0};
+    ref.set({
+      name:u.displayName||"Guest",
+      total:prev.total+score,
+      games:prev.games+1
+    });
   });
 }
 
-/* ================= START ================= */
+function loadLeaderboard(){
+  db.collection("leaderboard").orderBy("total","desc").limit(10)
+    .onSnapshot(s=>{
+      leaderboardList.innerHTML="";
+      s.forEach(d=>{
+        leaderboardList.innerHTML+=
+          `<li>${d.data().name} — $${d.data().total}</li>`;
+      });
+    });
+}
 
-initLadder();
-loadQuestion();
+});
