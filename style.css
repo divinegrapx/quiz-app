@@ -266,3 +266,31 @@ button.used {
     min-width: 100px;
   }
 }
+/* existing styles above ... */
+
+
+/* ================= FINAL SCREEN GLOW (SAFE ADD) ================= */
+
+.final-screen {
+  text-align: center;
+  padding: 30px;
+}
+
+.money-win {
+  font-size: 3rem;
+  color: #00ffcc;
+  text-shadow: 0 0 20px #00ffcc;
+}
+
+.final-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.final-buttons button {
+  padding: 12px 20px;
+  font-size: 1rem;
+  border-radius: 30px;
+}
