@@ -1,60 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Neon Millionaire</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<title>NEON MILLIONAIRE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
-
 <body>
-  <div class="container">
 
+<div class="container">
+
+  <div id="profileDiv"></div>
+
+  <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
+    <button id="googleLoginBtn">Login with Google</button>
+    <button id="guestLoginBtn">Play as Guest</button>
+  </div>
 
-    <!-- TOP BAR -->
-    <div class="top-bar">
-      <div id="question-counter">Question 1 / 20</div>
-      <button id="walk-away-btn">🚪 Walk Away</button>
-    </div>
+  <div id="categoryDiv" style="display:none;">
+    <h2>Game Mode</h2>
+    <select id="modeSelect">
+      <option value="normal">Normal</option>
+      <option value="hardcore">Hardcore 🔥</option>
+    </select>
+    <button id="startBtn">START</button>
+  </div>
 
-    <!-- TIMER -->
+  <div id="quiz-container" style="display:none;">
     <div id="timer-container">
       <div id="timer-bar"></div>
-      <div id="timer-text">30</div>
+      <span id="timer-text">30s</span>
     </div>
 
     <div id="quiz-and-ladder">
-
-      <!-- QUIZ -->
-      <div id="quiz">
-        <h2 id="question-text">Question text</h2>
-
-        <div id="answers">
-          <button class="option-btn" data-index="0"></button>
-          <button class="option-btn" data-index="1"></button>
-          <button class="option-btn" data-index="2"></button>
-          <button class="option-btn" data-index="3"></button>
-        </div>
-      </div>
-
-      <!-- MONEY LADDER -->
+      <div id="quiz"></div>
       <ul id="money-list"></ul>
-
     </div>
 
-    <!-- FINAL SCREEN -->
-    <div id="final-screen" class="hidden">
-      <h1 id="final-title"></h1>
-      <p id="final-money"></p>
-
-      <button onclick="location.reload()">🔁 Play Again</button>
+    <div id="lifelines">
+      <button id="fiftyBtn">50:50</button>
+      <button id="callFriendBtn">📞 Call</button>
+      <button id="audienceBtn">📊 Audience</button>
+      <button id="secondChanceBtn">❤️ Second</button>
     </div>
 
+    <button id="walkAwayBtn" class="walk">💰 Walk Away</button>
+
+    <div id="callFriendBox"></div>
+    <div id="audienceVote"></div>
   </div>
 
-  <script src="script.js"></script>
+  <h3>🏆 TOP 10 LIFETIME</h3>
+  <ul id="leaderboard-list"></ul>
+
+  <!-- SOUNDS -->
+  <audio id="thinking-sound" src="thinking.mp3"></audio>
+  <audio id="correct-sound" src="correct.wav"></audio>
+  <audio id="wrong-sound" src="wrong.wav"></audio>
+  <audio id="tick-sound" src="tick.mp3"></audio>
+
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
