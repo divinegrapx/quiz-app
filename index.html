@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NEON MILLIONAIRE - Campaign Mode</title>
+<title>NEON MILLIONAIRE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="style.css">
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
@@ -15,10 +16,8 @@
 
 <div class="container">
 
-  <!-- PROFILE -->
   <div id="profileDiv"></div>
 
-  <!-- AUTH -->
   <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
@@ -26,7 +25,6 @@
     <button id="emailRegisterBtn">Login / Register with Email</button>
   </div>
 
-  <!-- EMAIL LOGIN -->
   <div id="emailDiv" style="display:none;">
     <input type="email" id="emailInput" placeholder="Email">
     <input type="password" id="passwordInput" placeholder="Password">
@@ -35,7 +33,6 @@
     <button id="emailCancelBtn">Cancel</button>
   </div>
 
-  <!-- SETTINGS -->
   <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
     <select id="categorySelect">
@@ -46,22 +43,18 @@
       <option value="film_and_tv">Movies & TV</option>
       <option value="music">Music</option>
     </select>
-
     <select id="difficultySelect">
       <option value="easy">Easy</option>
       <option value="medium" selected>Medium</option>
       <option value="hard">Hard</option>
     </select>
-
     <select id="soundToggle">
       <option value="on">Sound ON</option>
       <option value="off">Sound OFF</option>
     </select>
-
     <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
-  <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
     <div id="timer-container">
       <div id="timer-bar"></div>
@@ -75,24 +68,15 @@
 
     <div id="lifelines">
       <button id="fiftyBtn">50:50</button>
-      <button id="secondChanceBtn">❤️ Second Chance</button>
       <button id="callFriendBtn">📞 Call</button>
       <button id="audienceBtn">📊 Audience</button>
+      <!-- Second Chance button will be added dynamically -->
     </div>
 
     <div id="callFriendBox"></div>
     <div id="audienceVote"></div>
   </div>
 
-  <!-- SHOP -->
-  <div id="shopDiv" style="display:none;">
-    <h2>Shop</h2>
-    <div id="shopItems"></div>
-    <button onclick="closeShop()">Close Shop</button>
-  </div>
-
-  <!-- LEADERBOARD -->
-  <h2>Top 10 Leaders</h2>
   <ul id="leaderboard-list"></ul>
 
   <!-- SOUNDS -->
