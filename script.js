@@ -281,6 +281,33 @@ function showFinalScreen() {
   stopAllSounds();
   playSound("win");
 
+  quizDiv.innerHTML = `
+    <div class="final-screen">
+      <h1>🎉 CONGRATULATIONS</h1>
+
+      <div class="money-win">
+        $${guaranteedMoney.toLocaleString()}
+      </div>
+
+      <p>Guaranteed Prize</p>
+
+      <div class="final-buttons">
+        <button onclick="location.reload()">🔁 Play Again</button>
+
+        <button onclick="navigator.share({
+          title: 'NEON MILLIONAIRE',
+          text: 'I won $${guaranteedMoney.toLocaleString()} in NEON MILLIONAIRE!'
+        })">📤 Share</button>
+
+        <button onclick="logoutUser()">🚪 Log Out</button>
+      </div>
+    </div>
+  `;
+
+  saveScore(guaranteedMoney);
+}
+
+
   // SAVE GUARANTEED MONEY
   saveScore(guaranteedMoney);
 
