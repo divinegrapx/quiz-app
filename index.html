@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>NEON MILLIONAIRE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link rel="stylesheet" href="style.css">
 
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -17,7 +18,7 @@
   <!-- PROFILE -->
   <div id="profileDiv"></div>
 
-  <!-- AUTH SCREEN -->
+  <!-- LOGIN / AUTH -->
   <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
@@ -34,9 +35,10 @@
     <button id="emailCancelBtn">Cancel</button>
   </div>
 
-  <!-- SETTINGS SCREEN -->
+  <!-- GAME SETTINGS -->
   <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
+
     <select id="categorySelect">
       <option value="general_knowledge">General</option>
       <option value="science">Science</option>
@@ -50,6 +52,7 @@
       <option value="easy">Easy</option>
       <option value="medium" selected>Medium</option>
       <option value="hard">Hard</option>
+      <option value="hardcore">Hardcore (20s)</option>
     </select>
 
     <select id="soundToggle">
@@ -57,22 +60,21 @@
       <option value="off">Sound OFF</option>
     </select>
 
-    <label><input type="checkbox" id="hardcoreToggle"> Hardcore Mode (20s, no lifelines)</label>
-    <button id="helpBtn">Help</button>
     <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
-  <!-- QUIZ SCREEN -->
+  <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
+
+    <!-- TIMER -->
     <div id="timer-container">
       <div id="timer-bar"></div>
       <span id="timer-text">30s</span>
     </div>
 
+    <!-- QUIZ + MONEY LADDER -->
     <div id="quiz-and-ladder">
       <div id="quiz"></div>
-
-      <!-- MONEY LADDER -->
       <ul id="money-list"></ul>
     </div>
 
@@ -80,27 +82,23 @@
     <div id="lifelines">
       <button id="fiftyBtn">50:50</button>
       <button id="secondChanceBtn">❤️ Second Chance</button>
-      <button id="callFriendBtn">📞 Call</button>
+      <button id="callFriendBtn">📞 Call Friend</button>
       <button id="audienceBtn">📊 Audience</button>
-      <button id="walkAwayBtn">🚪 Walk Away</button>
     </div>
 
-    <div id="callFriendBox" class="lifeline-box"></div>
-    <div id="audienceVote" class="lifeline-box"></div>
-  </div>
+    <!-- CALL & AUDIENCE OUTPUT -->
+    <div id="callFriendBox"></div>
+    <div id="audienceVote"></div>
 
-  <!-- SHOP MODAL -->
-  <div id="shopDiv" class="modal">
-    <h3>SHOP / POWER-UPS</h3>
-    <button class="buy-btn" data-item="50:50">50:50 - $50,000</button>
-    <button class="buy-btn" data-item="Second Chance">Second Chance - $100,000</button>
-    <button class="buy-btn" data-item="Time Freeze">Time Freeze - $25,000</button>
-    <button class="buy-btn" data-item="Hardcore Badge">Hardcore Badge - $250,000</button>
-    <button id="closeShopBtn">Close Shop</button>
+    <!-- SHOP / POWER-UPS -->
+    <div id="shop">
+      <button class="shop-btn" data-item="timeFreeze">⏱ Time Freeze $25k</button>
+      <button class="shop-btn" data-item="hardcoreBadge">🔥 Hardcore Badge $250k</button>
+    </div>
   </div>
 
   <!-- LEADERBOARD -->
-  <h2>Leaderboard - Top 10</h2>
+  <h2>Leaderboard</h2>
   <ul id="leaderboard-list"></ul>
 
   <!-- SOUNDS -->
