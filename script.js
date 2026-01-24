@@ -281,15 +281,45 @@ function showFinalScreen() {
   stopAllSounds();
   playSound("win");
 
+  // SAVE GUARANTEED MONEY
+  saveScore(guaranteedMoney);
+
   quizDiv.innerHTML = `
-    <div class="final-screen">
-      <h1>🎉 CONGRATULATIONS</h1>
-      <h2>You Won $${ladderLevel * 100}</h2>
-      <button onclick="location.reload()">Restart Quiz</button>
-      <button onclick="navigator.share({text:'I won $${ladderLevel * 100} in NEON MILLIONAIRE!'})">Share Score</button>
+    <div class="final-screen neon-glow">
+      <h1>🎉 CONGRATULATIONS 🎉</h1>
+      <h2>You secured</h2>
+      <h1 class="money-win">$${guaranteedMoney.toLocaleString()}</h1>
+
+      <div class="final-buttons">
+        <button id="playAgainBtn">🔁 Play Again</button>
+        <button id="shareBtn">📤 Share Score</button>
+        <button id="logoutBtn">🚪 Log Out</button>
+      </div>
     </div>
   `;
+
+  document.getElementById("playAgainBtn").onclick = () => {
+    location.reload();
+  };
+
+  document.getElementById("logoutBtn").onclick = async () => {
+    await auth.signOut();
+    location.reload();
+  };
+
+  document.getElementById("shareBtn").onclick = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: "NEON MILLIONAIRE",
+        text: `I just won $${guaranteedMoney.toLocaleString()} in NEON MILLIONAIRE! 💰🔥`,
+        url: location.href
+      });
+    } else {
+      alert("Sharing not supported on this device");
+    }
+  };
 }
+
 
 /* LEADERBOARD */
 function saveScore(score) {
