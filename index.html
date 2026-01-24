@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>NEON MILLIONAIRE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link rel="stylesheet" href="style.css">
 
 <!-- Firebase -->
@@ -15,20 +16,19 @@
 
 <div class="container">
 
-  <div class="top-bar">
-    <button id="helpBtn">❓ Help</button>
-    <button id="soundBtn">🔊 Sound ON</button>
-  </div>
-
+  <!-- PROFILE -->
   <div id="profileDiv"></div>
 
+  <!-- LOGIN -->
   <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
     <button id="guestLoginBtn">Play as Guest</button>
     <button id="emailRegisterBtn">Login / Register with Email</button>
+    <button id="helpBtn">❓ Help</button>
   </div>
 
+  <!-- EMAIL LOGIN -->
   <div id="emailDiv" style="display:none;">
     <input type="email" id="emailInput" placeholder="Email">
     <input type="password" id="passwordInput" placeholder="Password">
@@ -37,6 +37,7 @@
     <button id="emailCancelBtn">Cancel</button>
   </div>
 
+  <!-- SETTINGS -->
   <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
 
@@ -63,6 +64,7 @@
     <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
+  <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
     <div id="timer-container">
       <div id="timer-bar"></div>
@@ -76,31 +78,17 @@
 
     <div id="lifelines">
       <button id="fiftyBtn">50:50</button>
-      <button id="callFriendBtn">📞 Call Friend</button>
+      <button id="secondChanceBtn">💖 Second Chance</button>
+      <button id="callFriendBtn">📞 Call</button>
       <button id="audienceBtn">📊 Audience</button>
-      <button id="secondChanceBtn">❤️ Second Chance</button>
     </div>
 
     <div id="callFriendBox"></div>
     <div id="audienceVote"></div>
   </div>
 
+  <!-- LEADERBOARD -->
   <ul id="leaderboard-list"></ul>
-
-  <!-- HELP MODAL -->
-  <div id="helpModal" class="modal hidden">
-    <div class="modal-content">
-      <h2>❓ How to Play</h2>
-      <ul>
-        <li>✔ Answer 20 questions correctly</li>
-        <li>🛡 Safe checkpoints at Q5 / Q10 / Q15 / Q20</li>
-        <li>💰 Walk Away anytime to keep guaranteed money</li>
-        <li>🎯 Lifelines can help but aren’t always correct</li>
-        <li>🔥 Hardcore mode has less time & no help</li>
-      </ul>
-      <button id="closeHelpBtn">Got it!</button>
-    </div>
-  </div>
 
   <!-- SOUNDS -->
   <audio id="intro-sound" src="intro.mp3"></audio>
