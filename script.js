@@ -323,6 +323,7 @@ walkAwayBtn.onclick = () => {
 
 /* FINAL SCREEN */
 function showFinalScreen() {
+  walkAwayBtn.style.display = "none";
   stopAllSounds();
   playSound("win");
 
