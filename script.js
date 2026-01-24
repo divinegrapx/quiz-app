@@ -134,4 +134,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // LIFELINES
   fiftyBtn.addEventListener("click",()=>{
-    if(fiftyUsed) return
+    if(fiftyUsed) return; fiftyUsed=true; fiftyBtn.classList.add("used");
+    const correct=questions[current].correctAnswer; let removed=0;
+    document.querySelectorAll(".option-btn").forEach(b=>{if(b.textContent!==correct && removed<2){b.style.opacity=0.3; removed++;}});
+  });
+
+  secondChanceBtn.addEventListener("click",()=>{if(secondUsed) return; secondUsed=true; secondChanceBtn.classList.add("used"); alert("Second Chance ready! One wrong answer forgiven.");});
+
+  callFriendBtn.addEventListener("click",()=>{if(friendUsed) return; friendUsed=true; callFriendBtn.classList.add("used"); playSound("call"); callFriendBox.innerHTML=`📞 Friend says: <b>${questions[current].correctAnswer}</b>`;});
+
+  audienceBtn.addEventListener("click",()=>{if(audienceUsed) return; audienceUsed=true; audienceBtn.classList.add("used"); playSound("audience"); audienceVote.innerHTML=""; document.querySelectorAll(".option-btn").forEach(b=>{const percent=Math.floor(Math.random()*80)+10; audienceVote.innerHTML+=`<div>${b.textContent}: ${percent}%</div>`;});});
+
+  function showFinalScreen(){
+    stopAllSounds(); playSound("win");
+    quizDiv.innerHTML=`<div class="final-screen">
+      <h1>🎉 CONGRATULATIONS</h1>
+      <h2>You Won $${ladderLevel*100}</h2>
+      <button onclick="location.reload()">Restart Quiz</button>
+      <button onclick="navigator.share({text:'I won $${ladderLevel*100} in NEON MILLIONAIRE!'})">Share Score</button>
+    </div>`;
+  }
+
+});
