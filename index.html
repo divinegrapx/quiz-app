@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NEON MILLIONAIRE</title>
+<title>NEON MILLIONAIRE - Campaign Mode</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="style.css">
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
@@ -19,13 +18,12 @@
   <!-- PROFILE -->
   <div id="profileDiv"></div>
 
-  <!-- LOGIN -->
+  <!-- AUTH -->
   <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
     <button id="guestLoginBtn">Play as Guest</button>
     <button id="emailRegisterBtn">Login / Register with Email</button>
-    <button id="helpBtn">❓ Help</button>
   </div>
 
   <!-- EMAIL LOGIN -->
@@ -40,7 +38,6 @@
   <!-- SETTINGS -->
   <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
-
     <select id="categorySelect">
       <option value="general_knowledge">General</option>
       <option value="science">Science</option>
@@ -78,7 +75,7 @@
 
     <div id="lifelines">
       <button id="fiftyBtn">50:50</button>
-      <button id="secondChanceBtn">💖 Second Chance</button>
+      <button id="secondChanceBtn">❤️ Second Chance</button>
       <button id="callFriendBtn">📞 Call</button>
       <button id="audienceBtn">📊 Audience</button>
     </div>
@@ -87,7 +84,15 @@
     <div id="audienceVote"></div>
   </div>
 
+  <!-- SHOP -->
+  <div id="shopDiv" style="display:none;">
+    <h2>Shop</h2>
+    <div id="shopItems"></div>
+    <button onclick="closeShop()">Close Shop</button>
+  </div>
+
   <!-- LEADERBOARD -->
+  <h2>Top 10 Leaders</h2>
   <ul id="leaderboard-list"></ul>
 
   <!-- SOUNDS -->
