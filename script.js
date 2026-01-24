@@ -272,6 +272,15 @@ audienceBtn.onclick = () => {
   audienceUsed = true;
   audienceBtn.classList.add("used");
   playSound("audience");
+ 
+  walkAwayBtn.onclick = () => {
+  clearInterval(timer);
+  stopAllSounds();
+  playSound("win");
+
+  showFinalScreen();
+};
+
 
   audienceVote.innerHTML = "";
   document.querySelectorAll(".option-btn").forEach(b => {
