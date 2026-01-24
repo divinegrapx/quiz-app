@@ -9,22 +9,30 @@ document.addEventListener("DOMContentLoaded", () => {
     messagingSenderId: "891061147021",
     appId: "1:891061147021:web:7b3d80020f642da7b699c4"
   };
+
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
   /* ================= ELEMENTS ================= */
+  const authDiv = document.getElementById("authDiv");
+  const emailDiv = document.getElementById("emailDiv");
+  const categoryDiv = document.getElementById("categoryDiv");
+  const quizContainer = document.getElementById("quiz-container");
+
   const googleLoginBtn = document.getElementById("googleLoginBtn");
   const guestLoginBtn = document.getElementById("guestLoginBtn");
   const emailRegisterBtn = document.getElementById("emailRegisterBtn");
-  const emailDiv = document.getElementById("emailDiv");
   const emailLoginBtn = document.getElementById("emailLoginBtn");
   const emailRegisterSubmitBtn = document.getElementById("emailRegisterSubmitBtn");
   const emailCancelBtn = document.getElementById("emailCancelBtn");
-  const startBtn = document.getElementById("startBtn");
 
+  const emailInput = document.getElementById("emailInput");
+  const passwordInput = document.getElementById("passwordInput");
+
+  const startBtn = document.getElementById("startBtn");
   const quizDiv = document.getElementById("quiz");
-  const moneyList = document.getElementById("money-list");
+
   const timerBar = document.getElementById("timer-bar");
   const timerText = document.getElementById("timer-text");
 
@@ -32,45 +40,36 @@ document.addEventListener("DOMContentLoaded", () => {
   const secondChanceBtn = document.getElementById("secondChanceBtn");
   const callFriendBtn = document.getElementById("callFriendBtn");
   const audienceBtn = document.getElementById("audienceBtn");
+
   const callFriendBox = document.getElementById("callFriendBox");
   const audienceVote = document.getElementById("audienceVote");
 
   const categorySelect = document.getElementById("categorySelect");
   const difficultySelect = document.getElementById("difficultySelect");
+  const nightmareCheck = document.getElementById("nightmareModeCheck");
   const soundToggle = document.getElementById("soundToggle");
-
-  const leaderboardList = document.getElementById("leaderboard-list");
 
   /* ================= SOUNDS ================= */
   const sounds = {
     intro: document.getElementById("intro-sound"),
     thinking: document.getElementById("thinking-sound"),
-    call: document.getElementById("call-sound"),
-    audience: document.getElementById("audience-sound"),
     correct: document.getElementById("correct-sound"),
     wrong: document.getElementById("wrong-sound"),
-    win: document.getElementById("win-sound"),
-    lose: document.getElementById("lose-sound"),
-    tick: document.getElementById("tick-sound")
+    tick: document.getElementById("tick-sound"),
+    win: document.getElementById("win-sound")
   };
+
   let soundEnabled = true;
-
-  function stopAllSounds() {
-    Object.values(sounds).forEach(s => { s.pause(); s.currentTime = 0; });
-  }
-
   function playSound(name) {
     if (!soundEnabled || !sounds[name]) return;
-    stopAllSounds();
+    sounds[name].currentTime = 0;
     sounds[name].play();
   }
 
-  /* ================= LOGIN ================= */
+  /* ================= AUTH ================= */
   googleLoginBtn.onclick = async () => {
-    try {
-      await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-      showSettings();
-    } catch (err) { alert("Google Login failed: " + err.message); }
+    await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    showSettings();
   };
 
   guestLoginBtn.onclick = () => showSettings();
@@ -79,270 +78,172 @@ document.addEventListener("DOMContentLoaded", () => {
   emailCancelBtn.onclick = () => emailDiv.style.display = "none";
 
   emailLoginBtn.onclick = async () => {
-    try {
-      await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
-      showSettings();
-    } catch (err) { alert("Email login failed: " + err.message); }
+    await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+    showSettings();
   };
 
   emailRegisterSubmitBtn.onclick = async () => {
-    try {
-      await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
-      showSettings();
-    } catch (err) { alert("Email registration failed: " + err.message); }
+    await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+    showSettings();
   };
 
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      document.getElementById("profileDiv").innerHTML = `
-        <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}" width="48" height="48">
-        <h3>${user.displayName || "Guest"}</h3>
-      `;
-      loadLeaderboard();
-    }
-  });
-
   function showSettings() {
-    document.getElementById("authDiv").style.display = "none";
-    document.getElementById("categoryDiv").style.display = "block";
+    authDiv.style.display = "none";
+    emailDiv.style.display = "none";
+    categoryDiv.style.display = "block";
     playSound("intro");
   }
 
-  /* ================= GAME VARIABLES ================= */
+  /* ================= GAME STATE ================= */
   let questions = [];
   let current = 0;
-  let ladderLevel = 0;
-  let timer;
-  let fiftyUsed = false;
-  let secondChanceUsed = false;
-  let friendUsed = false;
-  let audienceUsed = false;
   let score = 0;
-  const timePerQuestionNormal = 30;
-  const timePerQuestionHardcore = 20;
+  let timer;
+  let timePerQuestion = 30;
 
-  startBtn.onclick = startQuiz;
+  let secondChanceActive = false;
+  let secondChanceUsed = false;
 
-  async function startQuiz() {
-    const category = categorySelect.value;
-    const difficulty = difficultySelect.value;
+  /* ================= START QUIZ ================= */
+  startBtn.onclick = async () => {
     soundEnabled = soundToggle.value === "on";
+    timePerQuestion = nightmareCheck.checked ? 20 : 30;
 
-    const res = await fetch(`https://the-trivia-api.com/api/questions?limit=20&categories=${category}&difficulty=${difficulty}`);
+    const res = await fetch(
+      `https://the-trivia-api.com/api/questions?limit=20&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`
+    );
     questions = await res.json();
 
-    document.getElementById("categoryDiv").style.display = "none";
-    document.getElementById("quiz-container").style.display = "block";
+    categoryDiv.style.display = "none";
+    quizContainer.style.display = "block";
 
-    buildMoneyLadder(20);
-
-    current = 0;
-    ladderLevel = 0;
-    fiftyUsed = friendUsed = audienceUsed = secondChanceUsed = false;
     score = 0;
+    current = 0;
+    secondChanceActive = false;
+    secondChanceUsed = false;
 
     playSound("thinking");
     showQuestion();
-  }
+  };
 
+  /* ================= QUESTION ================= */
   function showQuestion() {
     clearInterval(timer);
-    callFriendBox.innerHTML = "";
-    audienceVote.innerHTML = "";
+    quizDiv.innerHTML = "";
 
     const q = questions[current];
     quizDiv.innerHTML = `<h2>Q${current + 1}: ${q.question}</h2>`;
 
-    const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
+    const answers = [...q.incorrectAnswers, q.correctAnswer]
+      .sort(() => Math.random() - 0.5);
 
-    answers.forEach(a => {
+    answers.forEach(ans => {
       const btn = document.createElement("button");
       btn.className = "option-btn";
-      btn.textContent = a;
-      btn.onclick = () => checkAnswer(a);
+      btn.textContent = ans;
+      btn.onclick = () => handleAnswer(btn, ans);
       quizDiv.appendChild(btn);
     });
 
-    let timeLeft = (difficultySelect.value === "hardcore") ? timePerQuestionHardcore : timePerQuestionNormal;
-    updateTimer(timeLeft);
+    startTimer();
+  }
+
+  /* ================= TIMER ================= */
+  function startTimer() {
+    let t = timePerQuestion;
+    updateTimer(t);
 
     timer = setInterval(() => {
-      timeLeft--;
-      updateTimer(timeLeft);
-      if (timeLeft <= 5) playSound("tick");
-      if (timeLeft <= 0) nextQuestion(false);
+      t--;
+      updateTimer(t);
+      if (t <= 5) playSound("tick");
+      if (t <= 0) loseQuestion();
     }, 1000);
   }
 
   function updateTimer(t) {
     timerText.textContent = t + "s";
-    timerBar.style.width = (t / ((difficultySelect.value === "hardcore") ? timePerQuestionHardcore : timePerQuestionNormal) * 100) + "%";
-    timerBar.style.background = t > 10 ? "#00ff00" : t > 5 ? "#ffcc00" : "#ff4d4d";
+    timerBar.style.width = (t / timePerQuestion * 100) + "%";
   }
 
-  /* ================= CHECK ANSWER ================= */
-  function checkAnswer(ans) {
+  /* ================= ANSWER HANDLING ================= */
+  function handleAnswer(btn, answer) {
     clearInterval(timer);
-    stopAllSounds();
 
     const correct = questions[current].correctAnswer;
+    const buttons = document.querySelectorAll(".option-btn");
 
-    document.querySelectorAll(".option-btn").forEach(b => b.disabled = true);
+    buttons.forEach(b => {
+      b.disabled = true;
+      if (b.textContent === correct) b.classList.add("correct");
+    });
 
-    if (ans === correct) {
-      // Correct answer selected
+    if (answer === correct) {
+      btn.classList.add("correct");
       score += 100;
-      ladderLevel++;
-      const clickedBtn = Array.from(document.querySelectorAll(".option-btn")).find(b => b.textContent === ans);
-      clickedBtn.style.background = "#00ff00"; // 100% green
-      clickedBtn.classList.add("pulse-glow");
       playSound("correct");
-      updateMoneyLadder();
-      setTimeout(nextQuestion, 1500);
+      nextQuestion();
     } else {
-      // Wrong answer selected
-      if (!secondChanceUsed) {
+      btn.classList.add("wrong");
+      playSound("wrong");
+
+      if (secondChanceActive) {
+        secondChanceActive = false;
         secondChanceUsed = true;
-        alert("❤️ Second Chance activated! Try again!");
-        document.querySelectorAll(".option-btn").forEach(b => b.disabled = false);
-        return;
+        return; // forgive once
       }
 
-      const clickedBtn = Array.from(document.querySelectorAll(".option-btn")).find(b => b.textContent === ans);
-      clickedBtn.style.background = "#ff4d4d"; // 100% red
-      clickedBtn.classList.add("shake-red");
-
-      // Highlight correct
-      const correctBtn = Array.from(document.querySelectorAll(".option-btn")).find(b => b.textContent === correct);
-      correctBtn.style.background = "#00ff00"; // 100% green
-      correctBtn.classList.add("pulse-glow");
-
-      playSound("wrong");
-      updateMoneyLadder();
-      setTimeout(nextQuestion, 2000);
+      score = Math.max(0, score - 100);
+      setTimeout(showFinal, 1500);
     }
   }
 
-  function nextQuestion(isCorrect = true) {
-    current++;
-    if (current >= questions.length) {
-      showFinalScreen();
-      return;
-    }
-    playSound("thinking");
-    showQuestion();
+  function loseQuestion() {
+    score = Math.max(0, score - 100);
+    showFinal();
   }
 
-  /* ================= MONEY LADDER ================= */
-  function buildMoneyLadder(count) {
-    moneyList.innerHTML = "";
-    for (let i = count; i >= 1; i--) {
-      const li = document.createElement("li");
-      li.className = "ladder-btn";
-      li.textContent = "$" + (i * 100);
-      if ([5,10,15,20].includes(i)) li.classList.add("checkpoint");
-      moneyList.appendChild(li);
-    }
-  }
-
-  function updateMoneyLadder() {
-    [...moneyList.children].forEach(li => li.classList.remove("current"));
-    const idx = moneyList.children.length - ladderLevel;
-    if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
+  function nextQuestion() {
+    setTimeout(() => {
+      current++;
+      if (current >= questions.length) showFinal();
+      else showQuestion();
+    }, 1200);
   }
 
   /* ================= LIFELINES ================= */
   fiftyBtn.onclick = () => {
-    if (fiftyUsed) return;
-    fiftyUsed = true;
+    if (score < 100) return;
+    score -= 100;
     fiftyBtn.classList.add("used");
 
     const correct = questions[current].correctAnswer;
     let removed = 0;
     document.querySelectorAll(".option-btn").forEach(b => {
       if (b.textContent !== correct && removed < 2) {
-        b.style.opacity = 0.3;
+        b.style.opacity = 0.2;
         removed++;
       }
     });
   };
 
   secondChanceBtn.onclick = () => {
-    if (secondChanceUsed) return;
-    secondChanceUsed = true;
+    if (score < 200 || secondChanceUsed) return;
+    score -= 200;
+    secondChanceActive = true;
     secondChanceBtn.classList.add("used");
-    alert("❤️ Second Chance activated! One wrong answer forgiven.");
   };
 
-  callFriendBtn.onclick = () => {
-    if (friendUsed) return;
-    friendUsed = true;
-    callFriendBtn.classList.add("used");
-    playSound("call");
-    const correct = questions[current].correctAnswer;
-    callFriendBox.innerHTML = `📞 Friend says: <b>${correct}</b>`;
-  };
-
-  audienceBtn.onclick = () => {
-    if (audienceUsed) return;
-    audienceUsed = true;
-    audienceBtn.classList.add("used");
-    playSound("audience");
-
-    const correct = questions[current].correctAnswer;
-    audienceVote.innerHTML = "";
-    document.querySelectorAll(".option-btn").forEach(b => {
-      let percent = Math.floor(Math.random() * 50) + 25;
-      if (b.textContent === correct) percent += 15;
-      audienceVote.innerHTML += `<div>${b.textContent}: ${percent}%</div>`;
-    });
-  };
-
-  /* ================= FINAL SCREEN ================= */
-  function showFinalScreen() {
-    stopAllSounds();
+  /* ================= FINAL ================= */
+  function showFinal() {
     playSound("win");
     quizDiv.innerHTML = `
       <div class="final-screen">
-        <h1>🎉 CONGRATULATIONS</h1>
-        <h2>You Won $${score}</h2>
-        <button onclick="location.reload()">Restart Quiz</button>
-        <button onclick="navigator.share({text:'I won $${score} in NEON MILLIONAIRE!'})">Share Score</button>
+        <h1>🎉 Game Over</h1>
+        <h2>You earned $${score}</h2>
+        <button onclick="location.reload()">Play Again</button>
       </div>
     `;
-    saveScore(score);
-  }
-
-  /* ================= LEADERBOARD ================= */
-  async function saveScore(score) {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const userRef = db.collection("scores").doc(user.uid);
-    const doc = await userRef.get();
-    let totalScore = score;
-    if (doc.exists) totalScore += doc.data().totalScore || 0;
-
-    await userRef.set({
-      name: user.displayName || "Guest",
-      photo: user.photoURL || "",
-      totalScore: totalScore,
-      gamesPlayed: (doc.exists ? doc.data().gamesPlayed + 1 : 1),
-      lastPlayed: new Date()
-    });
-
-    loadLeaderboard();
-  }
-
-  async function loadLeaderboard() {
-    const snapshot = await db.collection("scores").orderBy("totalScore","desc").limit(10).get();
-    leaderboardList.innerHTML = "";
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const li = document.createElement("li");
-      li.innerHTML = `<span>${data.name}</span> <span>$${data.totalScore}</span>`;
-      leaderboardList.appendChild(li);
-    });
   }
 
 });
