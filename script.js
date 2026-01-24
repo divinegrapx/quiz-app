@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ================= FIREBASE =================
+  /* ================= FIREBASE ================= */
   const firebaseConfig = {
     apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
     authDomain: "neon-quiz-app.firebaseapp.com",
@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // ================= ELEMENTS =================
+  /* ================= ELEMENTS ================= */
   const googleLoginBtn = document.getElementById("googleLoginBtn");
   const guestLoginBtn = document.getElementById("guestLoginBtn");
   const emailRegisterBtn = document.getElementById("emailRegisterBtn");
@@ -23,15 +23,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const emailCancelBtn = document.getElementById("emailCancelBtn");
   const startBtn = document.getElementById("startBtn");
 
-  const emailInput = document.getElementById("emailInput");
-  const passwordInput = document.getElementById("passwordInput");
-
   const quizDiv = document.getElementById("quiz");
   const moneyList = document.getElementById("money-list");
   const timerBar = document.getElementById("timer-bar");
   const timerText = document.getElementById("timer-text");
 
   const fiftyBtn = document.getElementById("fiftyBtn");
+  const secondChanceBtn = document.getElementById("secondChanceBtn");
   const callFriendBtn = document.getElementById("callFriendBtn");
   const audienceBtn = document.getElementById("audienceBtn");
   const callFriendBox = document.getElementById("callFriendBox");
@@ -41,7 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const difficultySelect = document.getElementById("difficultySelect");
   const soundToggle = document.getElementById("soundToggle");
 
-  // ================= SOUNDS =================
+  const leaderboardList = document.getElementById("leaderboard-list");
+
+  /* ================= SOUNDS ================= */
   const sounds = {
     intro: document.getElementById("intro-sound"),
     thinking: document.getElementById("thinking-sound"),
@@ -53,15 +53,10 @@ document.addEventListener("DOMContentLoaded", () => {
     lose: document.getElementById("lose-sound"),
     tick: document.getElementById("tick-sound")
   };
-
   let soundEnabled = true;
-  let timer;
 
   function stopAllSounds() {
-    Object.values(sounds).forEach(s => {
-      s.pause();
-      s.currentTime = 0;
-    });
+    Object.values(sounds).forEach(s => { s.pause(); s.currentTime = 0; });
   }
 
   function playSound(name) {
@@ -70,14 +65,14 @@ document.addEventListener("DOMContentLoaded", () => {
     sounds[name].play();
   }
 
-  // ================= LOGIN =================
-
+  /* ================= LOGIN ================= */
   googleLoginBtn.onclick = async () => {
     try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      await auth.signInWithPopup(provider);
+      await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
       showSettings();
-    } catch (err) { alert("Google login failed: " + err.message); }
+    } catch (err) {
+      alert("Google Login failed: " + err.message);
+    }
   };
 
   guestLoginBtn.onclick = () => showSettings();
@@ -86,23 +81,21 @@ document.addEventListener("DOMContentLoaded", () => {
   emailCancelBtn.onclick = () => emailDiv.style.display = "none";
 
   emailLoginBtn.onclick = async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-    if (!email || !password) { alert("Enter email and password"); return; }
     try {
-      await auth.signInWithEmailAndPassword(email, password);
+      await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
       showSettings();
-    } catch (err) { alert("Email login failed: " + err.message); }
+    } catch (err) {
+      alert("Email login failed: " + err.message);
+    }
   };
 
   emailRegisterSubmitBtn.onclick = async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-    if (!email || !password) { alert("Enter email and password"); return; }
     try {
-      await auth.createUserWithEmailAndPassword(email, password);
+      await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
       showSettings();
-    } catch (err) { alert("Email registration failed: " + err.message); }
+    } catch (err) {
+      alert("Email registration failed: " + err.message);
+    }
   };
 
   auth.onAuthStateChanged(user => {
@@ -112,28 +105,27 @@ document.addEventListener("DOMContentLoaded", () => {
         <h3>${user.displayName || "Guest"}</h3>
       `;
       loadLeaderboard();
-    } else {
-      document.getElementById("profileDiv").innerHTML = "";
     }
   });
 
-  // ================= SETTINGS =================
   function showSettings() {
     document.getElementById("authDiv").style.display = "none";
     document.getElementById("categoryDiv").style.display = "block";
     playSound("intro");
   }
 
-  // ================= GAME =================
+  /* ================= GAME VARIABLES ================= */
   let questions = [];
   let current = 0;
   let ladderLevel = 0;
+  let timer;
   let fiftyUsed = false;
+  let secondChanceUsed = false;
   let friendUsed = false;
   let audienceUsed = false;
-  let secondChanceUsed = false;
-  let guaranteedMoney = 0;
-  const timePerQuestion = 30;
+  let score = 0;
+  const timePerQuestionNormal = 30;
+  const timePerQuestionHardcore = 20;
 
   startBtn.onclick = startQuiz;
 
@@ -153,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
     current = 0;
     ladderLevel = 0;
     fiftyUsed = friendUsed = audienceUsed = secondChanceUsed = false;
-    guaranteedMoney = 0;
+    score = 0;
 
     playSound("thinking");
     showQuestion();
@@ -177,20 +169,20 @@ document.addEventListener("DOMContentLoaded", () => {
       quizDiv.appendChild(btn);
     });
 
-    let timeLeft = timePerQuestion;
+    let timeLeft = (difficultySelect.value === "hardcore") ? timePerQuestionHardcore : timePerQuestionNormal;
     updateTimer(timeLeft);
 
     timer = setInterval(() => {
       timeLeft--;
       updateTimer(timeLeft);
       if (timeLeft <= 5) playSound("tick");
-      if (timeLeft <= 0) nextQuestion(false); // false = missed
+      if (timeLeft <= 0) nextQuestion(false);
     }, 1000);
   }
 
   function updateTimer(t) {
     timerText.textContent = t + "s";
-    timerBar.style.width = (t / timePerQuestion * 100) + "%";
+    timerBar.style.width = (t / ((difficultySelect.value === "hardcore") ? timePerQuestionHardcore : timePerQuestionNormal) * 100) + "%";
     timerBar.style.background = t > 10 ? "#00ff00" : t > 5 ? "#ffcc00" : "#ff4d4d";
   }
 
@@ -199,71 +191,71 @@ document.addEventListener("DOMContentLoaded", () => {
     stopAllSounds();
 
     const correct = questions[current].correctAnswer;
-    let correctAnswerBtn;
 
     document.querySelectorAll(".option-btn").forEach(b => {
       b.disabled = true;
-      if (b.textContent === correct) {
-        b.classList.add("correct");
-        correctAnswerBtn = b;
-      }
-      if (b.textContent === ans && ans !== correct) b.classList.add("wrong");
+      if (b.textContent === correct) b.classList.add("pulse-glow");
+      if (b.textContent === ans && ans !== correct) b.classList.add("shake-red");
     });
 
-    // Animate answer
     if (ans === correct) {
-      correctAnswerBtn.classList.add("pulse-glow");
+      score += 100;
       ladderLevel++;
-      if ([4,9,14,19].includes(current)) guaranteedMoney = ladderLevel*100;
       playSound("correct");
+      updateMoneyLadder();
+      setTimeout(nextQuestion, 1500);
     } else {
       if (!secondChanceUsed) {
         secondChanceUsed = true;
-        alert("Second Chance Activated! Try again.");
-        document.querySelectorAll(".option-btn").forEach(b=>b.disabled=false);
+        alert("❤️ Second Chance used! Try again!");
+        document.querySelectorAll(".option-btn").forEach(b => b.disabled = false);
         return;
+      } else {
+        playSound("wrong");
+        updateMoneyLadder();
+        highlightCorrectAnswer(correct);
+        setTimeout(() => nextQuestion(false), 2000);
       }
-      document.querySelectorAll(".option-btn").forEach(b => b.classList.add("shake-red"));
-      playSound("wrong");
     }
-
-    updateMoneyLadder();
-    setTimeout(() => nextQuestion(ans === correct), 2000);
   }
 
-  function nextQuestion(correct = true) {
-    if (current >= questions.length - 1) {
+  function highlightCorrectAnswer(correct) {
+    document.querySelectorAll(".option-btn").forEach(b => {
+      if (b.textContent === correct) b.classList.add("pulse-glow");
+    });
+  }
+
+  function nextQuestion(isCorrect=true) {
+    current++;
+
+    if (current >= questions.length) {
       showFinalScreen();
       return;
     }
-    current++;
+
     playSound("thinking");
     showQuestion();
   }
 
-  // ================= MONEY LADDER =================
+  /* ================= MONEY LADDER ================= */
   function buildMoneyLadder(count) {
     moneyList.innerHTML = "";
-    for (let i=count; i>=1; i--) {
+    for (let i = count; i >= 1; i--) {
       const li = document.createElement("li");
       li.className = "ladder-btn";
-      li.textContent = "$" + (i*100);
+      li.textContent = "$" + (i * 100);
+      if ([5,10,15,20].includes(i)) li.classList.add("checkpoint");
       moneyList.appendChild(li);
     }
   }
 
   function updateMoneyLadder() {
-    [...moneyList.children].forEach(li=>li.classList.remove("current","checkpoint"));
+    [...moneyList.children].forEach(li => li.classList.remove("current"));
     const idx = moneyList.children.length - ladderLevel;
     if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
-    // Checkpoints
-    [4,9,14,19].forEach(cp => {
-      const li = moneyList.children[moneyList.children.length-cp-1];
-      if(li) li.classList.add("checkpoint");
-    });
   }
 
-  // ================= LIFELINES =================
+  /* ================= LIFELINES ================= */
   fiftyBtn.onclick = () => {
     if (fiftyUsed) return;
     fiftyUsed = true;
@@ -271,10 +263,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const correct = questions[current].correctAnswer;
     let removed = 0;
-
     document.querySelectorAll(".option-btn").forEach(b => {
-      if (b.textContent !== correct && removed<2) { b.style.opacity=0.3; removed++; }
+      if (b.textContent !== correct && removed < 2) {
+        b.style.opacity = 0.3;
+        removed++;
+      }
     });
+  };
+
+  secondChanceBtn.onclick = () => {
+    if (secondChanceUsed) return;
+    secondChanceUsed = true;
+    secondChanceBtn.classList.add("used");
+    alert("❤️ Second Chance activated! You will survive one wrong answer.");
   };
 
   callFriendBtn.onclick = () => {
@@ -282,7 +283,8 @@ document.addEventListener("DOMContentLoaded", () => {
     friendUsed = true;
     callFriendBtn.classList.add("used");
     playSound("call");
-    callFriendBox.innerHTML = `📞 Friend says: <b>${questions[current].correctAnswer}</b>`;
+    const correct = questions[current].correctAnswer;
+    callFriendBox.innerHTML = `📞 Friend says: <b>${correct}</b>`;
   };
 
   audienceBtn.onclick = () => {
@@ -291,60 +293,59 @@ document.addEventListener("DOMContentLoaded", () => {
     audienceBtn.classList.add("used");
     playSound("audience");
 
+    const correct = questions[current].correctAnswer;
     audienceVote.innerHTML = "";
-    document.querySelectorAll(".option-btn").forEach(b=>{
-      let percent = Math.floor(Math.random()*50)+25; // bias correct answer
-      if(b.textContent !== questions[current].correctAnswer) percent = Math.floor(Math.random()*50);
+    document.querySelectorAll(".option-btn").forEach(b => {
+      let percent = Math.floor(Math.random() * 50) + 25; // 25-75% correct bias
+      if (b.textContent === correct) percent += 15;
       audienceVote.innerHTML += `<div>${b.textContent}: ${percent}%</div>`;
     });
   };
 
-  // ================= FINAL SCREEN =================
+  /* ================= FINAL SCREEN ================= */
   function showFinalScreen() {
     stopAllSounds();
     playSound("win");
-    saveScore(ladderLevel*100);
-
     quizDiv.innerHTML = `
       <div class="final-screen">
         <h1>🎉 CONGRATULATIONS</h1>
-        <h2>You Won $${ladderLevel*100}</h2>
-        <h3>Guaranteed Money: $${guaranteedMoney}</h3>
+        <h2>You Won $${score}</h2>
         <button onclick="location.reload()">Restart Quiz</button>
-        <button onclick="navigator.share({text:'I won $${ladderLevel*100} in NEON MILLIONAIRE!'})">Share Score</button>
+        <button onclick="navigator.share({text:'I won $${score} in NEON MILLIONAIRE!'})">Share Score</button>
       </div>
     `;
+    saveScore(score);
   }
 
-  // ================= LEADERBOARD =================
-  async function loadLeaderboard() {
-    const snapshot = await db.collection("scores").get();
-    const scores = {};
-    snapshot.forEach(doc=>{
-      const data = doc.data();
-      if(!scores[data.name]) scores[data.name]=0;
-      scores[data.name]+=data.score;
-    });
-
-    const sorted = Object.entries(scores).sort((a,b)=>b[1]-a[1]).slice(0,10);
-
-    const leaderboard = document.getElementById("leaderboard-list");
-    leaderboard.innerHTML = "";
-    sorted.forEach(([name,score])=>{
-      const li = document.createElement("li");
-      li.innerHTML = `<span>${name}</span> <span>$${score}</span>`;
-      leaderboard.appendChild(li);
-    });
-  }
-
-  function saveScore(score) {
+  /* ================= LEADERBOARD ================= */
+  async function saveScore(score) {
     const user = auth.currentUser;
-    if(!user) return;
-    db.collection("scores").add({
-      name: user.displayName||"Guest",
-      photo: user.photoURL||"",
-      score,
-      time: new Date()
+    if (!user) return;
+
+    const userRef = db.collection("scores").doc(user.uid);
+    const doc = await userRef.get();
+    let totalScore = score;
+    if (doc.exists) totalScore += doc.data().totalScore || 0;
+
+    await userRef.set({
+      name: user.displayName || "Guest",
+      photo: user.photoURL || "",
+      totalScore: totalScore,
+      gamesPlayed: (doc.exists ? doc.data().gamesPlayed + 1 : 1),
+      lastPlayed: new Date()
+    });
+
+    loadLeaderboard();
+  }
+
+  async function loadLeaderboard() {
+    const snapshot = await db.collection("scores").orderBy("totalScore","desc").limit(10).get();
+    leaderboardList.innerHTML = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${data.name}</span> <span>$${data.totalScore}</span>`;
+      leaderboardList.appendChild(li);
     });
   }
 
