@@ -193,11 +193,17 @@ function checkAnswer(ans) {
   });
 
   if (ans === correct) {
-    ladderLevel++;
-    playSound("correct");
-  } else {
-    playSound("wrong");
+  ladderLevel++;
+
+  if (checkpoints[ladderLevel]) {
+    guaranteedMoney = checkpoints[ladderLevel];
   }
+
+  playSound("correct");
+} else {
+  playSound("wrong");
+}
+
 
   updateMoneyLadder();
   setTimeout(nextQuestion, 2000);
