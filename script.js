@@ -361,4 +361,12 @@ function saveScore(score) {
   });
 }
 
+/* LOG OUT */
+function logoutUser() {
+  firebase.auth().signOut().then(() => {
+    location.reload();
+  });
+}
+
+/* DO NOT REMOVE */
 });
