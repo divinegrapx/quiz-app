@@ -197,7 +197,8 @@ function checkAnswer(ans) {
   if (ans === correct) {
   ladderLevel++;
 
-  if (checkpoints[ladderLevel]) {
+  // 💀 Hardcore Mode disables checkpoints
+  if (!hardcoreMode && checkpoints[ladderLevel]) {
     guaranteedMoney = checkpoints[ladderLevel];
   }
 
@@ -205,6 +206,7 @@ function checkAnswer(ans) {
 } else {
   playSound("wrong");
 }
+
 
 
   updateMoneyLadder();
