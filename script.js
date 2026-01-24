@@ -112,6 +112,15 @@ let fiftyUsed = false;
 let friendUsed = false;
 let audienceUsed = false;
 const timePerQuestion = 30;
+/* CHECKPOINTS (20 QUESTIONS) */
+const checkpoints = {
+  5: 1000,
+  10: 32000,
+  15: 250000,
+  20: 1000000
+};
+
+let guaranteedMoney = 0;
 
 startBtn.onclick = startQuiz;
 
