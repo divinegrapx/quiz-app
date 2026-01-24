@@ -31,6 +31,7 @@ const timerText = document.getElementById("timer-text");
 const fiftyBtn = document.getElementById("fiftyBtn");
 const callFriendBtn = document.getElementById("callFriendBtn");
 const audienceBtn = document.getElementById("audienceBtn");
+const walkAwayBtn = document.getElementById("walkAwayBtn");
 const callFriendBox = document.getElementById("callFriendBox");
 const audienceVote = document.getElementById("audienceVote");
 
