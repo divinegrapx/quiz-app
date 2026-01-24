@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>NEON MILLIONAIRE</title>
+<title>NEON MILLIONAIRE PHASE 3</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="style.css">
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
@@ -15,15 +16,19 @@
 
 <div class="container">
 
+  <!-- PROFILE -->
   <div id="profileDiv"></div>
 
+  <!-- LOGIN -->
   <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
     <button id="guestLoginBtn">Play as Guest</button>
     <button id="emailRegisterBtn">Login / Register with Email</button>
+    <button id="helpBtn">❓ Help</button>
   </div>
 
+  <!-- EMAIL LOGIN -->
   <div id="emailDiv" style="display:none;">
     <input type="email" id="emailInput" placeholder="Email">
     <input type="password" id="passwordInput" placeholder="Password">
@@ -32,11 +37,12 @@
     <button id="emailCancelBtn">Cancel</button>
   </div>
 
+  <!-- SETTINGS -->
   <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
 
     <select id="categorySelect">
-      <option value="general_knowledge">General</option>
+      <option value="general_knowledge">General Knowledge</option>
       <option value="science">Science</option>
       <option value="history">History</option>
       <option value="sports">Sports</option>
@@ -55,10 +61,16 @@
       <option value="off">Sound OFF</option>
     </select>
 
+    <label>
+      <input type="checkbox" id="hardcoreToggle"> Hardcore Mode (20s, no lifelines)
+    </label>
+
     <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
+  <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
+
     <div id="timer-container">
       <div id="timer-bar"></div>
       <span id="timer-text">30s</span>
@@ -69,17 +81,35 @@
       <ul id="money-list"></ul>
     </div>
 
+    <!-- LIFELINES -->
     <div id="lifelines">
       <button id="fiftyBtn">50:50</button>
-      <button id="callFriendBtn">📞 Call Friend</button>
+      <button id="secondChanceBtn">💓 Second Chance</button>
+      <button id="callFriendBtn">📞 Call</button>
       <button id="audienceBtn">📊 Audience</button>
     </div>
 
     <div id="callFriendBox"></div>
     <div id="audienceVote"></div>
+
+    <button id="walkAwayBtn">🚪 Walk Away</button>
+
   </div>
 
-  <h3>Leaderboard - Top Players</h3>
+  <!-- SHOP -->
+  <div id="shopDiv" style="display:none;">
+    <h2>Shop</h2>
+    <ul>
+      <li>50:50 - $50,000 <button class="buy-btn" data-item="fifty">Buy</button></li>
+      <li>Time Freeze - $25,000 <button class="buy-btn" data-item="freeze">Buy</button></li>
+      <li>Second Chance - $100,000 <button class="buy-btn" data-item="second">Buy</button></li>
+      <li>Hardcore Badge - $250,000 <button class="buy-btn" data-item="hardcore">Buy</button></li>
+    </ul>
+    <button id="closeShopBtn">Close Shop</button>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <h3>Leaderboard (Top 10 Lifetime Earnings)</h3>
   <ul id="leaderboard-list"></ul>
 
   <!-- SOUNDS -->
