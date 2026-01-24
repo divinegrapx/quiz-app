@@ -1,45 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>NEON MILLIONAIRE</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
+  <!-- STYLE -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- Firebase -->
+  <!-- FIREBASE (COMPAT FOR SIMPLICITY & STABILITY) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
+
 <body>
 
 <div class="container">
 
-  <!-- PROFILE -->
-  <div id="profileDiv"></div>
+  <!-- ================= PROFILE / LEADERBOARD ================= -->
+  <div id="profileBar">
+    <div id="profileInfo"></div>
+    <button id="logoutBtn" class="small-btn hidden">Logout</button>
+  </div>
 
-  <!-- AUTH -->
-  <div id="authDiv">
+  <!-- ================= AUTH ================= -->
+  <div id="authScreen">
     <h1 class="title">NEON MILLIONAIRE</h1>
 
-    <button type="button" id="googleLoginBtn">Login with Google</button>
-    <button type="button" id="guestLoginBtn">Play as Guest</button>
-    <button type="button" id="emailRegisterBtn">Login / Register with Email</button>
+    <button id="googleLoginBtn">Login with Google</button>
+    <button id="guestLoginBtn">Play as Guest</button>
+    <button id="emailLoginToggleBtn">Login / Register with Email</button>
   </div>
 
   <!-- EMAIL LOGIN -->
-  <div id="emailDiv" style="display:none;">
-    <input type="email" id="emailInput" placeholder="Email">
-    <input type="password" id="passwordInput" placeholder="Password">
-
-    <button type="button" id="emailLoginBtn">Login</button>
-    <button type="button" id="emailRegisterSubmitBtn">Register</button>
-    <button type="button" id="emailCancelBtn">Cancel</button>
+  <div id="emailScreen" class="hidden">
+    <input id="emailInput" type="email" placeholder="Email">
+    <input id="passwordInput" type="password" placeholder="Password">
+    <button id="emailLoginBtn">Login</button>
+    <button id="emailRegisterBtn">Register</button>
+    <button id="emailCancelBtn" class="danger">Cancel</button>
   </div>
 
-  <!-- SETTINGS -->
-  <div id="categoryDiv" style="display:none;">
+  <!-- ================= SETTINGS ================= -->
+  <div id="settingsScreen" class="hidden">
     <h2>Game Settings</h2>
 
     <select id="categorySelect">
@@ -57,9 +61,9 @@
       <option value="hard">Hard</option>
     </select>
 
-    <label class="hardcore-toggle">
+    <label class="toggle">
       <input type="checkbox" id="hardcoreToggle">
-      💀 Hardcore Mode (No Checkpoints)
+      💀 Hardcore Mode (x2 Score, No Lifelines)
     </label>
 
     <select id="soundToggle">
@@ -67,58 +71,66 @@
       <option value="off">Sound OFF</option>
     </select>
 
-    <button type="button" id="startBtn" class="start-btn">
-      START QUIZ
-    </button>
+    <button id="startGameBtn" class="start-btn">START QUIZ</button>
   </div>
 
-  <!-- QUIZ -->
-  <div id="quiz-container" style="display:none;">
+  <!-- ================= QUIZ ================= -->
+  <div id="quizScreen" class="hidden">
 
     <!-- TIMER -->
-    <div id="timer-container">
-      <div id="timer-bar"></div>
-      <span id="timer-text">30s</span>
+    <div id="timerContainer">
+      <div id="timerBar"></div>
+      <span id="timerText">20s</span>
     </div>
 
-    <!-- QUIZ + LADDER -->
-    <div id="quiz-and-ladder">
-      <div id="quiz"></div>
-      <ul id="money-list"></ul>
+    <!-- QUESTION + LADDER -->
+    <div id="gameArea">
+
+      <div id="questionArea">
+        <h2 id="questionText"></h2>
+        <div id="answers"></div>
+      </div>
+
+      <ul id="moneyLadder"></ul>
+
     </div>
 
     <!-- LIFELINES -->
     <div id="lifelines">
-      <button type="button" id="fiftyBtn">50:50</button>
-      <button type="button" id="callFriendBtn">📞 Call</button>
-      <button type="button" id="audienceBtn">📊 Audience</button>
-      <button type="button" id="walkAwayBtn" class="walk-away-btn">
-        💼 Walk Away
-      </button>
+      <button id="fiftyBtn">50:50</button>
+      <button id="callBtn">📞 Call</button>
+      <button id="audienceBtn">📊 Audience</button>
+      <button id="secondChanceBtn">❤️ Second Chance</button>
     </div>
 
-    <div id="callFriendBox"></div>
-    <div id="audienceVote"></div>
+    <!-- WALK AWAY -->
+    <button id="walkAwayBtn" class="danger">💰 WALK AWAY</button>
+
+    <!-- HELP MODALS -->
+    <div id="callBox" class="info-box hidden"></div>
+    <div id="audienceBox" class="info-box hidden"></div>
   </div>
 
-  <!-- LEADERBOARD -->
-  <ul id="leaderboard-list"></ul>
+  <!-- ================= FINAL ================= -->
+  <div id="finalScreen" class="hidden"></div>
 
-  <!-- SOUNDS -->
-  <audio id="intro-sound" src="intro.mp3" preload="auto"></audio>
-  <audio id="thinking-sound" src="thinking.mp3" preload="auto"></audio>
-  <audio id="call-sound" src="call.mp3" preload="auto"></audio>
-  <audio id="audience-sound" src="audience.mp3" preload="auto"></audio>
-  <audio id="correct-sound" src="correct.wav" preload="auto"></audio>
-  <audio id="wrong-sound" src="wrong.wav" preload="auto"></audio>
-  <audio id="win-sound" src="win.mp3" preload="auto"></audio>
-  <audio id="lose-sound" src="lose.mp3" preload="auto"></audio>
-  <audio id="tick-sound" src="tick.mp3" preload="auto"></audio>
+  <!-- ================= LEADERBOARD ================= -->
+  <div id="leaderboard">
+    <h3>🏆 TOP PLAYERS</h3>
+    <ul id="leaderboardList"></ul>
+  </div>
+
+  <!-- ================= SOUNDS ================= -->
+  <audio id="sndIntro" src="intro.mp3"></audio>
+  <audio id="sndThink" src="thinking.mp3" loop></audio>
+  <audio id="sndCorrect" src="correct.wav"></audio>
+  <audio id="sndWrong" src="wrong.wav"></audio>
+  <audio id="sndWin" src="win.mp3"></audio>
+  <audio id="sndLose" src="lose.mp3"></audio>
+  <audio id="sndTick" src="tick.mp3"></audio>
 
 </div>
 
-<!-- MAIN SCRIPT -->
 <script src="script.js"></script>
-
 </body>
 </html>
