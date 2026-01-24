@@ -38,6 +38,7 @@ const audienceVote = document.getElementById("audienceVote");
 const categorySelect = document.getElementById("categorySelect");
 const difficultySelect = document.getElementById("difficultySelect");
 const soundToggle = document.getElementById("soundToggle");
+const hardcoreToggle = document.getElementById("hardcoreToggle");
 
 /* SOUNDS */
 const sounds = {
