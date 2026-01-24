@@ -276,6 +276,38 @@ audienceBtn.onclick = () => {
     audienceVote.innerHTML += `<div>${b.textContent}: ${percent}%</div>`;
   });
 };
+/* WALK AWAY */
+walkAwayBtn.onclick = () => {
+  clearInterval(timer);
+  stopAllSounds();
+
+  playSound("win");
+
+  quizDiv.innerHTML = `
+    <div class="final-screen">
+      <h1>💰 YOU WALKED AWAY</h1>
+
+      <div class="money-win">
+        $${guaranteedMoney.toLocaleString()}
+      </div>
+
+      <p>You secured your guaranteed prize!</p>
+
+      <div class="final-buttons">
+        <button onclick="location.reload()">🔁 Play Again</button>
+
+        <button onclick="navigator.share({
+          title: 'NEON MILLIONAIRE',
+          text: 'I walked away with $${guaranteedMoney.toLocaleString()} in NEON MILLIONAIRE!'
+        })">📤 Share</button>
+
+        <button onclick="logoutUser()">🚪 Log Out</button>
+      </div>
+    </div>
+  `;
+
+  saveScore(guaranteedMoney);
+};
 
 /* FINAL SCREEN */
 function showFinalScreen() {
