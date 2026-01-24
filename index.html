@@ -7,7 +7,6 @@
 
 <link rel="stylesheet" href="style.css">
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
@@ -35,6 +34,7 @@
 
   <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
+
     <select id="categorySelect">
       <option value="general_knowledge">General</option>
       <option value="science">Science</option>
@@ -43,15 +43,18 @@
       <option value="film_and_tv">Movies & TV</option>
       <option value="music">Music</option>
     </select>
+
     <select id="difficultySelect">
       <option value="easy">Easy</option>
       <option value="medium" selected>Medium</option>
       <option value="hard">Hard</option>
     </select>
+
     <select id="soundToggle">
       <option value="on">Sound ON</option>
       <option value="off">Sound OFF</option>
     </select>
+
     <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
@@ -68,15 +71,15 @@
 
     <div id="lifelines">
       <button id="fiftyBtn">50:50</button>
-      <button id="callFriendBtn">📞 Call</button>
+      <button id="callFriendBtn">📞 Call Friend</button>
       <button id="audienceBtn">📊 Audience</button>
-      <!-- Second Chance button will be added dynamically -->
     </div>
 
     <div id="callFriendBox"></div>
     <div id="audienceVote"></div>
   </div>
 
+  <h3>Leaderboard - Top Players</h3>
   <ul id="leaderboard-list"></ul>
 
   <!-- SOUNDS -->
