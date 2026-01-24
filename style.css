@@ -1,64 +1,232 @@
-body {
-  background: radial-gradient(circle, #0f2027, #203a43, #2c5364);
-  font-family: Arial, sans-serif;
-  color: white;
-  text-align: center;
+* {
+  box-sizing: border-box;
+  font-family: "Orbitron", "Poppins", sans-serif;
 }
 
-.container {
-  max-width: 600px;
-  margin: auto;
+body {
+  margin: 0;
+  background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+  background-size: 400% 400%;
+  animation: bg 20s infinite;
+  color: #fff;
+  display: flex;
+  justify-content: center;
   padding: 20px;
 }
 
-.hidden {
-  display: none;
+@keyframes bg {
+  0% { background-position: 0%; }
+  50% { background-position: 100%; }
+  100% { background-position: 0%; }
 }
 
-button {
-  background: #00f2ff;
-  border: none;
-  padding: 12px;
-  margin: 6px;
+/* ---------- CONTAINER ---------- */
+.container {
+  max-width: 900px;
   width: 100%;
-  font-size: 16px;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 0 30px #00f2fe;
+  text-align: center;
+  animation: fadeIn 0.8s ease;
+}
+
+.title {
+  font-size: 46px;
+  color: #00f2fe;
+  text-shadow: 0 0 25px #00f2fe;
+  animation: neonPulse 2s infinite alternate;
+}
+
+@keyframes neonPulse {
+  from { text-shadow: 0 0 10px #00f2fe; }
+  to { text-shadow: 0 0 30px #00f2fe; }
+}
+
+/* ---------- BUTTONS ---------- */
+button {
+  padding: 12px 20px;
+  margin: 6px;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #00c6ff, #00f2fe);
+  color: #000;
   cursor: pointer;
-  border-radius: 6px;
+  transition: 0.2s;
 }
 
-button.correct {
-  background: #00ff3c !important;
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px #00f2fe;
 }
 
-button.wrong {
-  background: #ff0033 !important;
+button.used {
+  background: #444 !important;
+  color: #999 !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
 }
 
-#quiz button {
-  background: #111;
-  color: white;
+/* ---------- QUIZ LAYOUT ---------- */
+#quiz-and-ladder {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  align-items: flex-start;
 }
 
+#quiz {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 18px;
+  border-radius: 20px;
+  min-height: 320px;
+}
+
+/* ---------- QUESTION ---------- */
+#quiz h2 { margin-bottom: 10px; }
+
+/* ---------- ANSWER BUTTONS ---------- */
+.option-btn {
+  width: 100%;
+  height: 48px;
+  margin: 6px auto;
+  padding: 10px;
+  border-radius: 12px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #1c92d2, #f2fcfe);
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s ease;
+}
+
+/* ---------- ANSWER ANIMATIONS ---------- */
+.pulse-glow {
+  animation: pulseGlow 1s infinite alternate;
+  box-shadow: 0 0 15px #00ff00, 0 0 30px #00ff00;
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 15px #00ff00; }
+  50% { box-shadow: 0 0 25px #00ff00, 0 0 40px #00ff00; }
+  100% { box-shadow: 0 0 15px #00ff00; }
+}
+
+.shake-red {
+  animation: shakeRed 0.6s ease;
+}
+
+@keyframes shakeRed {
+  0% { transform: translateX(0); background-color: #ff4d4d; }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-10px); }
+  80% { transform: translateX(10px); }
+  100% { transform: translateX(0); }
+}
+
+/* ---------- MONEY LADDER ---------- */
 #money-list {
   list-style: none;
   padding: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  min-width: 140px;
+  gap: 5px;
 }
 
-#money-list li {
-  padding: 4px;
-}
-
-#money-list li.active {
-  color: #00ff3c;
+.ladder-btn {
+  width: 100%;
+  padding: 6px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
   font-weight: bold;
+  font-size: 13px;
+  transition: all 0.3s ease;
 }
 
-#scoreBox {
-  font-size: 24px;
-  margin-bottom: 10px;
+.ladder-btn.current {
+  background: linear-gradient(135deg, gold, orange);
+  color: #000;
+  box-shadow: 0 0 10px gold;
 }
 
-.nightmare {
-  display: block;
-  margin: 10px;
+.ladder-btn.checkpoint {
+  border: 2px solid gold;
+  animation: checkpointGlow 1.5s infinite alternate;
+}
+
+@keyframes checkpointGlow {
+  from { box-shadow: 0 0 10px gold; }
+  to { box-shadow: 0 0 25px gold, 0 0 40px gold; }
+}
+
+/* ---------- TIMER ---------- */
+#timer-container {
+  width: 100%;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  margin: 10px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+#timer-bar {
+  height: 100%;
+  width: 100%;
+  background: #00ff00;
+  transition: width 1s linear, background 0.3s;
+}
+
+#timer-text {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* ---------- LIFELINES ---------- */
+#lifelines {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* ---------- FINAL SCREEN ---------- */
+.final-screen {
+  padding: 40px;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.final-screen h1 {
+  font-size: 42px;
+  color: gold;
+  text-shadow: 0 0 20px gold;
+}
+
+/* ---------- ANIMATIONS ---------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 700px) {
+  #quiz-and-ladder {
+    flex-direction: column;
+  }
+  #money-list {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+  .ladder-btn { min-width: 100px; }
 }
