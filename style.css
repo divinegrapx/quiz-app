@@ -1,41 +1,37 @@
-/* ---------- GENERAL ---------- */
-* { box-sizing: border-box; font-family: "Orbitron", "Poppins", sans-serif; }
-body { margin:0; display:flex; justify-content:center; padding:20px; background:linear-gradient(-45deg,#0f2027,#203a43,#2c5364); background-size:400% 400%; animation:bg 20s infinite; color:#fff; }
-@keyframes bg { 0%{background-position:0%}50%{background-position:100%}100%{background-position:0%} }
+* { box-sizing: border-box; font-family:"Orbitron","Poppins",sans-serif; }
+body { margin:0; background:linear-gradient(-45deg,#0f2027,#203a43,#2c5364); background-size:400% 400%; animation:bg 20s infinite; color:#fff; display:flex; justify-content:center; padding:20px; }
+@keyframes bg {0%{background-position:0%}50%{background-position:100%}100%{background-position:0%}}
 
 .container { max-width:900px; width:100%; background:rgba(0,0,0,0.85); border-radius:20px; padding:25px; box-shadow:0 0 30px #00f2fe; text-align:center; animation:fadeIn 0.8s ease; }
-
 .title { font-size:46px; color:#00f2fe; text-shadow:0 0 25px #00f2fe; animation:neonPulse 2s infinite alternate; }
-@keyframes neonPulse { from {text-shadow:0 0 10px #00f2fe;} to {text-shadow:0 0 30px #00f2fe;} }
-
+@keyframes neonPulse {from{text-shadow:0 0 10px #00f2fe}to{text-shadow:0 0 30px #00f2fe}}
 button { padding:12px 20px; margin:6px; border:none; border-radius:12px; font-weight:bold; background:linear-gradient(135deg,#00c6ff,#00f2fe); color:#000; cursor:pointer; transition:0.2s; }
 button:hover { transform:scale(1.05); box-shadow:0 0 12px #00f2fe; }
 button.used { background:#444 !important; color:#999 !important; box-shadow:none !important; cursor:not-allowed; }
 
+/* QUIZ LAYOUT */
 #quiz-and-ladder { display:flex; gap:15px; margin-top:10px; align-items:flex-start; }
-#quiz { flex:1; background:rgba(255,255,255,0.05); padding:18px; border-radius:20px; min-height:320px; }
-
+#quiz { flex:1; background:rgba(255,255,255,0.05); padding:18px; border-radius:20px; min-height:320px; position:relative; }
 .option-btn { width:100%; height:48px; margin:6px auto; padding:10px; border-radius:12px; font-weight:bold; background:linear-gradient(135deg,#1c92d2,#f2fcfe); color:#000; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:0.3s; }
+.option-btn.correct { animation:glowPulse 1s infinite; background:#00ff00!important; color:#000; }
+.option-btn.wrong { animation:shake 0.5s; background:#ff4d4d!important; color:#000; }
 
-.correct { animation:correctGlow 0.8s ease infinite alternate; background:#00ff00 !important; color:#000; }
-.wrong { animation:shakeRed 0.6s; background:#ff4d4d !important; color:#000; }
-
-@keyframes correctGlow { 0%{box-shadow:0 0 5px #00ff00;}100%{box-shadow:0 0 20px #00ff00;} }
-@keyframes shakeRed { 0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-8px);}40%,80%{transform:translateX(8px);} }
+@keyframes glowPulse { 0%{box-shadow:0 0 10px #0f0}50%{box-shadow:0 0 25px #0f0}100%{box-shadow:0 0 10px #0f0} }
+@keyframes shake { 0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-5px)}100%{transform:translateX(0)} }
 
 #money-list { list-style:none; padding:0; display:flex; flex-direction:column-reverse; min-width:140px; gap:5px; }
-.ladder-btn { width:100%; padding:6px; border-radius:8px; background:rgba(255,255,255,0.15); color:#fff; font-weight:bold; font-size:13px; }
-.ladder-btn.current { background:linear-gradient(135deg,gold,orange); color:#000; box-shadow:0 0 10px gold; }
+.ladder-btn { width:100%; padding:6px; border-radius:8px; background:rgba(255,255,255,0.15); color:#fff; font-weight:bold; font-size:13px; transition:0.3s; }
+.ladder-btn.current { background:linear-gradient(135deg,gold,orange); color:#000; box-shadow:0 0 10px gold; animation:pulse 1s infinite; }
+@keyframes pulse {0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
 
 #timer-container { width:100%; height:22px; background:rgba(255,255,255,0.15); border-radius:20px; margin:10px 0; position:relative; overflow:hidden; }
-#timer-bar { height:100%; width:100%; background:#00ff00; transition:width 1s linear, background 0.3s; }
+#timer-bar { height:100%; width:100%; background:#00ff00; transition:width 0.3s linear, background 0.3s; }
 #timer-text { position:absolute; right:10px; top:50%; transform:translateY(-50%); font-weight:bold; font-size:14px; }
 
 #lifelines { margin-top:10px; display:flex; justify-content:center; gap:10px; animation:slideUp 0.6s ease; }
 #lifelines button { background:linear-gradient(135deg,#ffdd00,#ffaa00); font-size:14px; }
 
-@keyframes slideUp { from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;} }
-#callFriendBox, #audienceVote { margin:10px 0; font-size:16px; animation:fadeIn 0.4s ease; }
+#callFriendBox,#audienceVote { margin:10px 0; font-size:16px; animation:fadeIn 0.4s ease; }
 
 #leaderboard-list { list-style:none; padding:0; margin-top:10px; }
 #leaderboard-list li { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.1); padding:8px; border-radius:10px; margin-bottom:6px; }
@@ -44,6 +40,12 @@ button.used { background:#444 !important; color:#999 !important; box-shadow:none
 .final-screen { padding:40px; animation:fadeIn 0.6s ease-in-out; }
 .final-screen h1 { font-size:42px; color:gold; text-shadow:0 0 20px gold; }
 
-@keyframes fadeIn { from{opacity:0;transform:scale(0.95);} to{opacity:1;transform:scale(1);} }
+@keyframes fadeIn { from{opacity:0; transform:scale(0.95)} to{opacity:1; transform:scale(1)} }
+@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
 
-@media(max-width:700px){ #quiz-and-ladder{flex-direction:column;} #money-list{flex-direction:row;overflow-x:auto;} .ladder-btn{min-width:100px;} }
+/* MOBILE */
+@media (max-width:700px){
+  #quiz-and-ladder{flex-direction:column}
+  #money-list{flex-direction:row; overflow-x:auto}
+  .ladder-btn{min-width:100px}
+}
