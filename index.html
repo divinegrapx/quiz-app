@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>NEON MILLIONAIRE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="stylesheet" href="style.css">
 
 <!-- Firebase -->
@@ -12,36 +11,32 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
-
 <body>
 
 <div class="container">
 
-  <!-- PROFILE -->
-  <div id="profile" class="profile"></div>
-
-  <!-- AUTH -->
-  <div id="auth">
+  <!-- LOGIN / INTRO -->
+  <div id="loginDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
-    <button id="googleBtn">Google Login</button>
-    <button id="guestBtn">Play as Guest</button>
-    <button id="emailBtn">Email Login</button>
+    <label><input type="checkbox" id="nightmareModeCheck"> Nightmare Mode (Hardcore)</label><br><br>
+    <button id="googleLoginBtn">Login with Google</button>
+    <button id="guestLoginBtn">Play as Guest</button>
+    <button id="emailRegisterBtn">Login / Register with Email</button>
   </div>
 
-  <!-- EMAIL -->
-  <div id="emailBox" class="hidden">
-    <input id="email" type="email" placeholder="Email">
-    <input id="pass" type="password" placeholder="Password">
-    <button id="loginEmail">Login</button>
-    <button id="regEmail">Register</button>
-    <button id="cancelEmail">Cancel</button>
+  <!-- EMAIL LOGIN -->
+  <div id="emailDiv" class="hidden">
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passwordInput" placeholder="Password">
+    <button id="emailLoginBtn">Login</button>
+    <button id="emailRegisterSubmitBtn">Register</button>
+    <button id="emailCancelBtn">Cancel</button>
   </div>
 
   <!-- SETTINGS -->
-  <div id="settings" class="hidden">
+  <div id="categoryDiv" class="hidden">
     <h2>Game Settings</h2>
-
-    <select id="category">
+    <select id="categorySelect">
       <option value="general_knowledge">General</option>
       <option value="science">Science</option>
       <option value="history">History</option>
@@ -50,55 +45,59 @@
       <option value="music">Music</option>
     </select>
 
-    <select id="difficulty">
+    <select id="difficultySelect">
       <option value="easy">Easy</option>
       <option value="medium" selected>Medium</option>
       <option value="hard">Hard</option>
     </select>
 
-    <label>
-      <input type="checkbox" id="nightmare">
-      Nightmare Mode
-    </label>
-
-    <select id="sound">
+    <select id="soundToggle">
       <option value="on">Sound ON</option>
       <option value="off">Sound OFF</option>
     </select>
 
-    <button id="start">START</button>
+    <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
   <!-- QUIZ -->
-  <div id="game" class="hidden">
+  <div id="quiz-container" class="hidden">
+    <div id="scoreRow">Score: $0 | Total: $0</div>
 
-    <div id="timer">
-      <div id="bar"></div>
-      <span id="time">30s</span>
+    <div id="timer-container">
+      <div id="timer-bar"></div>
+      <span id="timer-text">30s</span>
     </div>
 
-    <div id="main">
-
+    <div id="quiz-and-ladder">
       <div id="quiz"></div>
-
-      <ul id="ladder"></ul>
-
+      <ul id="money-list"></ul>
     </div>
 
     <div id="lifelines">
-      <button id="fifty">50:50</button>
-      <button id="second">Second</button>
-      <button id="call">📞</button>
-      <button id="audience">📊</button>
+      <button id="fiftyBtn">50:50 ($100)</button>
+      <button id="secondChanceBtn">Second Chance ($200)</button>
+      <button id="callFriendBtn">📞 Call</button>
+      <button id="audienceBtn">📊 Audience</button>
+      <button id="safeMoneyBtn">💰 Safe Money</button>
     </div>
 
-    <div id="callBox"></div>
-    <div id="voteBox"></div>
-
+    <div id="callFriendBox"></div>
+    <div id="audienceVote"></div>
   </div>
 
   <!-- LEADERBOARD -->
-  <div id="board" class="leaderboard"></div>
+  <ul id="leaderboard-list"></ul>
+
+  <!-- SOUNDS -->
+  <audio id="intro-sound" src="intro.mp3"></audio>
+  <audio id="thinking-sound" src="thinking.mp3"></audio>
+  <audio id="call-sound" src="call.mp3"></audio>
+  <audio id="audience-sound" src="audience.mp3"></audio>
+  <audio id="win-sound" src="win.mp3"></audio>
+  <audio id="lose-sound" src="lose.mp3"></audio>
+  <audio id="correct-sound" src="correct.wav"></audio>
+  <audio id="wrong-sound" src="wrong.wav"></audio>
+  <audio id="tick-sound" src="tick.mp3"></audio>
 
 </div>
 
