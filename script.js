@@ -352,13 +352,17 @@ audienceBtn.onclick = () => {
 };
 
 
-  /* =================== SAFE MONEY =================== */
+ /* =================== SAFE MONEY =================== */
 safeMoneyBtn.onclick = () => {
-  score = getLastMilestone(); // set score to last safe milestone
+  // Set score to last safe milestone
+  score = getLastMilestone();
   updateScoreRow();
-  showFinalScreen();           // show final screen and save score once
+
+  // Show final screen and add score once to lifetime
+  showFinalScreen();
 };
 
+// Get last milestone function
 function getLastMilestone() {
   let amt = 0;
   [...moneyList.children].forEach(li => {
@@ -367,6 +371,7 @@ function getLastMilestone() {
   });
   return amt;
 }
+
 
 /* =================== FIREBASE SAVE SCORE =================== */
 async function saveScore(currentScore) {
@@ -407,10 +412,12 @@ function showFinalScreen() {
   stopAllSounds();
   playSound("win");
 
-  // Add current quiz score to lifetime and save
+  // Add current quiz score to lifetime once
   lifetime += score;
   updateScoreRow();
-  saveScore(score); // save only the current quiz points once
+
+  // Save score to Firebase
+  saveScore(score); // only add current quiz score, lifetime handled in saveScore
 
   quizDiv.innerHTML = `
     <div class="final-screen">
@@ -423,21 +430,28 @@ function showFinalScreen() {
   loadLeaderboard(); // refresh leaderboard
 }
 
-/* =================== FIREBASE LEADERBOARD =================== */
-function loadLeaderboard() {
-  leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
 
-  // Real-time listener
-  db.collection("users")
-    .orderBy("lifetime", "desc")
-    .limit(10)
-    .onSnapshot(snapshot => {
-      leaderboardList.innerHTML = "<h3>Top 10 Players</h3>"; // clear before re-render
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const li = document.createElement("li");
-        li.innerHTML = `<img src="${data.photo || 'https://i.imgur.com/6VBx3io.png'}" width="30"> ${data.name || 'Guest'}: $${data.lifetime || 0}`;
-        leaderboardList.appendChild(li);
+/* =================== FIREBASE SAVE SCORE =================== */
+async function saveScore(currentScore) {
+  if (!user) return;
+
+  const userRef = db.collection("users").doc(user.uid);
+
+  await db.runTransaction(async (transaction) => {
+    const doc = await transaction.get(userRef);
+    if (!doc.exists) {
+      transaction.set(userRef, {
+        lifetime: currentScore,
+        name: user.displayName || "Guest",
+        photo: user.photoURL || ""
       });
-    });
+    } else {
+      const previousLifetime = doc.data().lifetime || 0;
+      const newLifetime = previousLifetime + currentScore;
+
+      transaction.update(userRef, { lifetime: newLifetime });
+      lifetime = newLifetime; // update local variable for UI
+    }
+  });
 }
+
