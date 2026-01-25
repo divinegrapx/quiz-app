@@ -195,8 +195,20 @@ audienceBtn.onclick=()=>{
 };
 
 /* ================= SAFE MONEY ================= */
-safeMoneyBtn.onclick=()=>{score=getLastMilestone();endQuiz();};
-function getLastMilestone(){let amt=0;for(let i=0;i<prizes.length;i++){if(score>=prizes[i])amt=prizes[i];else break;}return amt;}
+safeMoneyBtn.onclick = () => {
+  score = getLastCheckpoint(); // collect money up to last checkpoint
+  endQuiz();
+};
+
+function getLastCheckpoint() {
+  let amt = 0;
+  for (let i = 0; i < prizes.length; i++) {
+    if (i <= current) { // all questions answered up to current
+      amt = prizes[i];
+    } else break;
+  }
+  return amt;
+}
 
 /* ================= SCORE & LADDER ================= */
 function buildLadder(){moneyList.innerHTML="";prizes.forEach(p=>{const li=document.createElement("li");li.className="ladder-btn";li.textContent="$"+p;moneyList.appendChild(li);});}
