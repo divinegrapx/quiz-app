@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+  /* =================== FIREBASE CONFIG =================== */
   const firebaseConfig = {
     apiKey: "AIzaSyBS-8TWRkUlpB36YTYpEMiW51WU6AGgtrY",
     authDomain: "neon-quiz-app.firebaseapp.com",
@@ -7,36 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
     storageBucket: "neon-quiz-app.appspot.com",
     messagingSenderId: "891061147021",
     appId: "1:891061147021:web:7b3d80020f642da7b699c4"
-    
   };
 
   firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-/* ================= LIFETIME SCORE & TOP 10 LEADERBOARD ================= */
-const leaderboardList = document.getElementById("leaderboard-list");
-
-// Update leaderboard display
-async function updateLeaderboard() {
-  leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
-  const snapshot = await db.collection("scores")
-                           .orderBy("totalScore", "desc")
-                           .limit(10)
-                           .get();
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <img src="${data.photo || 'https://i.imgur.com/6VBx3io.png'}" width="30" height="30">
-      <b>${data.name}</b> - $${data.totalScore}
-    `;
-    leaderboardList.appendChild(li);
-  });
-}
-
-
-  /* ELEMENTS */
+  /* =================== ELEMENTS =================== */
   const googleLoginBtn = document.getElementById("googleLoginBtn");
   const guestLoginBtn = document.getElementById("guestLoginBtn");
   const emailRegisterBtn = document.getElementById("emailRegisterBtn");
@@ -66,7 +44,7 @@ async function updateLeaderboard() {
   const scoreRow = document.getElementById("scoreRow");
   const leaderboardList = document.getElementById("leaderboard-list");
 
-  /* SOUNDS */
+  /* =================== SOUNDS =================== */
   const sounds = {
     intro: document.getElementById("intro-sound"),
     thinking: document.getElementById("thinking-sound"),
@@ -130,83 +108,62 @@ async function updateLeaderboard() {
   };
 
   auth.onAuthStateChanged(async u => {
-  if (u) {
-    user = u;
+    if (u) {
+      user = u;
 
-    // Fetch lifetime from Firestore
-    const docRef = db.collection("users").doc(user.uid);
-    const docSnap = await docRef.get();
-    if (docSnap.exists) {
-      lifetime = docSnap.data().lifetime || 0;
-    } else {
-      lifetime = 0; // new user
-      await docRef.set({ lifetime: 0, name: user.displayName || "Guest", photo: user.photoURL || "" });
+      // Load lifetime from Firestore
+      const docRef = db.collection("users").doc(user.uid);
+      const docSnap = await docRef.get();
+      if (docSnap.exists) {
+        lifetime = docSnap.data().lifetime || 0;
+      } else {
+        lifetime = 0;
+        await docRef.set({ lifetime: 0, name: user.displayName || "Guest", photo: user.photoURL || "" });
+      }
+
+      updateScoreRow();
+
+      // Show profile
+      document.getElementById("profileDiv").innerHTML = `
+        <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
+        <h3>${user.displayName || "Guest"}</h3>
+      `;
     }
+  });
 
-    updateScoreRow(); // update the score display with loaded lifetime
-
-    // Show profile
-    document.getElementById("profileDiv").innerHTML = `
-      <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
-      <h3>${user.displayName || "Guest"}</h3>
-    `;
+  function showSettings() {
+    document.getElementById("authDiv").style.display = "none";
+    document.getElementById("categoryDiv").style.display = "block";
+    playSound("intro");
   }
-});
-
-function showSettings() {
-  document.getElementById("authDiv").style.display = "none";
-  document.getElementById("categoryDiv").style.display = "block";
-  playSound("intro");
-}
-
 
   /* =================== START QUIZ =================== */
-startBtn.onclick = startQuiz;
+  startBtn.onclick = startQuiz;
 
-async function startQuiz() {
-  const category = categorySelect.value;
-  const difficulty = difficultySelect.value;
-  soundEnabled = soundToggle.value === "on";
+  async function startQuiz() {
+    const category = categorySelect.value;
+    const difficulty = difficultySelect.value;
+    soundEnabled = soundToggle.value === "on";
 
-  const res = await fetch(`https://the-trivia-api.com/api/questions?limit=20&categories=${category}&difficulty=${difficulty}`);
-  questions = await res.json();
+    const res = await fetch(`https://the-trivia-api.com/api/questions?limit=20&categories=${category}&difficulty=${difficulty}`);
+    questions = await res.json();
 
-  document.getElementById("categoryDiv").style.display = "none";
-  document.getElementById("quiz-container").style.display = "block";
+    document.getElementById("categoryDiv").style.display = "none";
+    document.getElementById("quiz-container").style.display = "block";
 
-  buildMoneyLadder(20);
-  current = 0;
-  ladderLevel = 0;
-  score = 0;
+    buildMoneyLadder(20);
+    current = 0;
+    ladderLevel = 0;
+    score = 0;
 
-  fiftyUsed = friendUsed = audienceUsed = false;
+    fiftyUsed = friendUsed = audienceUsed = false;
 
-  playSound("thinking");
-  showQuestion();
-  updateScoreRow();
+    playSound("thinking");
+    showQuestion();
+    updateScoreRow();
 
-  loadLeaderboard(); // just call it here
-}
-
-/* =================== FIREBASE LEADERBOARD (REAL-TIME) =================== */
-function loadLeaderboard() {
-  leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
-
-  // Real-time listener
-  db.collection("users")
-    .orderBy("lifetime", "desc")
-    .limit(10)
-    .onSnapshot(snapshot => {
-      leaderboardList.innerHTML = "<h3>Top 10 Players</h3>"; // clear before re-render
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const li = document.createElement("li");
-        li.innerHTML = `<img src="${data.photo || 'https://i.imgur.com/6VBx3io.png'}" width="30"> ${data.name}: $${data.lifetime}`;
-        leaderboardList.appendChild(li);
-      });
-    });
-}
-
+    loadLeaderboard(); // real-time listener
+  }
 
   /* =================== QUESTION DISPLAY =================== */
   function showQuestion() {
@@ -218,7 +175,6 @@ function loadLeaderboard() {
     quizDiv.innerHTML = `<h2>Q${current + 1}: ${q.question}</h2>`;
 
     const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
-
     answers.forEach(a => {
       const btn = document.createElement("button");
       btn.className = "option-btn";
@@ -284,144 +240,147 @@ function loadLeaderboard() {
   }
 
   /* =================== MONEY LADDER =================== */
-function buildMoneyLadder(count) {
-  moneyList.innerHTML = "";
-  for (let i = count; i >= 1; i--) {
-    const li = document.createElement("li");
-    li.className = "ladder-btn";
-    li.textContent = "$" + (i * 100);
-    moneyList.appendChild(li);
+  function buildMoneyLadder(count) {
+    moneyList.innerHTML = "";
+    for (let i = count; i >= 1; i--) {
+      const li = document.createElement("li");
+      li.className = "ladder-btn";
+      li.textContent = "$" + (i * 100);
+      moneyList.appendChild(li);
+    }
   }
-}
 
-function updateMoneyLadder() {
-  [...moneyList.children].forEach(li => li.classList.remove("current"));
-  const idx = moneyList.children.length - ladderLevel;
-  if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
-}
+  function updateMoneyLadder() {
+    [...moneyList.children].forEach(li => li.classList.remove("current"));
+    const idx = moneyList.children.length - ladderLevel;
+    if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
+  }
 
-function updateScoreRow() {
-  scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
-}
-/* =================== LIFELINES =================== */
-fiftyBtn.onclick = () => {
-  if (fiftyUsed) return;
-  fiftyUsed = true;
-  fiftyBtn.classList.add("used");
+  function updateScoreRow() {
+    scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
+  }
 
-  const correct = questions[current].correctAnswer;
-  let removed = 0;
+  /* =================== LIFELINES =================== */
+  fiftyBtn.onclick = () => {
+    if (fiftyUsed) return;
+    fiftyUsed = true;
+    fiftyBtn.classList.add("used");
 
-  document.querySelectorAll(".option-btn").forEach(b => {
-    if (b.textContent !== correct && removed < 2) {
-      b.style.opacity = 0.3;
-      removed++;
-    }
-  });
+    const correct = questions[current].correctAnswer;
+    let removed = 0;
 
-  playSound("thinking");
-};
+    document.querySelectorAll(".option-btn").forEach(b => {
+      if (b.textContent !== correct && removed < 2) {
+        b.style.opacity = 0.3;
+        removed++;
+      }
+    });
 
-callFriendBtn.onclick = () => {
-  if (friendUsed) return;
-  friendUsed = true;
-  callFriendBtn.classList.add("used");
+    playSound("thinking");
+  };
 
-  playSound("call");
-  callFriendBox.innerHTML = `📞 Friend says: <b>${questions[current].correctAnswer}</b>`;
-  setTimeout(() => { callFriendBox.innerHTML = ""; stopAllSounds(); }, 5000);
-};
+  callFriendBtn.onclick = () => {
+    if (friendUsed) return;
+    friendUsed = true;
+    callFriendBtn.classList.add("used");
 
-audienceBtn.onclick = () => {
-  if (audienceUsed) return;
-  audienceUsed = true;
-  audienceBtn.classList.add("used");
+    playSound("call");
+    callFriendBox.innerHTML = `📞 Friend says: <b>${questions[current].correctAnswer}</b>`;
+    setTimeout(() => { callFriendBox.innerHTML = ""; stopAllSounds(); }, 5000);
+  };
 
-  playSound("audience");
-  audienceVote.innerHTML = "";
+  audienceBtn.onclick = () => {
+    if (audienceUsed) return;
+    audienceUsed = true;
+    audienceBtn.classList.add("used");
 
-  const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
-  const correct = questions[current].correctAnswer;
+    playSound("audience");
+    audienceVote.innerHTML = "";
 
-  options.forEach(opt => {
-    const percent = opt === correct ? Math.floor(Math.random() * 50 + 50) : Math.floor(Math.random() * 50);
-    audienceVote.innerHTML += `<div>${opt}: ${percent}%</div>`;
-  });
+    const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
+    const correct = questions[current].correctAnswer;
 
-  setTimeout(() => { audienceVote.innerHTML = ""; stopAllSounds(); }, 5000);
-};
+    options.forEach(opt => {
+      const percent = opt === correct ? Math.floor(Math.random() * 50 + 50) : Math.floor(Math.random() * 50);
+      audienceVote.innerHTML += `<div>${opt}: ${percent}%</div>`;
+    });
 
-/* =================== SAFE MONEY =================== */
-safeMoneyBtn.onclick = () => {
-  score = getLastMilestone(); // set score to last safe milestone
-  updateScoreRow();
-  showFinalScreen();           // show final screen, save score correctly
-};
+    setTimeout(() => { audienceVote.innerHTML = ""; stopAllSounds(); }, 5000);
+  };
 
-function getLastMilestone() {
-  let amt = 0;
-  [...moneyList.children].forEach(li => {
-    const val = parseInt(li.textContent.replace("$", ""));
-    if (score >= val) amt = val;
-  });
-  return amt;
-}
+  /* =================== SAFE MONEY =================== */
+  safeMoneyBtn.onclick = () => {
+    score = getLastMilestone(); // last checkpoint
+    updateScoreRow();
+    showFinalScreen();
+  };
 
-/* =================== FIREBASE SAVE SCORE =================== */
-async function saveScore(currentQuizScore) {
-  if (!user) return;
+  function getLastMilestone() {
+    let amt = 0;
+    [...moneyList.children].forEach(li => {
+      const val = parseInt(li.textContent.replace("$", ""));
+      if (score >= val) amt = val;
+    });
+    return amt;
+  }
 
-  const userRef = db.collection("users").doc(user.uid);
+  /* =================== FIREBASE SAVE SCORE =================== */
+  async function saveScore(currentScore) {
+    if (!user) return;
 
-  await db.runTransaction(async (transaction) => {
-    const doc = await transaction.get(userRef);
-    if (!doc.exists) {
-      // New user
-      transaction.set(userRef, {
-        lifetime: currentQuizScore,
-        name: user.displayName || "Guest",
-        photo: user.photoURL || ""
+    const userRef = db.collection("users").doc(user.uid);
+
+    await db.runTransaction(async (transaction) => {
+      const doc = await transaction.get(userRef);
+      if (!doc.exists) {
+        transaction.set(userRef, {
+          lifetime: currentScore,
+          name: user.displayName || "Guest",
+          photo: user.photoURL || ""
+        });
+      } else {
+        const previousLifetime = doc.data().lifetime || 0;
+        const newLifetime = previousLifetime + currentScore;
+        transaction.update(userRef, { lifetime: newLifetime });
+        lifetime = newLifetime;
+      }
+    });
+  }
+
+  /* =================== FINAL SCREEN =================== */
+  function showFinalScreen() {
+    stopAllSounds();
+    playSound("win");
+
+    lifetime += score; // add current quiz score to lifetime once
+    updateScoreRow();
+    saveScore(score);  // save only the current quiz score
+
+    quizDiv.innerHTML = `
+      <div class="final-screen">
+        <h1>🎉 CONGRATULATIONS</h1>
+        <h2>You Won $${score}</h2>
+        <button onclick="location.reload()">Restart Quiz</button>
+      </div>
+    `;
+  }
+
+  /* =================== FIREBASE LEADERBOARD (REAL-TIME) =================== */
+  function loadLeaderboard() {
+    leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
+
+    db.collection("users")
+      .orderBy("lifetime", "desc")
+      .limit(10)
+      .onSnapshot(snapshot => {
+        leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const li = document.createElement("li");
+          li.innerHTML = `<img src="${data.photo || 'https://i.imgur.com/6VBx3io.png'}" width="30"> ${data.name}: $${data.lifetime}`;
+          leaderboardList.appendChild(li);
+        });
       });
-      lifetime = currentQuizScore; // update local variable
-    } else {
-      // Existing user
-      const previousLifetime = doc.data().lifetime || 0;
-      const newLifetime = previousLifetime + currentQuizScore;
-      transaction.update(userRef, { lifetime: newLifetime });
-      lifetime = newLifetime; // update local variable
-    }
-  });
-}
+  }
 
-/* =================== FINAL SCREEN =================== */
-function showFinalScreen() {
-  stopAllSounds();
-  playSound("win");
-
-  updateScoreRow();          // show current score & lifetime
-  saveScore(score);          // save only the current quiz score to lifetime
-
-  quizDiv.innerHTML = `
-    <div class="final-screen">
-      <h1>🎉 CONGRATULATIONS</h1>
-      <h2>You Won $${score}</h2>
-      <button onclick="location.reload()">Restart Quiz</button>
-    </div>
-  `;
-
-  loadLeaderboard();
-}
-
-/* =================== FIREBASE LEADERBOARD =================== */
-async function loadLeaderboard() {
-  leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
-
-  const top = await db.collection("users").orderBy("lifetime", "desc").limit(10).get();
-  top.forEach(doc => {
-    const data = doc.data();
-    const li = document.createElement("li");
-    li.innerHTML = `<img src="${data.photo || 'https://i.imgur.com/6VBx3io.png'}" width="30"> ${data.name}: $${data.lifetime}`;
-    leaderboardList.appendChild(li);
-  });
-}
-
+});
