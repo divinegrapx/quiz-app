@@ -29,11 +29,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const emailInput = document.getElementById("emailInput");
   const passwordInput = document.getElementById("passwordInput");
 
+  const categorySelect = document.getElementById("categorySelect");
+  const difficultySelect = document.getElementById("difficultySelect");
+  const nightmareCheck = document.getElementById("nightmareModeCheck");
+  const soundToggle = document.getElementById("soundToggle");
+
   const startBtn = document.getElementById("startBtn");
   const quizDiv = document.getElementById("quiz");
-
-  const timerBar = document.getElementById("timer-bar");
-  const timerText = document.getElementById("timer-text");
+  const moneyList = document.getElementById("money-list");
+  const scoreRow = document.createElement("div");
+  scoreRow.id = "scoreRow";
+  quizContainer.prepend(scoreRow);
 
   const fiftyBtn = document.getElementById("fiftyBtn");
   const secondChanceBtn = document.getElementById("secondChanceBtn");
@@ -42,16 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const callFriendBox = document.getElementById("callFriendBox");
   const audienceVote = document.getElementById("audienceVote");
-
-  const categorySelect = document.getElementById("categorySelect");
-  const difficultySelect = document.getElementById("difficultySelect");
-  const nightmareCheck = document.getElementById("nightmareModeCheck");
-  const soundToggle = document.getElementById("soundToggle");
-
-  const moneyList = document.getElementById("money-list");
-  const scoreRow = document.createElement("div");
-  scoreRow.id = "scoreRow";
-  quizContainer.prepend(scoreRow);
 
   /* ================= SOUNDS ================= */
   const sounds = {
@@ -65,29 +61,29 @@ document.addEventListener("DOMContentLoaded", () => {
     call: document.getElementById("call-sound"),
     audience: document.getElementById("audience-sound")
   };
+
   let soundEnabled = true;
   function playSound(name){
-    if(!soundEnabled||!sounds[name]) return;
-    sounds[name].currentTime=0;
+    if(!soundEnabled || !sounds[name]) return;
+    sounds[name].currentTime = 0;
     sounds[name].play();
   }
-  function stopSound(name){
-    if(sounds[name]){
-      sounds[name].pause();
-      sounds[name].currentTime=0;
-    }
-  }
 
-  /* ================= USER / AUTH ================= */
+  /* ================= AUTH ================= */
   let user = null;
-  let lifetime = 0;
 
-  googleLoginBtn.onclick = async () => await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+  googleLoginBtn.onclick = async () => {
+    await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+  };
   guestLoginBtn.onclick = () => auth.signInAnonymously();
   emailRegisterBtn.onclick = () => show(emailDiv);
   emailCancelBtn.onclick = () => hide(emailDiv);
-  emailLoginBtn.onclick = async () => await auth.signInWithEmailAndPassword(emailInput.value,passwordInput.value);
-  emailRegisterSubmitBtn.onclick = async () => await auth.createUserWithEmailAndPassword(emailInput.value,passwordInput.value);
+  emailLoginBtn.onclick = async () => {
+    await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+  };
+  emailRegisterSubmitBtn.onclick = async () => {
+    await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+  };
 
   auth.onAuthStateChanged(u => {
     if(!u) return;
@@ -99,241 +95,259 @@ document.addEventListener("DOMContentLoaded", () => {
     loadUserScore();
   });
 
-  function show(el){el.style.display="block";}
-  function hide(el){el.style.display="none";}
-
-  function loadUserScore(){
-    if(!user) return;
-    db.collection("users").doc(user.uid).get().then(doc=>{
-      if(doc.exists) lifetime = doc.data().lifetime || 0;
-      updateScoreRow();
-    });
-  }
-
-  function saveUserScore(){
-    if(!user) return;
-    db.collection("users").doc(user.uid).set({lifetime},{merge:true});
-  }
+  /* ================= UTILS ================= */
+  function show(el){ el.style.display="block"; }
+  function hide(el){ el.style.display="none"; }
 
   /* ================= GAME STATE ================= */
   let questions = [];
   let current = 0;
   let score = 0;
+  let lifetime = 0;
   let timer;
   let timePerQuestion = 30;
   let secondChanceActive = false;
   let secondChanceUsed = false;
 
-  const prizes=[100,200,300,500,1000,2000,5000,10000,20000,50000,100000,200000,500000,1000000];
+  const prizes = [100, 200, 300, 500, 1000, 2000, 4000, 8000, 16000, 32000];
 
   /* ================= START QUIZ ================= */
   startBtn.onclick = async () => {
     soundEnabled = soundToggle.value === "on";
     timePerQuestion = nightmareCheck.checked ? 20 : 30;
-    const res = await fetch(`https://the-trivia-api.com/api/questions?limit=20&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`);
+
+    const res = await fetch(
+      `https://the-trivia-api.com/api/questions?limit=20&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`
+    );
     questions = await res.json();
 
-    categoryDiv.style.display="none";
-    quizContainer.style.display="block";
+    hide(categoryDiv);
+    show(quizContainer);
 
     score = 0;
     current = 0;
-    secondChanceActive=false;
-    secondChanceUsed=false;
+    secondChanceActive = false;
+    secondChanceUsed = false;
 
-    playSound("thinking");
     buildLadder();
     highlightLadder();
     updateScoreRow();
+
+    playSound("thinking");
     showQuestion();
   };
 
   /* ================= QUESTION ================= */
-  function showQuestion(){
+  function showQuestion() {
     clearInterval(timer);
-    quizDiv.innerHTML="";
+    quizDiv.innerHTML = "";
+    callFriendBox.innerHTML = "";
+    audienceVote.innerHTML = "";
+
     const q = questions[current];
-    quizDiv.innerHTML=`<h2>Q${current+1}: ${q.question}</h2>`;
-    const answers=[...q.incorrectAnswers,q.correctAnswer].sort(()=>Math.random()-0.5);
-    answers.forEach(ans=>{
+    quizDiv.innerHTML = `<h2>Q${current + 1}: ${q.question}</h2>`;
+
+    const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
+
+    answers.forEach(ans => {
       const btn = document.createElement("button");
-      btn.className="option-btn";
-      btn.textContent=ans;
-      btn.onclick=()=>handleAnswer(btn,ans);
+      btn.className = "option-btn";
+      btn.textContent = ans;
+      btn.onclick = () => handleAnswer(btn, ans);
       quizDiv.appendChild(btn);
     });
+
     startTimer();
   }
 
   /* ================= TIMER ================= */
-  function startTimer(){
+  function startTimer() {
     let t = timePerQuestion;
     updateTimer(t);
-    timer = setInterval(()=>{
+
+    timer = setInterval(() => {
       t--;
       updateTimer(t);
-      if(t<=5) playSound("tick");
-      if(t<=0) loseQuestion();
-    },1000);
+      if(t <= 5) playSound("tick");
+      if(t <= 0) loseQuestion();
+    }, 1000);
   }
 
-  function updateTimer(t){
-    timerText.textContent=t+"s";
-    timerBar.style.width=(t/timePerQuestion*100)+"%";
+  function updateTimer(t) {
+    timerText.textContent = t + "s";
+    timerBar.style.width = (t / timePerQuestion * 100) + "%";
   }
 
   /* ================= ANSWER HANDLING ================= */
-  function handleAnswer(btn, answer){
+  function handleAnswer(btn, answer) {
     clearInterval(timer);
+
     const correct = questions[current].correctAnswer;
-    const buttons = document.querySelectorAll(".option-btn");
-    buttons.forEach(b=>{
-      b.disabled=true;
-      if(b.textContent===correct) b.classList.add("correct");
+    document.querySelectorAll(".option-btn").forEach(b=>{
+      b.disabled = true;
+      if(b.textContent === correct) b.classList.add("correct");
     });
 
-    if(answer===correct){
+    if(answer === correct){
       btn.classList.add("correct");
       score += 100;
+      current++;
       playSound("correct");
+      highlightLadder();
+      updateScoreRow();
       nextQuestion();
     } else {
       btn.classList.add("wrong");
       playSound("wrong");
+
       if(secondChanceActive){
-        secondChanceActive=false;
-        secondChanceUsed=true;
-        return;
+        secondChanceActive = false;
+        secondChanceUsed = true;
+        return; // forgive once
       }
+
       if(nightmareCheck.checked){
-        // Nightmare mode ends quiz immediately
-        score = Math.max(0,score-100);
-        showFinal();
-        return;
+        score = Math.max(0, score - 100);
+        endQuiz();
+      } else {
+        score = Math.max(0, score - 100);
+        updateScoreRow();
+        nextQuestion();
       }
-      score = Math.max(0,score-100);
-      nextQuestion();
     }
-    updateScoreRow();
-    highlightLadder();
   }
 
   function loseQuestion(){
-    score = Math.max(0,score-100);
-    nextQuestion();
+    if(nightmareCheck.checked){
+      endQuiz();
+    } else {
+      score = Math.max(0, score - 100);
+      updateScoreRow();
+      nextQuestion();
+    }
   }
 
   function nextQuestion(){
     setTimeout(()=>{
-      current++;
-      if(current>=questions.length){
-        showFinal();
-      } else {
-        showQuestion();
-      }
+      if(current >= questions.length) endQuiz();
+      else showQuestion();
     },1200);
   }
 
- /* ================= LADDER / SCORE ================= */
-function buildLadder() {
-  moneyList.innerHTML = "";
-  prizes.forEach(p => {
-    const li = document.createElement("li");
-    li.className = "ladder-btn";
-    li.textContent = "$" + p;
-    if (p % 5000 === 0) li.classList.add("checkpoint"); // checkpoint milestones
-    moneyList.appendChild(li);
-  });
-}
+  /* ================= SAFE MONEY ================= */
+  const safeMoneyBtn = document.createElement("button");
+  safeMoneyBtn.id = "safeMoneyBtn";
+  safeMoneyBtn.textContent = "💰 Safe Money";
+  quizContainer.prepend(safeMoneyBtn);
 
-// Highlight only the last correct milestone
-function highlightLadder() {
-  const buttons = document.querySelectorAll(".ladder-btn");
-  buttons.forEach(b => b.classList.remove("current"));
-  if (current > 0 && current <= prizes.length) {
-    buttons[current - 1].classList.add("current");
-  }
-}
+  safeMoneyBtn.onclick = ()=>{
+    score = getLastMilestone();
+    lifetime += score;
+    updateScoreRow();
+    endQuiz();
+  };
 
-function updateScoreRow() {
-  scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
-}
-
-/* ================= SAFE MONEY ================= */
-const safeMoneyBtn = document.createElement("button");
-safeMoneyBtn.id = "safeMoneyBtn";
-safeMoneyBtn.textContent = "💰 Safe Money";
-quizContainer.prepend(safeMoneyBtn);
-
-safeMoneyBtn.onclick = () => {
-  score = getLastMilestone();
-  lifetime += score;
-  updateScoreRow();
-  showFinal();
-};
-
-function getLastMilestone() {
-  let amt = 0;
-  for (let i = 0; i < prizes.length; i++) {
-    if (score >= prizes[i]) amt = prizes[i];
-    else break;
-  }
-  return amt;
-}
-
-/* ================= LIFELINES ================= */
-fiftyBtn.onclick = () => {
-  if (fiftyBtn.classList.contains("used")) return;
-  playSound("thinking");
-  const correct = questions[current].correctAnswer;
-  let removed = 0;
-  document.querySelectorAll(".option-btn").forEach(b => {
-    if (b.textContent !== correct && removed < 2) {
-      b.style.opacity = 0.2;
-      removed++;
+  function getLastMilestone(){
+    let amt = 0;
+    for(let i=0;i<prizes.length;i++){
+      if(score >= prizes[i]) amt = prizes[i];
+      else break;
     }
-  });
-  fiftyBtn.classList.add("used");
-  fiftyBtn.disabled = true;
-};
+    return amt;
+  }
 
-secondChanceBtn.onclick = () => {
-  if (secondChanceUsed || secondChanceBtn.classList.contains("used")) return;
-  secondChanceActive = true;
-  secondChanceBtn.classList.add("used");
-  secondChanceBtn.disabled = true;
-  playSound("thinking");
-};
+  /* ================= LADDER / SCORE ================= */
+  function buildLadder() {
+    moneyList.innerHTML = "";
+    prizes.forEach(p => {
+      const li = document.createElement("li");
+      li.className = "ladder-btn";
+      li.textContent = "$" + p;
+      if(p % 5000 === 0) li.classList.add("checkpoint");
+      moneyList.appendChild(li);
+    });
+  }
 
-callFriendBtn.onclick = () => {
-  if (callFriendBtn.classList.contains("used")) return;
-  playSound("call");
-  callFriendBtn.classList.add("used");
-  callFriendBtn.disabled = true;
+  function highlightLadder() {
+    const buttons = document.querySelectorAll(".ladder-btn");
+    buttons.forEach(b => b.classList.remove("current"));
+    if(current > 0 && current <= prizes.length){
+      buttons[current-1].classList.add("current");
+    }
+  }
 
-  const correct = questions[current].correctAnswer;
-  callFriendBox.innerHTML = `<p>Friend thinks the answer is: <strong>${correct}</strong></p>`;
-  setTimeout(() => { callFriendBox.innerHTML = ""; }, 5000);
-};
+  function updateScoreRow(){
+    scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
+  }
 
-audienceBtn.onclick = () => {
-  if (audienceBtn.classList.contains("used")) return;
-  playSound("audience");
-  audienceBtn.classList.add("used");
-  audienceBtn.disabled = true;
+  /* ================= LIFELINES ================= */
+  fiftyBtn.onclick = () => {
+    if(fiftyBtn.classList.contains("used")) return;
+    playSound("thinking");
+    const correct = questions[current].correctAnswer;
+    let removed = 0;
+    document.querySelectorAll(".option-btn").forEach(b=>{
+      if(b.textContent !== correct && removed < 2){
+        b.style.opacity = 0.2;
+        removed++;
+      }
+    });
+    fiftyBtn.classList.add("used");
+    fiftyBtn.disabled = true;
+  };
 
-  const correct = questions[current].correctAnswer;
-  const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
-  const votes = options.map(opt => opt === correct ? 60 : Math.floor(Math.random() * 40));
-  let html = "<p>Audience votes:</p>";
-  options.forEach((opt, i) => {
-    html += `<div>${opt}: ${votes[i]}%</div>`;
-  });
-  audienceVote.innerHTML = html;
-  setTimeout(() => { audienceVote.innerHTML = ""; }, 5000);
-};
+  secondChanceBtn.onclick = () => {
+    if(secondChanceUsed || secondChanceBtn.classList.contains("used")) return;
+    secondChanceActive = true;
+    secondChanceBtn.classList.add("used");
+    secondChanceBtn.disabled = true;
+    playSound("thinking");
+  };
 
-/* ================= INIT LADDER & SCORE ================= */
-buildLadder();
-updateScoreRow();
-highlightLadder();
+  callFriendBtn.onclick = () => {
+    if(callFriendBtn.classList.contains("used")) return;
+    playSound("call");
+    callFriendBtn.classList.add("used");
+    callFriendBtn.disabled = true;
+
+    const correct = questions[current].correctAnswer;
+    callFriendBox.innerHTML = `<p>Friend thinks the answer is: <strong>${correct}</strong></p>`;
+    setTimeout(()=>{callFriendBox.innerHTML="";},5000);
+  };
+
+  audienceBtn.onclick = () => {
+    if(audienceBtn.classList.contains("used")) return;
+    playSound("audience");
+    audienceBtn.classList.add("used");
+    audienceBtn.disabled = true;
+
+    const correct = questions[current].correctAnswer;
+    const options = [...document.querySelectorAll(".option-btn")].map(b=>b.textContent);
+    const votes = options.map(opt=>opt === correct ? 60 : Math.floor(Math.random()*40));
+    let html = "<p>Audience votes:</p>";
+    options.forEach((opt,i)=>{ html += `<div>${opt}: ${votes[i]}%</div>` });
+    audienceVote.innerHTML = html;
+    setTimeout(()=>{audienceVote.innerHTML="";},5000);
+  };
+
+  /* ================= END QUIZ ================= */
+  function endQuiz(){
+    clearInterval(timer);
+    playSound("win");
+    lifetime += score;
+    quizDiv.innerHTML = `<div class="final-screen">
+      <h1>🎉 Game Over</h1>
+      <h2>You earned $${score}</h2>
+      <button onclick="location.reload()">Play Again</button>
+    </div>`;
+    updateScoreRow();
+  }
+
+  /* ================= LOAD USER SCORE ================= */
+  function loadUserScore(){
+    // Optional: Load previous lifetime score from Firestore if desired
+    lifetime = 0;
+    updateScoreRow();
+  }
+
+});
