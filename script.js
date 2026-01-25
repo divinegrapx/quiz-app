@@ -419,17 +419,51 @@ function showFinalScreen() {
   // Save only the current quiz score to lifetime in Firebase
   saveScore(score);
 
-  // Show final screen
+  // Show main final screen
   quizDiv.innerHTML = `
     <div class="final-screen">
       <h1>🎉 CONGRATULATIONS</h1>
       <h2>You Won $${score}</h2>
+      <div id="statsDiv" class="stats-div"></div> <!-- Stats will appear here -->
       <button onclick="location.reload()">Restart Quiz</button>
     </div>
   `;
+
+  // ---------- DISPLAY STATS ----------
+  displayStats();
+
+  // Load leaderboard as usual
+  loadLeaderboard();
 }
 
+/* =================== DISPLAY STATS =================== */
+function displayStats() {
+  if (!questions || questions.length === 0) return;
 
+  // Count correct/incorrect
+  const total = questions.length;
+  const correct = stats.correct;
+  const incorrect = stats.incorrect;
+
+  // Breakdown by category & difficulty
+  const categoryCounts = stats.categories; // {category: correctCount}
+  const difficultyCounts = stats.difficulties; // {difficulty: correctCount}
+
+  const statsDiv = document.getElementById("statsDiv");
+  statsDiv.innerHTML = `
+    <h3>Quiz Stats</h3>
+    <p>Correct: ${correct} / ${total}</p>
+    <p>Incorrect: ${incorrect} / ${total}</p>
+    <h4>By Category:</h4>
+    <ul>
+      ${Object.entries(categoryCounts).map(([cat, val]) => `<li>${cat}: ${val} correct</li>`).join('')}
+    </ul>
+    <h4>By Difficulty:</h4>
+    <ul>
+      ${Object.entries(difficultyCounts).map(([dif, val]) => `<li>${dif}: ${val} correct</li>`).join('')}
+    </ul>
+  `;
+}
 
 /* =================== FIREBASE SAVE SCORE =================== */
 async function saveScore(currentScore) {
