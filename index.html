@@ -2,116 +2,97 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Neon Quiz</title>
+<title>NEON MILLIONAIRE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link rel="stylesheet" href="style.css">
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
-
 <body>
 
-<!-- ================= LOGIN ================= -->
-<div id="loginDiv" class="box">
+<div class="container">
 
-  <h1>🎮 Neon Quiz</h1>
+  <div id="profileDiv"></div>
 
-  <button id="googleLoginBtn">Login with Google</button>
-  <button id="guestLoginBtn">Continue as Guest</button>
-  <button id="emailRegisterBtn">Email Login</button>
+  <div id="authDiv">
+    <h1 class="title">NEON MILLIONAIRE</h1>
+    <button id="googleLoginBtn">Login with Google</button>
+    <button id="guestLoginBtn">Play as Guest</button>
+    <button id="emailRegisterBtn">Login / Register with Email</button>
+  </div>
 
-  <div id="emailDiv" style="display:none">
-    <input id="emailInput" placeholder="Email">
-    <input id="passwordInput" type="password" placeholder="Password">
-
+  <div id="emailDiv" style="display:none;">
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passwordInput" placeholder="Password">
     <button id="emailLoginBtn">Login</button>
     <button id="emailRegisterSubmitBtn">Register</button>
     <button id="emailCancelBtn">Cancel</button>
   </div>
 
-</div>
+  <div id="categoryDiv" style="display:none;">
+    <h2>Game Settings</h2>
 
+    <select id="categorySelect">
+      <option value="general_knowledge">General</option>
+      <option value="science">Science</option>
+      <option value="history">History</option>
+      <option value="sports">Sports</option>
+      <option value="film_and_tv">Movies & TV</option>
+      <option value="music">Music</option>
+    </select>
 
-<!-- ================= SETTINGS ================= -->
-<div id="categoryDiv" class="box" style="display:none">
+    <select id="difficultySelect">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+    </select>
 
-  <h2>Game Settings</h2>
+    <select id="soundToggle">
+      <option value="on">Sound ON</option>
+      <option value="off">Sound OFF</option>
+    </select>
 
-  <select id="categorySelect">
-    <option value="general_knowledge">General</option>
-    <option value="science">Science</option>
-    <option value="history">History</option>
-    <option value="music">Music</option>
-  </select>
+    <button id="startBtn" class="start-btn">START QUIZ</button>
+  </div>
 
-  <select id="difficultySelect">
-    <option value="easy">Easy</option>
-    <option value="medium">Medium</option>
-    <option value="hard">Hard</option>
-  </select>
-
-  <label>
-    <input type="checkbox" id="nightmareModeCheck">
-    Nightmare Mode
-  </label>
-
-  <select id="soundToggle">
-    <option value="on">Sound ON</option>
-    <option value="off">Sound OFF</option>
-  </select>
-
-  <button id="startBtn">START GAME</button>
-
-</div>
-
-
-<!-- ================= QUIZ ================= -->
-<div id="quiz-container" style="display:none">
-
-  <div id="topBar">
-
-    <div id="timer">
+  <div id="quiz-container" style="display:none;">
+    <div id="timer-container">
       <div id="timer-bar"></div>
       <span id="timer-text">30s</span>
     </div>
 
-    <div id="lifelines">
-      <button id="fiftyBtn">50/50</button>
-      <button id="secondChanceBtn">2nd Chance</button>
-      <button id="callFriendBtn">Call</button>
-      <button id="audienceBtn">Audience</button>
+    <div id="quiz-and-ladder">
+      <div id="quiz"></div>
+      <ul id="money-list"></ul>
     </div>
 
+    <div id="lifelines">
+      <button id="fiftyBtn">50:50</button>
+      <button id="callFriendBtn">📞 Call</button>
+      <button id="audienceBtn">📊 Audience</button>
+    </div>
+
+    <div id="callFriendBox"></div>
+    <div id="audienceVote"></div>
   </div>
 
+  <ul id="leaderboard-list"></ul>
 
-  <div id="mainArea">
-
-    <div id="quiz"></div>
-
-    <ul id="money-list"></ul>
-
-  </div>
-
-  <div id="callFriendBox"></div>
-  <div id="audienceVote"></div>
+  <!-- SOUNDS -->
+  <audio id="intro-sound" src="intro.mp3"></audio>
+  <audio id="thinking-sound" src="thinking.mp3"></audio>
+  <audio id="call-sound" src="call.mp3"></audio>
+  <audio id="audience-sound" src="audience.mp3"></audio>
+  <audio id="win-sound" src="win.mp3"></audio>
+  <audio id="lose-sound" src="lose.mp3"></audio>
+  <audio id="correct-sound" src="correct.wav"></audio>
+  <audio id="wrong-sound" src="wrong.wav"></audio>
+  <audio id="tick-sound" src="tick.mp3"></audio>
 
 </div>
-
-
-<!-- ================= SOUNDS ================= -->
-<audio id="intro-sound" src="sounds/intro.mp3"></audio>
-<audio id="thinking-sound" src="sounds/thinking.mp3"></audio>
-<audio id="correct-sound" src="sounds/correct.mp3"></audio>
-<audio id="wrong-sound" src="sounds/wrong.mp3"></audio>
-<audio id="tick-sound" src="sounds/tick.mp3"></audio>
-<audio id="win-sound" src="sounds/win.mp3"></audio>
-<audio id="lose-sound" src="sounds/lose.mp3"></audio>
-<audio id="call-sound" src="sounds/call.mp3"></audio>
-<audio id="audience-sound" src="sounds/audience.mp3"></audio>
-
 
 <script src="script.js"></script>
 </body>
