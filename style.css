@@ -184,3 +184,13 @@ button.used {
   #money-list { flex-direction: row; overflow-x: auto; }
   .ladder-btn { min-width: 100px; }
 }
+/* ---------- SAFE MONEY / CHECKPOINT GLOW ---------- */
+.ladder-btn.checkpoint {
+  border: 2px solid gold;
+  animation: checkpointGlow 1.5s infinite alternate;
+}
+
+@keyframes checkpointGlow {
+  from { box-shadow: 0 0 10px gold; }
+  to { box-shadow: 0 0 25px gold, 0 0 40px gold; }
+}
