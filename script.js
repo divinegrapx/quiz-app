@@ -350,17 +350,17 @@ audienceBtn.onclick = () => {
   }, 5000);
 };
 
- /* =================== SAFE MONEY =================== */
+/* =================== SAFE MONEY =================== */
 safeMoneyBtn.onclick = () => {
   // Set score to last safe milestone
   score = getLastMilestone();
   updateScoreRow();
 
-  // Show final screen and add score once to lifetime
+  // End quiz and save score
   showFinalScreen();
 };
 
-// Get last milestone function
+// Compute last milestone (checkpoint) based on money ladder
 function getLastMilestone() {
   let amt = 0;
   [...moneyList.children].forEach(li => {
@@ -370,7 +370,6 @@ function getLastMilestone() {
   return amt;
 }
 
-
 /* =================== FIREBASE SAVE SCORE =================== */
 async function saveScore(currentScore) {
   if (!user) return;
@@ -379,28 +378,17 @@ async function saveScore(currentScore) {
 
   await db.runTransaction(async (transaction) => {
     const doc = await transaction.get(userRef);
-
-    const userData = {
-      name: user.displayName || "Guest",
-      photo: user.photoURL || "https://i.imgur.com/6VBx3io.png"
-    };
-
     if (!doc.exists) {
-      // New user
       transaction.set(userRef, {
-        ...userData,
-        lifetime: currentScore
+        lifetime: currentScore,
+        name: user.displayName || "Guest",
+        photo: user.photoURL || ""
       });
-      lifetime = currentScore; // update local lifetime
     } else {
-      // Existing user
       const previousLifetime = doc.data().lifetime || 0;
       const newLifetime = previousLifetime + currentScore;
-      transaction.update(userRef, {
-        lifetime: newLifetime,
-        ...userData // ensures name/photo are always current
-      });
-      lifetime = newLifetime;
+      transaction.update(userRef, { lifetime: newLifetime });
+      lifetime = newLifetime; // update local variable
     }
   });
 }
@@ -414,9 +402,10 @@ function showFinalScreen() {
   lifetime += score;
   updateScoreRow();
 
-  // Save score to Firebase
-  saveScore(score); // only add current quiz score, lifetime handled in saveScore
+  // Save only the current quiz score to lifetime in Firebase
+  saveScore(score);
 
+  // Show final screen
   quizDiv.innerHTML = `
     <div class="final-screen">
       <h1>🎉 CONGRATULATIONS</h1>
@@ -424,9 +413,8 @@ function showFinalScreen() {
       <button onclick="location.reload()">Restart Quiz</button>
     </div>
   `;
-
-  loadLeaderboard(); // refresh leaderboard
 }
+
 
 
 /* =================== FIREBASE SAVE SCORE =================== */
