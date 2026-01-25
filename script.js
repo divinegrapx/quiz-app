@@ -366,21 +366,31 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =================== FIREBASE LEADERBOARD (REAL-TIME) =================== */
-  function loadLeaderboard() {
-    leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
+function loadLeaderboard() {
+  leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
 
-    db.collection("users")
-      .orderBy("lifetime", "desc")
-      .limit(10)
-      .onSnapshot(snapshot => {
-        leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const li = document.createElement("li");
-          li.innerHTML = `<img src="${data.photo || 'https://i.imgur.com/6VBx3io.png'}" width="30"> ${data.name}: $${data.lifetime}`;
-          leaderboardList.appendChild(li);
-        });
+  // Real-time listener
+  db.collection("users")
+    .orderBy("lifetime", "desc")
+    .limit(10)
+    .onSnapshot(snapshot => {
+      leaderboardList.innerHTML = "<h3>Top 10 Players</h3>"; // clear before re-render
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+
+        // Ensure name and photo are always defined
+        const name = data.name || "Guest";
+        const photo = data.photo || "https://i.imgur.com/6VBx3io.png";
+        const lifetimeScore = data.lifetime || 0;
+
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <img src="${photo}" width="30" height="30" style="border-radius:50%; margin-right:8px;">
+          <b>${name}</b>: $${lifetimeScore}
+        `;
+        leaderboardList.appendChild(li);
       });
-  }
+    });
+}
 
-});
