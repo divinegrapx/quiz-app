@@ -51,17 +51,16 @@
       <option value="hard">Hard</option>
     </select>
 
-    <select id="soundToggle">
-      <option value="on">Sound ON</option>
-      <option value="off">Sound OFF</option>
-    </select>
+    <label>
+      <input type="checkbox" id="soundToggle" checked>
+      Sound ON
+    </label>
 
     <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
   <!-- QUIZ -->
   <div id="quiz-container" class="hidden">
-    <div id="scoreRow"></div>
     <div id="timer-container">
       <div id="timer-bar"></div>
       <span id="timer-text">30s</span>
@@ -73,26 +72,27 @@
     </div>
 
     <div id="lifelines">
-      <button id="fiftyBtn">50:50 ($100)</button>
-      <button id="secondChanceBtn">Second Chance ($200)</button>
+      <button id="fiftyBtn">50:50</button>
+      <button id="secondChanceBtn">Second Chance</button>
       <button id="callFriendBtn">📞 Call</button>
       <button id="audienceBtn">📊 Audience</button>
     </div>
-  </div>
 
-  <!-- LEADERBOARD -->
-  <ul id="leaderboard-list"></ul>
+    <!-- Call / Audience display -->
+    <div id="callFriendBox"></div>
+    <div id="audienceVote"></div>
+  </div>
 
   <!-- SOUNDS -->
   <audio id="intro-sound" src="intro.mp3"></audio>
   <audio id="thinking-sound" src="thinking.mp3"></audio>
-  <audio id="call-sound" src="call.mp3"></audio>
-  <audio id="audience-sound" src="audience.mp3"></audio>
-  <audio id="win-sound" src="win.mp3"></audio>
-  <audio id="lose-sound" src="lose.mp3"></audio>
   <audio id="correct-sound" src="correct.wav"></audio>
   <audio id="wrong-sound" src="wrong.wav"></audio>
   <audio id="tick-sound" src="tick.mp3"></audio>
+  <audio id="win-sound" src="win.mp3"></audio>
+  <audio id="lose-sound" src="lose.mp3"></audio>
+  <audio id="call-sound" src="call.mp3"></audio>
+  <audio id="audience-sound" src="audience.mp3"></audio>
 
 </div>
 
