@@ -260,97 +260,95 @@ document.addEventListener("DOMContentLoaded", () => {
     scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
   }
 
-  /* =================== LIFELINES (IMPROVED) =================== */
-
-// 50:50 Lifeline
+  /* =================== LIFELINES =================== */
 fiftyBtn.onclick = () => {
   if (fiftyUsed) return;
   fiftyUsed = true;
   fiftyBtn.classList.add("used");
 
   const correct = questions[current].correctAnswer;
-  const options = [...document.querySelectorAll(".option-btn")].filter(b => b.textContent !== correct);
-  
-  // Randomly remove 2 wrong answers
-  const toRemove = [];
-  while (toRemove.length < 2 && options.length > 0) {
-    const index = Math.floor(Math.random() * options.length);
-    toRemove.push(options[index]);
-    options.splice(index, 1);
-  }
+  let removed = 0;
 
-  toRemove.forEach(btn => btn.style.opacity = 0.3);
-
-  // Highlight remaining options
-  document.querySelectorAll(".option-btn").forEach(btn => {
-    if (btn.textContent === correct) btn.classList.add("highlight");
+  document.querySelectorAll(".option-btn").forEach(b => {
+    if (b.textContent !== correct && removed < 2) {
+      b.disabled = true; // prevent clicking
+      b.style.transition = "opacity 0.5s";
+      b.style.opacity = 0; // fade out
+      removed++;
+    }
   });
 
   playSound("thinking");
 };
 
-// Call a Friend Lifeline
 callFriendBtn.onclick = () => {
   if (friendUsed) return;
   friendUsed = true;
   callFriendBtn.classList.add("used");
+  playSound("call");
 
   const correct = questions[current].correctAnswer;
   const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
 
-  // 70% chance friend gives correct answer
-  let friendAnswer;
-  if (Math.random() < 0.7) {
-    friendAnswer = correct;
-  } else {
-    const wrongOptions = options.filter(o => o !== correct);
-    friendAnswer = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
-  }
+  // Friend thinking animation
+  callFriendBox.innerHTML = "📞 Friend is thinking...";
 
-  callFriendBox.innerHTML = `📞 Friend says: <b>${friendAnswer}</b> (I think...)`;
-  playSound("call");
+  setTimeout(() => {
+    const chance = Math.random();
+    let friendAnswer = correct;
 
-  setTimeout(() => { callFriendBox.innerHTML = ""; stopAllSounds(); }, 5000);
+    // 20% chance friend gives wrong answer
+    if (chance < 0.2) {
+      const wrongOptions = options.filter(o => o !== correct);
+      friendAnswer = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
+    }
+
+    callFriendBox.innerHTML = `📞 Friend says: <b>${friendAnswer}</b>`;
+    
+    setTimeout(() => {
+      callFriendBox.innerHTML = "";
+      stopAllSounds();
+    }, 5000);
+  }, 1500); // thinking delay
 };
 
-// Audience Vote Lifeline
 audienceBtn.onclick = () => {
   if (audienceUsed) return;
   audienceUsed = true;
   audienceBtn.classList.add("used");
+  playSound("audience");
 
   const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
   const correct = questions[current].correctAnswer;
 
-  audienceVote.innerHTML = "";
-  playSound("audience");
+  let percentages = [];
+  let remaining = 100;
 
-  options.forEach(opt => {
-    let percent;
-    if (opt === correct) {
-      percent = Math.floor(Math.random() * 40 + 50); // 50% to 90%
+  options.forEach((opt, i) => {
+    let pct;
+    if (i === options.length - 1) {
+      pct = remaining; // last option takes remaining
+    } else if (opt === correct) {
+      pct = Math.floor(Math.random() * 40 + 50); // 50–90% for correct
+      remaining -= pct;
     } else {
-      percent = Math.floor(Math.random() * 50);       // 0% to 50%
+      pct = Math.floor(Math.random() * remaining / 2); // distribute remaining
+      remaining -= pct;
     }
-
-    const bar = document.createElement("div");
-    bar.style.width = percent + "%";
-    bar.style.background = opt === correct ? "#00ff00" : "#ff4d4d";
-    bar.style.margin = "3px 0";
-    bar.style.height = "20px";
-    bar.style.color = "#000";
-    bar.style.fontWeight = "bold";
-    bar.style.paddingLeft = "5px";
-    bar.style.display = "flex";
-    bar.style.alignItems = "center";
-    bar.textContent = `${opt}: ${percent}%`;
-
-    audienceVote.appendChild(bar);
+    percentages.push(pct);
   });
 
-  setTimeout(() => { audienceVote.innerHTML = ""; stopAllSounds(); }, 5000);
-};
+  audienceVote.innerHTML = "";
+  options.forEach((opt, i) => {
+    const style = opt === correct ? "font-weight:bold; color:#00ff00;" : "";
+    audienceVote.innerHTML += `<div style="${style}">${opt}: ${percentages[i]}%</div>`;
+  });
 
+  setTimeout(() => {
+    audienceVote.innerHTML = "";
+    stopAllSounds();
+  }, 5000);
+};
 
  /* =================== SAFE MONEY =================== */
 safeMoneyBtn.onclick = () => {
