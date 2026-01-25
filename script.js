@@ -7,11 +7,34 @@ document.addEventListener("DOMContentLoaded", () => {
     storageBucket: "neon-quiz-app.appspot.com",
     messagingSenderId: "891061147021",
     appId: "1:891061147021:web:7b3d80020f642da7b699c4"
+    
   };
 
   firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* ================= LIFETIME SCORE & TOP 10 LEADERBOARD ================= */
+const leaderboardList = document.getElementById("leaderboard-list");
+
+// Update leaderboard display
+async function updateLeaderboard() {
+  leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
+  const snapshot = await db.collection("scores")
+                           .orderBy("totalScore", "desc")
+                           .limit(10)
+                           .get();
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <img src="${data.photo || 'https://i.imgur.com/6VBx3io.png'}" width="30" height="30">
+      <b>${data.name}</b> - $${data.totalScore}
+    `;
+    leaderboardList.appendChild(li);
+  });
+}
+
 
   /* ELEMENTS */
   const googleLoginBtn = document.getElementById("googleLoginBtn");
@@ -225,25 +248,50 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =================== MONEY LADDER =================== */
-  function buildMoneyLadder(count) {
-    moneyList.innerHTML = "";
-    for (let i = count; i >= 1; i--) {
-      const li = document.createElement("li");
-      li.className = "ladder-btn";
-      li.textContent = "$" + (i * 100);
-      moneyList.appendChild(li);
-    }
+function buildMoneyLadder(count) {
+  moneyList.innerHTML = "";
+  for (let i = count; i >= 1; i--) {
+    const li = document.createElement("li");
+    li.className = "ladder-btn";
+    li.textContent = "$" + (i * 100);
+    moneyList.appendChild(li);
   }
+}
 
-  function updateMoneyLadder() {
-    [...moneyList.children].forEach(li => li.classList.remove("current"));
-    const idx = moneyList.children.length - ladderLevel;
-    if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
-  }
+function updateMoneyLadder() {
+  [...moneyList.children].forEach(li => li.classList.remove("current"));
+  const idx = moneyList.children.length - ladderLevel;
+  if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
+}
 
-  function updateScoreRow() {
-    scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
+function updateScoreRow() {
+  scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
+}
+
+/* ================= SAFE MONEY ================= */
+const safeMoneyBtn = document.createElement("button");
+safeMoneyBtn.id = "safeMoneyBtn";
+safeMoneyBtn.textContent = "💰 Safe Money";
+quizDiv.prepend(safeMoneyBtn); // adds button above the question
+
+safeMoneyBtn.onclick = () => {
+  const lastMilestone = getLastMilestone();
+  lifetime += lastMilestone;
+  score = lastMilestone;
+  updateScoreRow();
+  showFinalScreen();
+};
+
+// Function to get last milestone (checkpoint)
+function getLastMilestone() {
+  let amt = 0;
+  for (let i = 0; i < prizes.length; i++) {
+    if (score >= prizes[i]) amt = prizes[i];
+    else break;
   }
+  return amt;
+}
+
 
   /* =================== LIFELINES =================== */
   fiftyBtn.onclick = () => {
