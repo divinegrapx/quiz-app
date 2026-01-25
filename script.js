@@ -200,7 +200,14 @@ function getLastMilestone(){let amt=0;for(let i=0;i<prizes.length;i++){if(score>
 
 /* ================= SCORE & LADDER ================= */
 function buildLadder(){moneyList.innerHTML="";prizes.forEach(p=>{const li=document.createElement("li");li.className="ladder-btn";li.textContent="$"+p;moneyList.appendChild(li);});}
-function highlightLadder(){document.querySelectorAll(".ladder-btn").forEach((b,i)=>b.classList.toggle("current",i===current+1));}
+function highlightLadder() {
+  const buttons = document.querySelectorAll(".ladder-btn");
+  buttons.forEach((b, i) => {
+    b.classList.remove("current", "checkpoint");
+    if (i === current + 1) b.classList.add("current");  // current question
+    if (i <= current) b.classList.add("checkpoint");    // past questions glow as milestones
+  });
+}
 function updateScoreRow(){scoreRow.textContent=`Score: $${score} | Total: $${lifetime}`;}
 
 /* ================= END QUIZ ================= */
