@@ -178,25 +178,42 @@ button.used {
   font-size: 14px;
 }
 
-/* ---------- LIFELINES (MOVED UP + ANIMATED) ---------- */
+/* ---------- LIFELINES ENHANCEMENTS ---------- */
 
-#lifelines {
-  margin-top: 10px;
+/* Highlight pulse for correct answer after 50:50 */
+.option-btn.highlight {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 5px #00ff00; }
+  50% { box-shadow: 0 0 15px #00ff00; }
+  100% { box-shadow: 0 0 5px #00ff00; }
+}
+
+/* Disabled option after 50:50 */
+.option-btn[disabled] {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+/* Audience vote row */
+.vote-row {
+  margin: 4px 0;
   display: flex;
-  justify-content: center;
-  gap: 10px;
-  animation: slideUp 0.6s ease;
+  align-items: center;
+  gap: 5px;
 }
 
-#lifelines button {
-  background: linear-gradient(135deg, #ffdd00, #ffaa00);
-  font-size: 14px;
+.vote-bar {
+  height: 15px;
+  background-color: #00bfff;
+  display: inline-block;
+  border-radius: 5px;
+  width: 0%;
+  transition: width 1s;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
 
 /* ---------- CALL & AUDIENCE ---------- */
 
