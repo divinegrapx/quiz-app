@@ -234,118 +234,106 @@ document.addEventListener("DOMContentLoaded", () => {
     },1200);
   }
 
-  /* ================= LADDER / SCORE ================= */
-  function buildLadder() {
-    moneyList.innerHTML = "";
-    prizes.forEach(p => {
-      const li = document.createElement("li");
-      li.className = "ladder-btn";
-      li.textContent = "$"+p;
-      if([5000,10000,20000,50000,100000,500000,1000000].includes(p)) li.classList.add("checkpoint");
-      moneyList.appendChild(li);
-    });
+ /* ================= LADDER / SCORE ================= */
+function buildLadder() {
+  moneyList.innerHTML = "";
+  prizes.forEach(p => {
+    const li = document.createElement("li");
+    li.className = "ladder-btn";
+    li.textContent = "$" + p;
+    if (p % 5000 === 0) li.classList.add("checkpoint"); // checkpoint milestones
+    moneyList.appendChild(li);
+  });
+}
+
+// Highlight only the last correct milestone
+function highlightLadder() {
+  const buttons = document.querySelectorAll(".ladder-btn");
+  buttons.forEach(b => b.classList.remove("current"));
+  if (current > 0 && current <= prizes.length) {
+    buttons[current - 1].classList.add("current");
   }
+}
 
-  function highlightLadder(){
-    document.querySelectorAll(".ladder-btn").forEach((b,i)=>{
-      b.classList.toggle("current",i===current);
-    });
+function updateScoreRow() {
+  scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
+}
+
+/* ================= SAFE MONEY ================= */
+const safeMoneyBtn = document.createElement("button");
+safeMoneyBtn.id = "safeMoneyBtn";
+safeMoneyBtn.textContent = "💰 Safe Money";
+quizContainer.prepend(safeMoneyBtn);
+
+safeMoneyBtn.onclick = () => {
+  score = getLastMilestone();
+  lifetime += score;
+  updateScoreRow();
+  showFinal();
+};
+
+function getLastMilestone() {
+  let amt = 0;
+  for (let i = 0; i < prizes.length; i++) {
+    if (score >= prizes[i]) amt = prizes[i];
+    else break;
   }
+  return amt;
+}
 
-  function updateScoreRow(){
-    scoreRow.textContent=`Score: $${score} | Total: $${lifetime}`;
-  }
-
-  /* ================= SAFE MONEY ================= */
-  const safeMoneyBtn = document.createElement("button");
-  safeMoneyBtn.id="safeMoneyBtn";
-  safeMoneyBtn.textContent="💰 Safe Money";
-  quizContainer.prepend(safeMoneyBtn);
-
-  safeMoneyBtn.onclick = ()=>{
-    score = getLastMilestone();
-    lifetime += score;
-    updateScoreRow();
-    saveUserScore();
-    showFinal();
-  };
-
-  function getLastMilestone(){
-    let amt=0;
-    for(let i=0;i<prizes.length;i++){
-      if(score>=prizes[i]) amt=prizes[i];
-      else break;
+/* ================= LIFELINES ================= */
+fiftyBtn.onclick = () => {
+  if (fiftyBtn.classList.contains("used")) return;
+  playSound("thinking");
+  const correct = questions[current].correctAnswer;
+  let removed = 0;
+  document.querySelectorAll(".option-btn").forEach(b => {
+    if (b.textContent !== correct && removed < 2) {
+      b.style.opacity = 0.2;
+      removed++;
     }
-    return amt;
-  }
+  });
+  fiftyBtn.classList.add("used");
+  fiftyBtn.disabled = true;
+};
 
-  /* ================= LIFELINES ================= */
-  fiftyBtn.onclick = () => {
-    if(fiftyBtn.classList.contains("used")) return;
-    playSound("thinking");
-    const correct = questions[current].correctAnswer;
-    let removed = 0;
-    document.querySelectorAll(".option-btn").forEach(b=>{
-      if(b.textContent!==correct && removed<2){
-        b.style.opacity=0.2;
-        removed++;
-      }
-    });
-    fiftyBtn.classList.add("used");
-    fiftyBtn.disabled = true;
-  };
+secondChanceBtn.onclick = () => {
+  if (secondChanceUsed || secondChanceBtn.classList.contains("used")) return;
+  secondChanceActive = true;
+  secondChanceBtn.classList.add("used");
+  secondChanceBtn.disabled = true;
+  playSound("thinking");
+};
 
-  secondChanceBtn.onclick = () => {
-    if(secondChanceUsed || secondChanceBtn.classList.contains("used")) return;
-    secondChanceActive = true;
-    secondChanceBtn.classList.add("used");
-    secondChanceBtn.disabled = true;
-    playSound("thinking");
-  };
+callFriendBtn.onclick = () => {
+  if (callFriendBtn.classList.contains("used")) return;
+  playSound("call");
+  callFriendBtn.classList.add("used");
+  callFriendBtn.disabled = true;
 
-  callFriendBtn.onclick = () => {
-    if(callFriendBtn.classList.contains("used")) return;
-    playSound("call");
-    callFriendBtn.classList.add("used");
-    callFriendBtn.disabled = true;
-    const correct = questions[current].correctAnswer;
-    callFriendBox.innerHTML=`<p>Friend thinks the answer is: <strong>${correct}</strong></p>`;
-    setTimeout(()=>{
-      callFriendBox.innerHTML="";
-      stopSound("call");
-    },5000);
-  };
+  const correct = questions[current].correctAnswer;
+  callFriendBox.innerHTML = `<p>Friend thinks the answer is: <strong>${correct}</strong></p>`;
+  setTimeout(() => { callFriendBox.innerHTML = ""; }, 5000);
+};
 
-  audienceBtn.onclick = () => {
-    if(audienceBtn.classList.contains("used")) return;
-    playSound("audience");
-    audienceBtn.classList.add("used");
-    audienceBtn.disabled = true;
-    const correct = questions[current].correctAnswer;
-    const options = [...document.querySelectorAll(".option-btn")].map(b=>b.textContent);
-    const votes = options.map(opt=>opt===correct?60:Math.floor(Math.random()*40));
-    let html="<p>Audience votes:</p>";
-    options.forEach((opt,i)=> html+=`<div>${opt}: ${votes[i]}%</div>`);
-    audienceVote.innerHTML=html;
-    setTimeout(()=>{
-      audienceVote.innerHTML="";
-      stopSound("audience");
-    },5000);
-  };
+audienceBtn.onclick = () => {
+  if (audienceBtn.classList.contains("used")) return;
+  playSound("audience");
+  audienceBtn.classList.add("used");
+  audienceBtn.disabled = true;
 
-  /* ================= FINAL ================= */
-  function showFinal(){
-    playSound("win");
-    quizDiv.innerHTML=`
-      <div class="final-screen">
-        <h1>🎉 Game Over</h1>
-        <h2>You earned $${score}</h2>
-        <button onclick="location.reload()">Play Again</button>
-      </div>
-    `;
-    lifetime += score;
-    updateScoreRow();
-    saveUserScore();
-  }
+  const correct = questions[current].correctAnswer;
+  const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
+  const votes = options.map(opt => opt === correct ? 60 : Math.floor(Math.random() * 40));
+  let html = "<p>Audience votes:</p>";
+  options.forEach((opt, i) => {
+    html += `<div>${opt}: ${votes[i]}%</div>`;
+  });
+  audienceVote.innerHTML = html;
+  setTimeout(() => { audienceVote.innerHTML = ""; }, 5000);
+};
 
-});
+/* ================= INIT LADDER & SCORE ================= */
+buildLadder();
+updateScoreRow();
+highlightLadder();
