@@ -1,292 +1,186 @@
-/* ================= GLOBAL ================= */
-
-*{
-  box-sizing:border-box;
-  font-family:"Orbitron","Poppins",sans-serif;
+* {
+  box-sizing: border-box;
+  font-family: "Orbitron", "Poppins", sans-serif;
 }
 
-body{
-  margin:0;
-  background:linear-gradient(-45deg,#0f2027,#203a43,#2c5364);
-  background-size:400% 400%;
-  animation:bg 20s infinite;
-  color:#fff;
-  display:flex;
-  justify-content:center;
-  padding:20px;
+body {
+  margin: 0;
+  background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+  background-size: 400% 400%;
+  animation: bg 20s infinite;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
 }
 
-@keyframes bg{
-  0%{background-position:0%}
-  50%{background-position:100%}
-  100%{background-position:0%}
+@keyframes bg {
+  0% { background-position: 0%; }
+  50% { background-position: 100%; }
+  100% { background-position: 0%; }
 }
 
-
-/* ================= CONTAINER ================= */
-
-.container{
-  max-width:900px;
-  width:100%;
-  background:rgba(0,0,0,0.85);
-  border-radius:20px;
-  padding:25px;
-  box-shadow:0 0 30px #00f2fe;
-  text-align:center;
-  animation:fadeIn .8s ease;
+.container {
+  max-width: 900px;
+  width: 100%;
+  background: rgba(0,0,0,0.85);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 0 30px #00f2fe;
+  text-align: center;
+  animation: fadeIn 0.8s ease;
 }
 
-
-/* ================= TITLE ================= */
-
-.title{
-  font-size:44px;
-  color:#00f2fe;
-  text-shadow:0 0 25px #00f2fe;
-  animation:pulse 2s infinite alternate;
+.title {
+  font-size: 46px;
+  color: #00f2fe;
+  text-shadow: 0 0 25px #00f2fe;
+  animation: neonPulse 2s infinite alternate;
 }
 
-@keyframes pulse{
-  from{ text-shadow:0 0 10px #00f2fe }
-  to{ text-shadow:0 0 30px #00f2fe }
+@keyframes neonPulse {
+  from { text-shadow: 0 0 10px #00f2fe; }
+  to { text-shadow: 0 0 30px #00f2fe; }
 }
 
-
-/* ================= PROFILE ================= */
-
-.profile{
-  background:rgba(255,255,255,.08);
-  padding:12px;
-  border-radius:12px;
-  margin-bottom:10px;
-  box-shadow:0 0 10px #00f2fe;
-  font-size:14px;
+button {
+  padding: 12px 20px;
+  margin: 6px;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #00c6ff, #00f2fe);
+  color: #000;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-
-/* ================= HIDDEN ================= */
-
-.hidden{
-  display:none !important;
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px #00f2fe;
 }
 
-
-/* ================= BUTTONS ================= */
-
-button{
-  padding:12px 20px;
-  margin:6px;
-  border:none;
-  border-radius:12px;
-  font-weight:bold;
-  background:linear-gradient(135deg,#00c6ff,#00f2fe);
-  color:#000;
-  cursor:pointer;
-  transition:.2s;
+button.used {
+  background: #444 !important;
+  color: #999 !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
 }
 
-button:hover{
-  transform:scale(1.05);
-  box-shadow:0 0 12px #00f2fe;
+#quiz-and-ladder {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  align-items: flex-start;
 }
 
-button.used{
-  background:#333 !important;
-  color:#888 !important;
-  cursor:not-allowed;
-  box-shadow:none !important;
+#quiz {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  padding: 18px;
+  border-radius: 20px;
+  min-height: 320px;
 }
 
-
-/* ================= INPUT ================= */
-
-input,select{
-  padding:10px;
-  border-radius:8px;
-  border:none;
-  margin:5px;
-  font-size:14px;
+.option-btn {
+  width: 100%;
+  height: 48px;
+  margin: 6px auto;
+  padding: 10px;
+  border-radius: 12px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #1c92d2, #f2fcfe);
+  color: #000;
+  transition: all 0.3s ease;
 }
 
+.option-btn.correct { background: green; color: #fff; }
+.option-btn.wrong { background: red; color: #fff; }
 
-/* ================= QUIZ ================= */
-
-#main{
-  display:flex;
-  gap:15px;
-  margin-top:10px;
+#money-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  min-width: 140px;
+  gap: 5px;
 }
 
-#quiz{
-  flex:1;
-  background:rgba(255,255,255,.05);
-  padding:18px;
-  border-radius:18px;
-  min-height:320px;
+.ladder-btn {
+  width: 100%;
+  padding: 6px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-weight: bold;
+  font-size: 13px;
 }
 
-#quiz h2{
-  margin-bottom:15px;
+.ladder-btn.current {
+  background: linear-gradient(135deg, gold, orange);
+  color: #000;
+  box-shadow: 0 0 10px gold;
 }
 
-
-/* ================= ANSWERS ================= */
-
-.option-btn{
-  width:100%;
-  height:48px;
-  margin:6px 0;
-  border-radius:12px;
-  font-weight:bold;
-  background:linear-gradient(135deg,#1c92d2,#f2fcfe);
-  color:#000;
-  transition:.3s;
+#timer-container {
+  width: 100%;
+  height: 22px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 20px;
+  margin: 10px 0;
+  position: relative;
+  overflow: hidden;
 }
 
-.option-btn:hover{
-  transform:scale(1.03);
+#timer-bar {
+  height: 100%;
+  width: 100%;
+  background: #00ff00;
+  transition: width 1s linear, background 0.3s;
 }
 
-.correct{
-  background:linear-gradient(135deg,#00ff88,#00cc66)!important;
-  box-shadow:0 0 15px #00ff88;
+#timer-text {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+  font-size: 14px;
 }
 
-.wrong{
-  background:linear-gradient(135deg,#ff4d4d,#cc0000)!important;
-  box-shadow:0 0 15px red;
+#lifelines {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-
-/* ================= LADDER ================= */
-
-#ladder{
-  list-style:none;
-  padding:0;
-  display:flex;
-  flex-direction:column-reverse;
-  min-width:130px;
-  gap:5px;
+.final-screen {
+  padding: 40px;
+  animation: fadeIn 0.6s ease-in-out;
 }
 
-.ladder-btn{
-  padding:6px;
-  border-radius:8px;
-  background:rgba(255,255,255,.15);
-  font-size:13px;
-  font-weight:bold;
+.final-screen h1 {
+  font-size: 42px;
+  color: gold;
+  text-shadow: 0 0 20px gold;
 }
 
-.ladder-btn.current{
-  background:linear-gradient(135deg,gold,orange);
-  color:#000;
-  box-shadow:0 0 10px gold;
+#scoreRow {
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
+.hidden { display: none; }
 
-/* ================= TIMER ================= */
-
-#timer{
-  width:100%;
-  height:22px;
-  background:rgba(255,255,255,.15);
-  border-radius:20px;
-  margin:10px 0;
-  position:relative;
-  overflow:hidden;
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-#bar{
-  height:100%;
-  width:100%;
-  background:#00ff00;
-  transition:width 1s linear;
-}
-
-#time{
-  position:absolute;
-  right:10px;
-  top:50%;
-  transform:translateY(-50%);
-  font-weight:bold;
-}
-
-
-/* ================= LIFELINES ================= */
-
-#lifelines{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  margin-top:12px;
-  flex-wrap:wrap;
-}
-
-#callBox,
-#voteBox{
-  margin-top:10px;
-  font-size:14px;
-  background:rgba(255,255,255,.07);
-  padding:8px;
-  border-radius:8px;
-}
-
-
-/* ================= FINAL ================= */
-
-.final-screen{
-  padding:40px;
-  animation:fadeIn .5s ease;
-}
-
-.final-screen h1{
-  font-size:42px;
-  color:gold;
-  text-shadow:0 0 20px gold;
-}
-
-
-/* ================= LEADERBOARD ================= */
-
-.leaderboard{
-  margin-top:15px;
-  background:rgba(255,255,255,.06);
-  padding:12px;
-  border-radius:12px;
-  box-shadow:0 0 10px #00f2fe;
-}
-
-.leaderboard h3{
-  margin-bottom:5px;
-}
-
-
-/* ================= MOBILE ================= */
-
-@media(max-width:700px){
-
-  #main{
-    flex-direction:column;
-  }
-
-  #ladder{
-    flex-direction:row;
-    overflow-x:auto;
-  }
-
-  .ladder-btn{
-    min-width:90px;
-  }
-
-  .title{
-    font-size:32px;
-  }
-}
-
-
-/* ================= FADE ================= */
-
-@keyframes fadeIn{
-  from{opacity:0;transform:scale(.95)}
-  to{opacity:1;transform:scale(1)}
+@media (max-width:700px){
+  #quiz-and-ladder { flex-direction: column; }
+  #money-list { flex-direction: row; overflow-x: auto; }
+  .ladder-btn { min-width: 100px; }
 }
