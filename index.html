@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>NEON MILLIONAIRE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="stylesheet" href="style.css">
 
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -15,8 +14,10 @@
 
 <div class="container">
 
+  <!-- USER PROFILE -->
   <div id="profileDiv"></div>
 
+  <!-- LOGIN / AUTH -->
   <div id="authDiv">
     <h1 class="title">NEON MILLIONAIRE</h1>
     <button id="googleLoginBtn">Login with Google</button>
@@ -24,6 +25,7 @@
     <button id="emailRegisterBtn">Login / Register with Email</button>
   </div>
 
+  <!-- EMAIL LOGIN -->
   <div id="emailDiv" style="display:none;">
     <input type="email" id="emailInput" placeholder="Email">
     <input type="password" id="passwordInput" placeholder="Password">
@@ -32,6 +34,7 @@
     <button id="emailCancelBtn">Cancel</button>
   </div>
 
+  <!-- GAME SETTINGS -->
   <div id="categoryDiv" style="display:none;">
     <h2>Game Settings</h2>
 
@@ -50,6 +53,10 @@
       <option value="hard">Hard</option>
     </select>
 
+    <label>
+      <input type="checkbox" id="nightmareModeCheck"> Nightmare Mode (Hardcore)
+    </label><br><br>
+
     <select id="soundToggle">
       <option value="on">Sound ON</option>
       <option value="off">Sound OFF</option>
@@ -58,37 +65,37 @@
     <button id="startBtn" class="start-btn">START QUIZ</button>
   </div>
 
+  <!-- QUIZ -->
   <div id="quiz-container" style="display:none;">
-    <div id="quiz-container" style="display:none;">
-  
-  <!-- LIFETIME SCORE ROW -->
-  <div id="scoreRow">Score: $0 | Total: $0</div>
 
-  <div id="timer-container">
-    <div id="timer-bar"></div>
-    <span id="timer-text">30s</span>
-  </div>
+    <!-- LIFETIME SCORE ROW -->
+    <div id="scoreRow">Score: $0 | Total: $0</div>
 
+    <!-- TIMER -->
     <div id="timer-container">
       <div id="timer-bar"></div>
       <span id="timer-text">30s</span>
     </div>
 
+    <!-- QUIZ AND LADDER -->
     <div id="quiz-and-ladder">
       <div id="quiz"></div>
       <ul id="money-list"></ul>
     </div>
 
+    <!-- LIFELINES -->
     <div id="lifelines">
       <button id="fiftyBtn">50:50</button>
       <button id="callFriendBtn">📞 Call</button>
       <button id="audienceBtn">📊 Audience</button>
+      <button id="safeMoneyBtn">💰 Safe Money</button>
     </div>
 
     <div id="callFriendBox"></div>
     <div id="audienceVote"></div>
   </div>
 
+  <!-- LEADERBOARD -->
   <ul id="leaderboard-list"></ul>
 
   <!-- SOUNDS -->
