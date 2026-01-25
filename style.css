@@ -194,3 +194,32 @@ button.used {
   from { box-shadow: 0 0 10px gold; }
   to { box-shadow: 0 0 25px gold, 0 0 40px gold; }
 }
+/* ---------- CURRENT QUESTION LADDERS NEON BLINK ---------- */
+.ladder-btn.current {
+  background: linear-gradient(135deg, #00f2fe, #00c6ff);
+  color: #000;
+  box-shadow: 0 0 10px #00f2fe;
+  animation: neonBlink 1s infinite alternate;
+}
+
+@keyframes neonBlink {
+  0% { box-shadow: 0 0 10px #00f2fe; }
+  50% { box-shadow: 0 0 20px #00f2fe, 0 0 30px #00f2fe; }
+  100% { box-shadow: 0 0 10px #00f2fe; }
+}
+
+/* ---------- SCORE ROW NEON ---------- */
+#scoreRow {
+  font-weight: bold;
+  font-size: 18px;
+  color: #00f2fe;
+  text-shadow: 0 0 5px #00f2fe, 0 0 10px #00c6ff;
+  margin-bottom: 12px;
+  animation: scoreGlow 2s infinite alternate;
+}
+
+@keyframes scoreGlow {
+  0% { text-shadow: 0 0 5px #00f2fe, 0 0 10px #00c6ff; }
+  50% { text-shadow: 0 0 10px #00f2fe, 0 0 20px #00c6ff; }
+  100% { text-shadow: 0 0 5px #00f2fe, 0 0 10px #00c6ff; }
+}
