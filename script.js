@@ -89,58 +89,87 @@ let stats = {
   }
 
   /* =================== AUTH =================== */
-  googleLoginBtn.onclick = async () => {
-    await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+
+// Google Login
+googleLoginBtn.onclick = async () => {
+  try {
+    const result = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    user = result.user;
     showSettings();
-  };
-
-  guestLoginBtn.onclick = () => {
-    auth.signInAnonymously();
-    showSettings();
-  };
-
-  emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
-  emailCancelBtn.onclick = () => emailDiv.style.display = "none";
-
-  emailLoginBtn.onclick = async () => {
-    await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
-    location.reload();
-  };
-
-  emailRegisterSubmitBtn.onclick = async () => {
-    await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
-    location.reload();
-  };
-
-  auth.onAuthStateChanged(async u => {
-    if (u) {
-      user = u;
-
-      // Load lifetime from Firestore
-      const docRef = db.collection("users").doc(user.uid);
-      const docSnap = await docRef.get();
-      if (docSnap.exists) {
-        lifetime = docSnap.data().lifetime || 0;
-      } else {
-        lifetime = 0;
-        await docRef.set({ lifetime: 0, name: user.displayName || "Guest", photo: user.photoURL || "" });
-      }
-
-      updateScoreRow();
-
-      // Show profile
-      document.getElementById("profileDiv").innerHTML = `
-        <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
-        <h3>${user.displayName || "Guest"}</h3>
-      `;
-    }
-  });
-
-  function showSettings() {
-    document.getElementById("authDiv").style.display = "none";
-    document.getElementById("categoryDiv").style.display = "block";
-    playSound("intro");
+  } catch (err) {
+    alert("Google login failed: " + err.message);
   }
+};
+
+// Guest Login
+guestLoginBtn.onclick = async () => {
+  try {
+    const result = await auth.signInAnonymously();
+    user = result.user;
+    showSettings();
+  } catch (err) {
+    alert("Guest login failed: " + err.message);
+  }
+};
+
+// Show Email Login/Register form
+emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
+emailCancelBtn.onclick = () => emailDiv.style.display = "none";
+
+// Email Login
+emailLoginBtn.onclick = async () => {
+  try {
+    const result = await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+    user = result.user;
+    showSettings();
+  } catch (err) {
+    alert("Email login failed: " + err.message);
+  }
+};
+
+// Email Register
+emailRegisterSubmitBtn.onclick = async () => {
+  try {
+    const result = await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+    user = result.user;
+    showSettings();
+  } catch (err) {
+    alert("Email registration failed: " + err.message);
+  }
+};
+
+// Watch for auth state changes
+auth.onAuthStateChanged(async u => {
+  if (u) {
+    user = u;
+
+    // Load lifetime from Firestore
+    const docRef = db.collection("users").doc(user.uid);
+    const docSnap = await docRef.get();
+    if (docSnap.exists) {
+      lifetime = docSnap.data().lifetime || 0;
+    } else {
+      lifetime = 0;
+      await docRef.set({ lifetime: 0, name: user.displayName || "Guest", photo: user.photoURL || "" });
+    }
+
+    updateScoreRow();
+
+    // Show profile
+    document.getElementById("profileDiv").innerHTML = `
+      <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
+      <h3>${user.displayName || "Guest"}</h3>
+    `;
+  }
+});
+
+// Hide auth div and show settings
+function showSettings() {
+  document.getElementById("authDiv").style.display = "none";
+  document.getElementById("emailDiv").style.display = "none";
+  document.getElementById("categoryDiv").style.display = "block";
+  playSound("intro");
+}
 
   /* =================== START QUIZ =================== */
   startBtn.onclick = startQuiz;
