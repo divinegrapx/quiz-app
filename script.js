@@ -102,7 +102,21 @@ function showSettings() {
   document.getElementById("categoryDiv").style.display = "block";
   playSound("intro");
 }
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById("profileDiv").innerHTML = `
+      <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
+      <h3>${user.displayName || "Guest"}</h3>
+    `;
+  }
+});
 
+/* SETTINGS */
+function showSettings() {
+  document.getElementById("authDiv").style.display = "none";
+  document.getElementById("categoryDiv").style.display = "block";
+  playSound("intro");
+}
 /* GAME */
 let questions = [];
 let current = 0;
