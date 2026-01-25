@@ -161,31 +161,52 @@ function showSettings() {
 
 
   /* =================== START QUIZ =================== */
-  startBtn.onclick = startQuiz;
+startBtn.onclick = startQuiz;
 
-  async function startQuiz() {
-    const category = categorySelect.value;
-    const difficulty = difficultySelect.value;
-    soundEnabled = soundToggle.value === "on";
+async function startQuiz() {
+  const category = categorySelect.value;
+  const difficulty = difficultySelect.value;
+  soundEnabled = soundToggle.value === "on";
 
-    const res = await fetch(`https://the-trivia-api.com/api/questions?limit=20&categories=${category}&difficulty=${difficulty}`);
-    questions = await res.json();
+  const res = await fetch(`https://the-trivia-api.com/api/questions?limit=20&categories=${category}&difficulty=${difficulty}`);
+  questions = await res.json();
 
-    document.getElementById("categoryDiv").style.display = "none";
-    document.getElementById("quiz-container").style.display = "block";
+  document.getElementById("categoryDiv").style.display = "none";
+  document.getElementById("quiz-container").style.display = "block";
 
-    buildMoneyLadder(20);
-    current = 0;
-    ladderLevel = 0;
-    score = 0;
+  buildMoneyLadder(20);
+  current = 0;
+  ladderLevel = 0;
+  score = 0;
 
-    fiftyUsed = friendUsed = audienceUsed = false;
+  fiftyUsed = friendUsed = audienceUsed = false;
 
-    playSound("thinking");
-    showQuestion();
-    updateScoreRow();
-    loadLeaderboard();
-  }
+  playSound("thinking");
+  showQuestion();
+  updateScoreRow();
+
+  loadLeaderboard(); // just call it here
+}
+
+/* =================== FIREBASE LEADERBOARD (REAL-TIME) =================== */
+function loadLeaderboard() {
+  leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
+
+  // Real-time listener
+  db.collection("users")
+    .orderBy("lifetime", "desc")
+    .limit(10)
+    .onSnapshot(snapshot => {
+      leaderboardList.innerHTML = "<h3>Top 10 Players</h3>"; // clear before re-render
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.innerHTML = `<img src="${data.photo || 'https://i.imgur.com/6VBx3io.png'}" width="30"> ${data.name}: $${data.lifetime}`;
+        leaderboardList.appendChild(li);
+      });
+    });
+}
+
 
   /* =================== QUESTION DISPLAY =================== */
   function showQuestion() {
