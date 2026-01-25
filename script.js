@@ -65,6 +65,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let ladderLevel = 0;
   let score = 0;
   let lifetime = 0;
+/* =================== STATS TRACKING =================== */
+let stats = {
+  categories: {}, // correct/total per category
+  difficulty: {}  // correct/total per difficulty
+};
 
   let fiftyUsed = false;
   let friendUsed = false;
@@ -201,43 +206,56 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =================== CHECK ANSWER =================== */
-  function checkAnswer(ans) {
-    clearInterval(timer);
-    stopAllSounds();
-    const correct = questions[current].correctAnswer;
+function checkAnswer(ans) {
+  clearInterval(timer);
+  stopAllSounds();
+  const correct = questions[current].correctAnswer;
 
-    document.querySelectorAll(".option-btn").forEach(b => {
-      b.disabled = true;
-      if (b.textContent === correct) b.classList.add("correct");
-      if (b.textContent === ans && ans !== correct) b.classList.add("wrong");
-    });
+  // Disable all buttons and show correct/wrong states
+  document.querySelectorAll(".option-btn").forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add("correct");
+    if (b.textContent === ans && ans !== correct) b.classList.add("wrong");
+  });
 
-    if (ans === correct) {
-      ladderLevel++;
-      score += 100;
-      playSound("correct");
-    } else {
-      playSound("wrong");
-      if (nightmareCheck.checked) {
-        setTimeout(() => showFinalScreen(), 1500);
-        return;
-      }
-    }
+  // ---------- TRACK STATS ----------
+  trackStats(ans); // <-- Call the tracking function here
 
-    updateMoneyLadder();
-    updateScoreRow();
-    setTimeout(nextQuestion, 2000);
-  }
-
-  function nextQuestion() {
-    current++;
-    if (current >= questions.length) {
-      showFinalScreen();
+  // Update score and ladder
+  if (ans === correct) {
+    ladderLevel++;
+    score += 100;
+    playSound("correct");
+  } else {
+    playSound("wrong");
+    if (nightmareCheck.checked) {
+      setTimeout(() => showFinalScreen(), 1500);
       return;
     }
-    playSound("thinking");
-    showQuestion();
   }
+
+  updateMoneyLadder();
+  updateScoreRow();
+  setTimeout(nextQuestion, 2000);
+}
+
+// ---------- TRACK STATS FUNCTION ----------
+function trackStats(ans) {
+  const q = questions[current];
+  const correct = q.correctAnswer;
+
+  if (!stats.categories[q.category]) stats.categories[q.category] = { correct: 0, total: 0 };
+  if (!stats.difficulty[q.difficulty]) stats.difficulty[q.difficulty] = { correct: 0, total: 0 };
+
+  stats.categories[q.category].total++;
+  stats.difficulty[q.difficulty].total++;
+
+  if (ans === correct) {
+    stats.categories[q.category].correct++;
+    stats.difficulty[q.difficulty].correct++;
+  }
+}
+
 
   /* =================== MONEY LADDER =================== */
   function buildMoneyLadder(count) {
