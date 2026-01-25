@@ -309,63 +309,77 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* =================== SAFE MONEY =================== */
-  safeMoneyBtn.onclick = () => {
-    score = getLastMilestone(); // last checkpoint
-    updateScoreRow();
-    showFinalScreen();
-  };
+safeMoneyBtn.onclick = () => {
+  score = getLastMilestone(); // set score to last safe milestone
+  updateScoreRow();
+  showFinalScreen();           // show final screen and save score once
+};
 
-  function getLastMilestone() {
-    let amt = 0;
-    [...moneyList.children].forEach(li => {
-      const val = parseInt(li.textContent.replace("$", ""));
-      if (score >= val) amt = val;
-    });
-    return amt;
-  }
+function getLastMilestone() {
+  let amt = 0;
+  [...moneyList.children].forEach(li => {
+    const val = parseInt(li.textContent.replace("$", ""));
+    if (score >= val) amt = val;
+  });
+  return amt;
+}
 
-  /* =================== FIREBASE SAVE SCORE =================== */
-  async function saveScore(currentScore) {
-    if (!user) return;
+/* =================== FIREBASE SAVE SCORE =================== */
+async function saveScore(currentScore) {
+  if (!user) return;
 
-    const userRef = db.collection("users").doc(user.uid);
+  const userRef = db.collection("users").doc(user.uid);
 
-    await db.runTransaction(async (transaction) => {
-      const doc = await transaction.get(userRef);
-      if (!doc.exists) {
-        transaction.set(userRef, {
-          lifetime: currentScore,
-          name: user.displayName || "Guest",
-          photo: user.photoURL || ""
-        });
-      } else {
-        const previousLifetime = doc.data().lifetime || 0;
-        const newLifetime = previousLifetime + currentScore;
-        transaction.update(userRef, { lifetime: newLifetime });
-        lifetime = newLifetime;
-      }
-    });
-  }
+  await db.runTransaction(async (transaction) => {
+    const doc = await transaction.get(userRef);
 
-  /* =================== FINAL SCREEN =================== */
-  function showFinalScreen() {
-    stopAllSounds();
-    playSound("win");
+    const userData = {
+      name: user.displayName || "Guest",
+      photo: user.photoURL || "https://i.imgur.com/6VBx3io.png"
+    };
 
-    lifetime += score; // add current quiz score to lifetime once
-    updateScoreRow();
-    saveScore(score);  // save only the current quiz score
+    if (!doc.exists) {
+      // New user
+      transaction.set(userRef, {
+        ...userData,
+        lifetime: currentScore
+      });
+      lifetime = currentScore; // update local lifetime
+    } else {
+      // Existing user
+      const previousLifetime = doc.data().lifetime || 0;
+      const newLifetime = previousLifetime + currentScore;
+      transaction.update(userRef, {
+        lifetime: newLifetime,
+        ...userData // ensures name/photo are always current
+      });
+      lifetime = newLifetime;
+    }
+  });
+}
 
-    quizDiv.innerHTML = `
-      <div class="final-screen">
-        <h1>🎉 CONGRATULATIONS</h1>
-        <h2>You Won $${score}</h2>
-        <button onclick="location.reload()">Restart Quiz</button>
-      </div>
-    `;
-  }
+/* =================== FINAL SCREEN =================== */
+function showFinalScreen() {
+  stopAllSounds();
+  playSound("win");
 
-  /* =================== FIREBASE LEADERBOARD (REAL-TIME) =================== */
+  // Add current quiz score to lifetime and save
+  lifetime += score;
+  updateScoreRow();
+  saveScore(score); // save only the current quiz points once
+
+  quizDiv.innerHTML = `
+    <div class="final-screen">
+      <h1>🎉 CONGRATULATIONS</h1>
+      <h2>You Won $${score}</h2>
+      <button onclick="location.reload()">Restart Quiz</button>
+    </div>
+  `;
+
+  loadLeaderboard(); // refresh leaderboard
+}
+
+/* =================== FIREBASE LEADERBOARD =================== */
 function loadLeaderboard() {
   leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
 
@@ -375,22 +389,11 @@ function loadLeaderboard() {
     .limit(10)
     .onSnapshot(snapshot => {
       leaderboardList.innerHTML = "<h3>Top 10 Players</h3>"; // clear before re-render
-
       snapshot.forEach(doc => {
         const data = doc.data();
-
-        // Ensure name and photo are always defined
-        const name = data.name || "Guest";
-        const photo = data.photo || "https://i.imgur.com/6VBx3io.png";
-        const lifetimeScore = data.lifetime || 0;
-
         const li = document.createElement("li");
-        li.innerHTML = `
-          <img src="${photo}" width="30" height="30" style="border-radius:50%; margin-right:8px;">
-          <b>${name}</b>: $${lifetimeScore}
-        `;
+        li.innerHTML = `<img src="${data.photo || 'https://i.imgur.com/6VBx3io.png'}" width="30"> ${data.name || 'Guest'}: $${data.lifetime || 0}`;
         leaderboardList.appendChild(li);
       });
     });
 }
-
