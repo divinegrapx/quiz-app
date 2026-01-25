@@ -67,22 +67,75 @@ let soundEnabled=true;
 function playSound(name){if(!soundEnabled||!sounds[name])return;sounds[name].currentTime=0;sounds[name].play().catch(()=>{});}
 
 /* ================= AUTH ================= */
-let user=null;
-googleLoginBtn.onclick=async()=>{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());};
-guestLoginBtn.onclick=()=>auth.signInAnonymously();
-emailRegisterBtn.onclick=()=>show(emailDiv);
-emailCancelBtn.onclick=()=>hide(emailDiv);
-emailLoginBtn.onclick=async()=>{await auth.signInWithEmailAndPassword(emailInput.value,passwordInput.value);};
-emailRegisterSubmitBtn.onclick=async()=>{await auth.createUserWithEmailAndPassword(emailInput.value,passwordInput.value);};
-auth.onAuthStateChanged(u=>{
-  if(!u)return;
-  user=u;
-  hide(loginDiv);
-  hide(emailDiv);
-  show(categoryDiv);
+let user = null;
+
+// LOGIN BUTTONS
+googleLoginBtn.onclick = async () => {
+  await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+};
+
+guestLoginBtn.onclick = () => auth.signInAnonymously();
+
+emailRegisterBtn.onclick = () => show(emailDiv);
+emailCancelBtn.onclick = () => hide(emailDiv);
+
+emailLoginBtn.onclick = async () => {
+  await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+};
+
+emailRegisterSubmitBtn.onclick = async () => {
+  await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+};
+
+// AFTER LOGIN
+auth.onAuthStateChanged(u => {
+  if (!u) return;
+  user = u;
+
+  // Hide login / email
+  loginDiv.style.display = "none";
+  emailDiv.style.display = "none";
+
+  // Show category selection
+  categoryDiv.style.display = "block";
   playSound("intro");
   loadUserScore();
+  updateLeaderboard();
 });
+
+// START QUIZ
+startBtn.onclick = async () => {
+  // Get Nightmare mode from the checkbox in loginDiv
+  const nightmareChecked = nightmareCheck.checked;
+  timePerQ = nightmareChecked ? 20 : 30;
+
+  // Sound toggle
+  soundEnabled = soundToggle.value === "on";
+
+  // Reset lifelines & scores
+  resetLifelines();
+  score = 0;
+  current = 0;
+
+  // Fetch questions
+  const res = await fetch(
+    `https://the-trivia-api.com/api/questions?limit=15&categories=${categorySelect.value}&difficulty=${difficultySelect.value}`
+  );
+  questions = await res.json();
+
+  // Hide categoryDiv, show quiz
+  categoryDiv.style.display = "none";
+  quizContainer.style.display = "block";
+
+  // Build ladder + highlight
+  buildLadder();
+  highlightLadder();
+
+  // Play thinking sound and show first question
+  playSound("thinking");
+  showQuestion();
+};
+
 
 /* ================= GAME STATE ================= */
 let questions=[],current=0,score=0,lifetime=0,timer,timePerQ=30;
