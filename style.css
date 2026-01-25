@@ -247,25 +247,55 @@ button.used {
   border-radius: 50%;
 }
 
-/* ---------- FINAL SCREEN ---------- */
-
-.final-screen {
-  padding: 40px;
-  animation: fadeIn 0.6s ease-in-out;
+/* =================== FINAL SCREEN STATS =================== */
+.stats-div {
+  margin-top: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 15px 20px;
+  border-radius: 15px;
+  text-align: left;
+  color: #00f2fe;
+  box-shadow: 0 0 20px #00f2fe;
+  animation: neonPulse 2s infinite alternate;
 }
 
-.final-screen h1 {
-  font-size: 42px;
-  color: gold;
-  text-shadow: 0 0 20px gold;
+.stats-div h3 {
+  font-size: 22px;
+  color: #ffdd00;
+  text-shadow: 0 0 10px #ffdd00, 0 0 20px #ffaa00;
+  margin-bottom: 10px;
 }
 
-/* ---------- ANIMATIONS ---------- */
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+.stats-div h4 {
+  font-size: 18px;
+  color: #00ff99;
+  text-shadow: 0 0 8px #00ff99;
+  margin-top: 12px;
+  margin-bottom: 6px;
 }
+
+.stats-div p {
+  margin: 4px 0;
+  font-weight: bold;
+}
+
+.stats-div ul {
+  list-style: none;
+  padding-left: 15px;
+}
+
+.stats-div li {
+  margin: 2px 0;
+  position: relative;
+}
+
+.stats-div li::before {
+  content: "▸";
+  position: absolute;
+  left: -15px;
+  color: #00f2fe;
+}
+
 
 /* ---------- MOBILE ---------- */
 
