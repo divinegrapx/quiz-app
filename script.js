@@ -260,53 +260,97 @@ document.addEventListener("DOMContentLoaded", () => {
     scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
   }
 
-  /* =================== LIFELINES =================== */
-  fiftyBtn.onclick = () => {
-    if (fiftyUsed) return;
-    fiftyUsed = true;
-    fiftyBtn.classList.add("used");
+  /* =================== LIFELINES (IMPROVED) =================== */
 
-    const correct = questions[current].correctAnswer;
-    let removed = 0;
+// 50:50 Lifeline
+fiftyBtn.onclick = () => {
+  if (fiftyUsed) return;
+  fiftyUsed = true;
+  fiftyBtn.classList.add("used");
 
-    document.querySelectorAll(".option-btn").forEach(b => {
-      if (b.textContent !== correct && removed < 2) {
-        b.style.opacity = 0.3;
-        removed++;
-      }
-    });
+  const correct = questions[current].correctAnswer;
+  const options = [...document.querySelectorAll(".option-btn")].filter(b => b.textContent !== correct);
+  
+  // Randomly remove 2 wrong answers
+  const toRemove = [];
+  while (toRemove.length < 2 && options.length > 0) {
+    const index = Math.floor(Math.random() * options.length);
+    toRemove.push(options[index]);
+    options.splice(index, 1);
+  }
 
-    playSound("thinking");
-  };
+  toRemove.forEach(btn => btn.style.opacity = 0.3);
 
-  callFriendBtn.onclick = () => {
-    if (friendUsed) return;
-    friendUsed = true;
-    callFriendBtn.classList.add("used");
+  // Highlight remaining options
+  document.querySelectorAll(".option-btn").forEach(btn => {
+    if (btn.textContent === correct) btn.classList.add("highlight");
+  });
 
-    playSound("call");
-    callFriendBox.innerHTML = `📞 Friend says: <b>${questions[current].correctAnswer}</b>`;
-    setTimeout(() => { callFriendBox.innerHTML = ""; stopAllSounds(); }, 5000);
-  };
+  playSound("thinking");
+};
 
-  audienceBtn.onclick = () => {
-    if (audienceUsed) return;
-    audienceUsed = true;
-    audienceBtn.classList.add("used");
+// Call a Friend Lifeline
+callFriendBtn.onclick = () => {
+  if (friendUsed) return;
+  friendUsed = true;
+  callFriendBtn.classList.add("used");
 
-    playSound("audience");
-    audienceVote.innerHTML = "";
+  const correct = questions[current].correctAnswer;
+  const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
 
-    const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
-    const correct = questions[current].correctAnswer;
+  // 70% chance friend gives correct answer
+  let friendAnswer;
+  if (Math.random() < 0.7) {
+    friendAnswer = correct;
+  } else {
+    const wrongOptions = options.filter(o => o !== correct);
+    friendAnswer = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
+  }
 
-    options.forEach(opt => {
-      const percent = opt === correct ? Math.floor(Math.random() * 50 + 50) : Math.floor(Math.random() * 50);
-      audienceVote.innerHTML += `<div>${opt}: ${percent}%</div>`;
-    });
+  callFriendBox.innerHTML = `📞 Friend says: <b>${friendAnswer}</b> (I think...)`;
+  playSound("call");
 
-    setTimeout(() => { audienceVote.innerHTML = ""; stopAllSounds(); }, 5000);
-  };
+  setTimeout(() => { callFriendBox.innerHTML = ""; stopAllSounds(); }, 5000);
+};
+
+// Audience Vote Lifeline
+audienceBtn.onclick = () => {
+  if (audienceUsed) return;
+  audienceUsed = true;
+  audienceBtn.classList.add("used");
+
+  const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
+  const correct = questions[current].correctAnswer;
+
+  audienceVote.innerHTML = "";
+  playSound("audience");
+
+  options.forEach(opt => {
+    let percent;
+    if (opt === correct) {
+      percent = Math.floor(Math.random() * 40 + 50); // 50% to 90%
+    } else {
+      percent = Math.floor(Math.random() * 50);       // 0% to 50%
+    }
+
+    const bar = document.createElement("div");
+    bar.style.width = percent + "%";
+    bar.style.background = opt === correct ? "#00ff00" : "#ff4d4d";
+    bar.style.margin = "3px 0";
+    bar.style.height = "20px";
+    bar.style.color = "#000";
+    bar.style.fontWeight = "bold";
+    bar.style.paddingLeft = "5px";
+    bar.style.display = "flex";
+    bar.style.alignItems = "center";
+    bar.textContent = `${opt}: ${percent}%`;
+
+    audienceVote.appendChild(bar);
+  });
+
+  setTimeout(() => { audienceVote.innerHTML = ""; stopAllSounds(); }, 5000);
+};
+
 
   /* =================== SAFE MONEY =================== */
 safeMoneyBtn.onclick = () => {
