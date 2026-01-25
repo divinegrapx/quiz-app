@@ -1,51 +1,208 @@
-* { box-sizing: border-box; font-family: "Orbitron","Poppins",sans-serif; }
-body { margin:0; background:linear-gradient(-45deg,#0f2027,#203a43,#2c5364); background-size:400% 400%; animation:bg 20s infinite; color:#fff; display:flex; justify-content:center; padding:20px; }
-@keyframes bg {0%{background-position:0%}50%{background-position:100%}100%{background-position:0%}}
+* {
+  box-sizing: border-box;
+  font-family: "Orbitron", "Poppins", sans-serif;
+}
 
-.container { max-width:900px; width:100%; background:rgba(0,0,0,0.85); border-radius:20px; padding:25px; box-shadow:0 0 30px #00f2fe; text-align:center; animation:fadeIn 0.8s ease; }
-.title { font-size:46px; color:#00f2fe; text-shadow:0 0 25px #00f2fe; animation:neonPulse 2s infinite alternate; }
-@keyframes neonPulse { from{ text-shadow:0 0 10px #00f2fe } to{ text-shadow:0 0 30px #00f2fe } }
+body {
+  margin: 0;
+  background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+  background-size: 400% 400%;
+  animation: bg 20s infinite;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
 
-button { padding:12px 20px; margin:6px; border:none; border-radius:12px; font-weight:bold; background:linear-gradient(135deg,#00c6ff,#00f2fe); color:#000; cursor:pointer; transition:0.2s; }
-button:hover { transform:scale(1.05); box-shadow:0 0 12px #00f2fe; }
-button.used { background:#444 !important; color:#999 !important; box-shadow:none !important; cursor:not-allowed; }
+@keyframes bg {
+  0% { background-position: 0%; }
+  50% { background-position: 100%; }
+  100% { background-position: 0%; }
+}
 
-#quiz-and-ladder { display:flex; gap:15px; margin-top:10px; align-items:flex-start; }
-#quiz { flex:1; background:rgba(255,255,255,0.05); padding:18px; border-radius:20px; min-height:320px; }
-.option-btn { width:100%; height:48px; margin:6px auto; padding:10px; border-radius:12px; font-weight:bold; background:linear-gradient(135deg,#1c92d2,#f2fcfe); color:#000; transition:all 0.3s ease; }
-.option-btn.correct { background:green; color:#fff; }
-.option-btn.wrong { background:red; color:#fff; }
-.option-btn:hover { animation: pulseGlow 1s infinite alternate; }
+.container {
+  max-width: 900px;
+  width: 100%;
+  background: rgba(0,0,0,0.85);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 0 30px #00f2fe;
+  text-align: center;
+  animation: fadeIn 0.8s ease;
+}
 
-@keyframes pulseGlow {0%{box-shadow:0 0 15px #00ff00,0 0 30px #00ff00}50%{box-shadow:0 0 25px #00ff00,0 0 40px #00ff00}100%{box-shadow:0 0 15px #00ff00}}
+.title {
+  font-size: 46px;
+  color: #00f2fe;
+  text-shadow: 0 0 25px #00f2fe;
+  animation: neonPulse 2s infinite alternate;
+}
 
-#money-list { list-style:none; padding:0; display:flex; flex-direction:column-reverse; min-width:140px; gap:5px; }
-.ladder-btn { width:100%; padding:6px; border-radius:8px; background:rgba(255,255,255,0.15); color:#fff; font-weight:bold; font-size:13px; }
-.ladder-btn.checkpoint { border:2px solid gold; animation:checkpointGlow 1.5s infinite alternate; }
-@keyframes checkpointGlow { from{box-shadow:0 0 10px gold} to{box-shadow:0 0 25px gold,0 0 40px gold} }
+@keyframes neonPulse {
+  from { text-shadow: 0 0 10px #00f2fe; }
+  to { text-shadow: 0 0 30px #00f2fe; }
+}
 
-.ladder-btn.current { background:linear-gradient(135deg,#00f2fe,#00c6ff); color:#000; box-shadow:0 0 10px #00f2fe; animation:neonBlink 1s infinite alternate; }
-@keyframes neonBlink {0%{box-shadow:0 0 10px #00f2fe}50%{box-shadow:0 0 20px #00f2fe,0 0 30px #00f2fe}100%{box-shadow:0 0 10px #00f2fe}}
+/* ---------- BUTTONS ---------- */
+button {
+  padding: 12px 20px;
+  margin: 6px;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #00c6ff, #00f2fe);
+  color: #000;
+  cursor: pointer;
+  transition: 0.2s;
+}
 
-#timer-container { width:100%; height:22px; background:rgba(255,255,255,0.15); border-radius:20px; margin:10px 0; position:relative; overflow:hidden; }
-#timer-bar { height:100%; width:100%; background:#00ff00; transition:width 1s linear, background 0.3s; }
-#timer-text { position:absolute; right:10px; top:50%; transform:translateY(-50%); font-weight:bold; font-size:14px; }
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px #00f2fe;
+}
 
-#lifelines { margin-top:10px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+button.used {
+  background: #444 !important;
+  color: #999 !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}
 
-.final-screen { padding:40px; animation:fadeIn 0.6s ease-in-out; }
-.final-screen h1 { font-size:42px; color:gold; text-shadow:0 0 20px gold; }
+/* ---------- SCORE ROW ---------- */
+#scoreRow {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #00f2fe;
+  text-shadow: 0 0 8px #00f2fe;
+}
 
-#scoreRow { font-weight:bold; font-size:18px; color:#00f2fe; text-shadow:0 0 5px #00f2fe,0 0 10px #00c6ff; margin-bottom:12px; animation:scoreGlow 2s infinite alternate; }
+/* ---------- QUIZ LAYOUT ---------- */
+#quiz-and-ladder {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  align-items: flex-start;
+}
 
-@keyframes scoreGlow {0%{text-shadow:0 0 5px #00f2fe,0 0 10px #00c6ff}50%{text-shadow:0 0 10px #00f2fe,0 0 20px #00c6ff}100%{text-shadow:0 0 5px #00f2fe,0 0 10px #00c6ff}}
+#quiz {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  padding: 18px;
+  border-radius: 20px;
+  min-height: 320px;
+}
 
-#quiz-container button#safeMoneyBtn { background:linear-gradient(135deg,gold,orange); color:#000; font-weight:bold; padding:12px 20px; border-radius:12px; border:none; cursor:pointer; transition:0.3s; box-shadow:0 0 8px gold; }
-#quiz-container button#safeMoneyBtn:hover { animation:safeMoneyGlow 1s infinite alternate; transform:scale(1.05); }
-@keyframes safeMoneyGlow {0%{box-shadow:0 0 10px gold,0 0 20px orange}50%{box-shadow:0 0 20px gold,0 0 40px orange}100%{box-shadow:0 0 10px gold,0 0 20px orange}}
+.option-btn {
+  width: 100%;
+  height: 48px;
+  margin: 6px auto;
+  padding: 10px;
+  border-radius: 12px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #1c92d2, #f2fcfe);
+  color: #000;
+  transition: all 0.3s ease;
+}
 
-.hidden { display:none; }
+.option-btn.correct { background: green; color: #fff; }
+.option-btn.wrong { background: red; color: #fff; }
 
-@keyframes fadeIn { from{opacity:0; transform:scale(0.95)} to{opacity:1; transform:scale(1)} }
+/* ---------- MONEY LADDER ---------- */
+#money-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  min-width: 140px;
+  gap: 5px;
+}
 
-@media(max-width:700px){#quiz-and-ladder{flex-direction:column} #money-list{flex-direction:row; overflow-x:auto} .ladder-btn{min-width:100px}}
+.ladder-btn {
+  width: 100%;
+  padding: 6px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-weight: bold;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.ladder-btn.current {
+  background: linear-gradient(135deg, gold, orange);
+  color: #000;
+  box-shadow: 0 0 10px gold;
+}
+
+/* ---------- CHECKPOINTS ---------- */
+.ladder-btn.checkpoint {
+  border: 2px solid gold;
+  animation: checkpointGlow 1.5s infinite alternate;
+}
+
+@keyframes checkpointGlow {
+  from { box-shadow: 0 0 10px gold; }
+  to { box-shadow: 0 0 25px gold, 0 0 40px gold; }
+}
+
+/* ---------- TIMER ---------- */
+#timer-container {
+  width: 100%;
+  height: 22px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 20px;
+  margin: 10px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+#timer-bar {
+  height: 100%;
+  width: 100%;
+  background: #00ff00;
+  transition: width 1s linear, background 0.3s;
+}
+
+#timer-text {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* ---------- LIFELINES ---------- */
+#lifelines {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ---------- FINAL SCREEN ---------- */
+.final-screen {
+  padding: 40px;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.final-screen h1 {
+  font-size: 42px;
+  color: gold;
+  text-shadow: 0 0 20px gold;
+}
+
+/* ---------- ANIMATIONS ---------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width:700px){
+  #quiz-and-ladder { flex-direction: column; }
+  #money-list { flex-direction: row; overflow-x: auto; }
+  .ladder-btn { min-width: 100px; }
+}
