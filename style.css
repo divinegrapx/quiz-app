@@ -261,8 +261,49 @@ button.used {
     flex-direction: row;
     overflow-x: auto;
   }
+/* ---------- NIGHTMARE MODE TOOLTIP ---------- */
+.nightmare-label {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 10px;
+}
 
-  .ladder-btn {
-    min-width: 100px;
-  }
+.info-icon {
+  margin-left: 8px;
+  cursor: pointer;
+  color: #00f2fe;
+  font-weight: bold;
+  transition: transform 0.2s;
+}
+
+.info-icon:hover {
+  transform: scale(1.2);
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 250px;
+  background-color: rgba(0,0,0,0.9);
+  color: #00f2fe;
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 8px;
+  position: absolute;
+  z-index: 100;
+  top: 25px;
+  left: 0;
+  font-size: 13px;
+  box-shadow: 0 0 10px #00f2fe;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.nightmare-label:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Keep your ladder button min-width styling separately */
+.ladder-btn {
+  min-width: 100px;
 }
