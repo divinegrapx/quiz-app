@@ -268,31 +268,6 @@ function updateScoreRow() {
   scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
 }
 
-/* ================= SAFE MONEY ================= */
-const safeMoneyBtn = document.createElement("button");
-safeMoneyBtn.id = "safeMoneyBtn";
-safeMoneyBtn.textContent = "💰 Safe Money";
-quizDiv.prepend(safeMoneyBtn); // adds button above the question
-
-safeMoneyBtn.onclick = () => {
-  const lastMilestone = getLastMilestone();
-  lifetime += lastMilestone;
-  score = lastMilestone;
-  updateScoreRow();
-  showFinalScreen();
-};
-
-// Function to get last milestone (checkpoint)
-function getLastMilestone() {
-  let amt = 0;
-  for (let i = 0; i < prizes.length; i++) {
-    if (score >= prizes[i]) amt = prizes[i];
-    else break;
-  }
-  return amt;
-}
-
-
   /* =================== LIFELINES =================== */
   fiftyBtn.onclick = () => {
     if (fiftyUsed) return;
@@ -337,39 +312,39 @@ function getLastMilestone() {
   };
 
   /* =================== SAFE MONEY =================== */
-  safeMoneyBtn.onclick = () => {
-    lifetime += score;
-    score = getLastMilestone();
-    updateScoreRow();
-    showFinalScreen();
-  };
+safeMoneyBtn.onclick = () => {
+  score = getLastMilestone();  // set score to last safe milestone
+  updateScoreRow();
+  showFinalScreen();           // show final screen and add to lifetime once
+};
 
-  function getLastMilestone() {
-    let amt = 0;
-    [...moneyList.children].forEach(li => {
-      const val = parseInt(li.textContent.replace("$", ""));
-      if (score >= val) amt = val;
-    });
-    return amt;
-  }
+function getLastMilestone() {
+  let amt = 0;
+  [...moneyList.children].forEach(li => {
+    const val = parseInt(li.textContent.replace("$", ""));
+    if (score >= val) amt = val;
+  });
+  return amt;
+}
 
-  /* =================== FINAL SCREEN =================== */
-  function showFinalScreen() {
-    stopAllSounds();
-    playSound("win");
-    lifetime += score;
-    updateScoreRow();
-    saveScore(lifetime);
+/* =================== FINAL SCREEN =================== */
+function showFinalScreen() {
+  stopAllSounds();
+  playSound("win");
+  lifetime += score;   // add final score once
+  updateScoreRow();
+  saveScore(lifetime);
 
-    quizDiv.innerHTML = `
-      <div class="final-screen">
-        <h1>🎉 CONGRATULATIONS</h1>
-        <h2>You Won $${score}</h2>
-        <button onclick="location.reload()">Restart Quiz</button>
-      </div>
-    `;
-    loadLeaderboard();
-  }
+  quizDiv.innerHTML = `
+    <div class="final-screen">
+      <h1>🎉 CONGRATULATIONS</h1>
+      <h2>You Won $${score}</h2>
+      <button onclick="location.reload()">Restart Quiz</button>
+    </div>
+  `;
+  loadLeaderboard();
+}
+
 
   /* =================== FIREBASE LEADERBOARD =================== */
   async function saveScore(score) {
