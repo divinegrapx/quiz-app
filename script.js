@@ -24,6 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const emailCancelBtn = document.getElementById("emailCancelBtn");
   const startBtn = document.getElementById("startBtn");
 
+  const emailInput = document.getElementById("emailInput");
+  const passwordInput = document.getElementById("passwordInput");
+
   const quizDiv = document.getElementById("quiz");
   const moneyList = document.getElementById("money-list");
   const timerBar = document.getElementById("timer-bar");
@@ -65,11 +68,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let ladderLevel = 0;
   let score = 0;
   let lifetime = 0;
-/* =================== STATS TRACKING =================== */
-let stats = {
-  categories: {}, // correct/total per category
-  difficulty: {}  // correct/total per difficulty
-};
+
+  /* =================== STATS TRACKING =================== */
+  let stats = {
+    categories: {},
+    difficulty: {}
+  };
 
   let fiftyUsed = false;
   let friendUsed = false;
@@ -90,86 +94,89 @@ let stats = {
 
   /* =================== AUTH =================== */
 
-// Google Login
-googleLoginBtn.onclick = async () => {
-  try {
-    const result = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-    user = result.user;
-    showSettings();
-  } catch (err) {
-    alert("Google login failed: " + err.message);
-  }
-};
-
-// Guest Login
-guestLoginBtn.onclick = async () => {
-  try {
-    const result = await auth.signInAnonymously();
-    user = result.user;
-    showSettings();
-  } catch (err) {
-    alert("Guest login failed: " + err.message);
-  }
-};
-
-// Show Email Login/Register form
-emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
-emailCancelBtn.onclick = () => emailDiv.style.display = "none";
-
-// Email Login
-emailLoginBtn.onclick = async () => {
-  try {
-    const result = await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
-    user = result.user;
-    showSettings();
-  } catch (err) {
-    alert("Email login failed: " + err.message);
-  }
-};
-
-// Email Register
-emailRegisterSubmitBtn.onclick = async () => {
-  try {
-    const result = await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
-    user = result.user;
-    showSettings();
-  } catch (err) {
-    alert("Email registration failed: " + err.message);
-  }
-};
-
-// Watch for auth state changes
-auth.onAuthStateChanged(async u => {
-  if (u) {
-    user = u;
-
-    // Load lifetime from Firestore
-    const docRef = db.collection("users").doc(user.uid);
-    const docSnap = await docRef.get();
-    if (docSnap.exists) {
-      lifetime = docSnap.data().lifetime || 0;
-    } else {
-      lifetime = 0;
-      await docRef.set({ lifetime: 0, name: user.displayName || "Guest", photo: user.photoURL || "" });
+  // Google Login
+  googleLoginBtn.onclick = async () => {
+    try {
+      const result = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      user = result.user;
+      showSettings();
+    } catch (err) {
+      alert("Google login failed: " + err.message);
     }
+  };
 
-    updateScoreRow();
+  // Guest Login
+  guestLoginBtn.onclick = async () => {
+    try {
+      const result = await auth.signInAnonymously();
+      user = result.user;
+      showSettings();
+    } catch (err) {
+      alert("Guest login failed: " + err.message);
+    }
+  };
 
-    // Show profile
-    document.getElementById("profileDiv").innerHTML = `
-      <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
-      <h3>${user.displayName || "Guest"}</h3>
-    `;
+  // Show Email Login/Register form
+  emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
+  emailCancelBtn.onclick = () => emailDiv.style.display = "none";
+
+  // Email Login
+  emailLoginBtn.onclick = async () => {
+    try {
+      const result = await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+      user = result.user;
+      showSettings();
+    } catch (err) {
+      alert("Email login failed: " + err.message);
+    }
+  };
+
+  // Email Register
+  emailRegisterSubmitBtn.onclick = async () => {
+    try {
+      const result = await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+      user = result.user;
+      showSettings();
+    } catch (err) {
+      alert("Email registration failed: " + err.message);
+    }
+  };
+
+  // Auth state changes
+  auth.onAuthStateChanged(async u => {
+    if (u) {
+      user = u;
+
+      const docRef = db.collection("users").doc(user.uid);
+      const docSnap = await docRef.get();
+      if (docSnap.exists) {
+        lifetime = docSnap.data().lifetime || 0;
+      } else {
+        lifetime = 0;
+        await docRef.set({
+          lifetime: 0,
+          name: user.displayName || "Guest",
+          photo: user.photoURL || ""
+        });
+      }
+
+      updateScoreRow();
+
+      document.getElementById("profileDiv").innerHTML = `
+        <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
+        <h3>${user.displayName || "Guest"}</h3>
+      `;
+
+      loadLeaderboard();
+    }
+  });
+
+  function showSettings() {
+    document.getElementById("authDiv").style.display = "none";
+    document.getElementById("emailDiv").style.display = "none";
+    document.getElementById("categoryDiv").style.display = "block";
+    playSound("intro");
   }
-});
-
-// Hide auth div and show settings
-function showSettings() {
-  document.getElementById("authDiv").style.display = "none";
-  document.getElementById("emailDiv").style.display = "none";
-  document.getElementById("categoryDiv").style.display = "block";
-  playSound("intro");
-}
 
   /* =================== START QUIZ =================== */
   startBtn.onclick = startQuiz;
@@ -195,8 +202,6 @@ function showSettings() {
     playSound("thinking");
     showQuestion();
     updateScoreRow();
-
-    loadLeaderboard(); // real-time listener
   }
 
   /* =================== QUESTION DISPLAY =================== */
@@ -235,56 +240,62 @@ function showSettings() {
   }
 
   /* =================== CHECK ANSWER =================== */
-function checkAnswer(ans) {
-  clearInterval(timer);
-  stopAllSounds();
-  const correct = questions[current].correctAnswer;
+  function checkAnswer(ans) {
+    clearInterval(timer);
+    stopAllSounds();
+    const correct = questions[current].correctAnswer;
 
-  // Disable all buttons and show correct/wrong states
-  document.querySelectorAll(".option-btn").forEach(b => {
-    b.disabled = true;
-    if (b.textContent === correct) b.classList.add("correct");
-    if (b.textContent === ans && ans !== correct) b.classList.add("wrong");
-  });
+    document.querySelectorAll(".option-btn").forEach(b => {
+      b.disabled = true;
+      if (b.textContent === correct) b.classList.add("correct");
+      if (b.textContent === ans && ans !== correct) b.classList.add("wrong");
+    });
 
-  // ---------- TRACK STATS ----------
-  trackStats(ans); // <-- Call the tracking function here
+    // Track stats
+    trackStats(ans);
 
-  // Update score and ladder
-  if (ans === correct) {
-    ladderLevel++;
-    score += 100;
-    playSound("correct");
-  } else {
-    playSound("wrong");
-    if (nightmareCheck.checked) {
-      setTimeout(() => showFinalScreen(), 1500);
+    if (ans === correct) {
+      ladderLevel++;
+      score += 100;
+      playSound("correct");
+    } else {
+      playSound("wrong");
+      if (nightmareCheck.checked) {
+        setTimeout(() => showFinalScreen(), 1500);
+        return;
+      }
+    }
+
+    updateMoneyLadder();
+    updateScoreRow();
+    setTimeout(nextQuestion, 2000);
+  }
+
+  function nextQuestion() {
+    current++;
+    if (current >= questions.length) {
+      showFinalScreen();
       return;
     }
+    playSound("thinking");
+    showQuestion();
   }
 
-  updateMoneyLadder();
-  updateScoreRow();
-  setTimeout(nextQuestion, 2000);
-}
+  function trackStats(ans) {
+    const q = questions[current];
+    const correct = q.correctAnswer;
 
-// ---------- TRACK STATS FUNCTION ----------
-function trackStats(ans) {
-  const q = questions[current];
-  const correct = q.correctAnswer;
+    if (!stats.categories[q.category]) stats.categories[q.category] = { correct: 0, total: 0 };
+    if (!stats.difficulty[q.difficulty]) stats.difficulty[q.difficulty] = { correct: 0, total: 0 };
 
-  if (!stats.categories[q.category]) stats.categories[q.category] = { correct: 0, total: 0 };
-  if (!stats.difficulty[q.difficulty]) stats.difficulty[q.difficulty] = { correct: 0, total: 0 };
+    stats.categories[q.category].total++;
+    stats.difficulty[q.difficulty].total++;
 
-  stats.categories[q.category].total++;
-  stats.difficulty[q.difficulty].total++;
-
-  if (ans === correct) {
-    stats.categories[q.category].correct++;
-    stats.difficulty[q.difficulty].correct++;
+    if (ans === correct) {
+      stats.categories[q.category].correct++;
+      stats.difficulty[q.difficulty].correct++;
+    }
   }
-}
-
 
   /* =================== MONEY LADDER =================== */
   function buildMoneyLadder(count) {
@@ -308,213 +319,186 @@ function trackStats(ans) {
   }
 
   /* =================== LIFELINES =================== */
-fiftyBtn.onclick = () => {
-  if (fiftyUsed) return; // prevent reuse
-  fiftyUsed = true;
-  fiftyBtn.classList.add("used");
+  fiftyBtn.onclick = () => {
+    if (fiftyUsed) return;
+    fiftyUsed = true;
+    fiftyBtn.classList.add("used");
 
-  const correct = questions[current].correctAnswer;
-  let removed = 0;
+    const correct = questions[current].correctAnswer;
+    let removed = 0;
 
-  document.querySelectorAll(".option-btn").forEach(btn => {
-    btn.style.transition = "opacity 0.5s";
+    document.querySelectorAll(".option-btn").forEach(btn => {
+      btn.style.transition = "opacity 0.5s";
+      if (btn.textContent !== correct && removed < 2) {
+        btn.style.opacity = 0.3;
+        btn.disabled = true;
+        removed++;
+      } else if (btn.textContent === correct) {
+        btn.classList.add("highlight");
+      }
+    });
 
-    if (btn.textContent !== correct && removed < 2) {
-      btn.style.opacity = 0.3;    // fade out
-      btn.disabled = true;        // disable wrong options
-      removed++;
-    } else if (btn.textContent === correct) {
-      btn.classList.add("highlight"); // add pulse effect
-    }
-  });
+    playSound("thinking");
+  };
 
-  playSound("thinking");
-};
+  callFriendBtn.onclick = () => {
+    if (friendUsed) return;
+    friendUsed = true;
+    callFriendBtn.classList.add("used");
 
-callFriendBtn.onclick = () => {
-  if (friendUsed) return;
-  friendUsed = true;
-  callFriendBtn.classList.add("used");
+    const correct = questions[current].correctAnswer;
+    const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
 
-  const correct = questions[current].correctAnswer;
-  const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
+    const isCorrect = Math.random() < 0.85;
+    const friendAnswer = isCorrect
+      ? correct
+      : options.filter(o => o !== correct)[Math.floor(Math.random() * (options.length - 1))];
 
-  // 85% chance friend is correct
-  const isCorrect = Math.random() < 0.85;
-  const friendAnswer = isCorrect
-    ? correct
-    : options.filter(o => o !== correct)[Math.floor(Math.random() * (options.length - 1))];
+    playSound("call");
+    callFriendBox.innerHTML = `📞 Friend says: <b>${friendAnswer}</b>`;
+    setTimeout(() => { callFriendBox.innerHTML = ""; stopAllSounds(); }, 5000);
+  };
 
-  playSound("call");
-  callFriendBox.innerHTML = `📞 Friend says: <b>${friendAnswer}</b>`;
-  setTimeout(() => { 
-    callFriendBox.innerHTML = ""; 
-    stopAllSounds(); 
-  }, 5000);
-};
+  audienceBtn.onclick = () => {
+    if (audienceUsed) return;
+    audienceUsed = true;
+    audienceBtn.classList.add("used");
 
-audienceBtn.onclick = () => {
-  if (audienceUsed) return;
-  audienceUsed = true;
-  audienceBtn.classList.add("used");
+    const correct = questions[current].correctAnswer;
+    const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
+    const votes = {};
 
-  const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
-  const correct = questions[current].correctAnswer;
-  const votes = {};
+    options.forEach(opt => {
+      votes[opt] = opt === correct ? Math.floor(Math.random() * 50 + 50) : Math.floor(Math.random() * 50);
+    });
 
-  // Generate votes: correct gets more
-  options.forEach(opt => {
-    votes[opt] = opt === correct ? Math.floor(Math.random() * 50 + 50) : Math.floor(Math.random() * 50);
-  });
+    audienceVote.innerHTML = "";
+    options.forEach(opt => {
+      audienceVote.innerHTML += `
+        <div class="vote-row">
+          <span>${opt}</span>
+          <div class="vote-bar" style="width:0%;"></div>
+          <span> ${votes[opt]}%</span>
+        </div>
+      `;
+    });
 
-  audienceVote.innerHTML = "";
-  options.forEach(opt => {
-    audienceVote.innerHTML += `
-      <div class="vote-row">
-        <span>${opt}</span>
-        <div class="vote-bar" style="width:0%;"></div>
-        <span> ${votes[opt]}%</span>
+    document.querySelectorAll(".vote-bar").forEach((bar, i) => {
+      bar.style.transition = "width 1s";
+      bar.style.width = votes[options[i]] + "%";
+    });
+
+    playSound("audience");
+    setTimeout(() => { audienceVote.innerHTML = ""; stopAllSounds(); }, 5000);
+  };
+
+  safeMoneyBtn.onclick = () => {
+    score = getLastMilestone();
+    updateScoreRow();
+    showFinalScreen();
+  };
+
+  function getLastMilestone() {
+    let amt = 0;
+    [...moneyList.children].forEach(li => {
+      const val = parseInt(li.textContent.replace("$", ""));
+      if (score >= val) amt = val;
+    });
+    return amt;
+  }
+
+  /* =================== SAVE SCORE =================== */
+  async function saveScore(currentScore) {
+    if (!user) return;
+
+    const userRef = db.collection("users").doc(user.uid);
+
+    await db.runTransaction(async transaction => {
+      const doc = await transaction.get(userRef);
+      if (!doc.exists) {
+        transaction.set(userRef, {
+          lifetime: currentScore,
+          name: user.displayName || "Guest",
+          photo: user.photoURL || ""
+        });
+      } else {
+        const previousLifetime = doc.data().lifetime || 0;
+        const newLifetime = previousLifetime + currentScore;
+        transaction.update(userRef, { lifetime: newLifetime });
+        lifetime = newLifetime;
+      }
+    });
+  }
+
+  /* =================== FINAL SCREEN =================== */
+  function showFinalScreen() {
+    stopAllSounds();
+    playSound("win");
+
+    updateScoreRow();
+    saveScore(score);
+
+    quizDiv.innerHTML = `
+      <div class="final-screen">
+        <h1>🎉 CONGRATULATIONS</h1>
+        <h2>You Won $${score}</h2>
+        <div id="statsDiv" class="stats-div"></div>
+        <button onclick="location.reload()">Restart Quiz</button>
       </div>
     `;
-  });
 
-  // Animate bars filling
-  document.querySelectorAll(".vote-bar").forEach((bar, i) => {
-    bar.style.transition = "width 1s";
-    bar.style.width = votes[options[i]] + "%";
-  });
+    displayStats();
+  }
 
-  playSound("audience");
+  /* =================== DISPLAY STATS =================== */
+  function displayStats() {
+    if (!questions || questions.length === 0) return;
 
-  setTimeout(() => {
-    audienceVote.innerHTML = "";
-    stopAllSounds();
-  }, 5000);
-};
+    const total = questions.length;
 
+    let correct = 0;
+    Object.values(stats.categories).forEach(c => correct += c.correct);
+    const incorrect = total - correct;
 
-/* =================== SAFE MONEY =================== */
-safeMoneyBtn.onclick = () => {
-  // Set score to last safe milestone
-  score = getLastMilestone();
-  updateScoreRow();
+    const statsDiv = document.getElementById("statsDiv");
+    const categoryCounts = stats.categories;
+    const difficultyCounts = stats.difficulty;
 
-  // End quiz and save score
-  showFinalScreen();
-};
+    statsDiv.innerHTML = `
+      <h3>Quiz Stats</h3>
+      <p>Correct: ${correct} / ${total}</p>
+      <p>Incorrect: ${incorrect} / ${total}</p>
+      <h4>By Category:</h4>
+      <ul>
+        ${Object.entries(categoryCounts).map(([cat, val]) => `<li>${cat}: ${val.correct} / ${val.total}</li>`).join('')}
+      </ul>
+      <h4>By Difficulty:</h4>
+      <ul>
+        ${Object.entries(difficultyCounts).map(([dif, val]) => `<li>${dif}: ${val.correct} / ${val.total}</li>`).join('')}
+      </ul>
+    `;
+  }
 
-// Compute last milestone (checkpoint) based on money ladder
-function getLastMilestone() {
-  let amt = 0;
-  [...moneyList.children].forEach(li => {
-    const val = parseInt(li.textContent.replace("$", ""));
-    if (score >= val) amt = val;
-  });
-  return amt;
-}
+  /* =================== LEADERBOARD =================== */
+  function loadLeaderboard() {
+    leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
 
-/* =================== FIREBASE SAVE SCORE =================== */
-async function saveScore(currentScore) {
-  if (!user) return;
+    db.collection("users")
+      .orderBy("lifetime", "desc")
+      .limit(10)
+      .onSnapshot(snapshot => {
+        leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const name = data.name || "Guest";
+          const photo = data.photo || "https://i.imgur.com/6VBx3io.png";
+          const lifetimeScore = data.lifetime || 0;
 
-  const userRef = db.collection("users").doc(user.uid);
-
-  await db.runTransaction(async (transaction) => {
-    const doc = await transaction.get(userRef);
-    if (!doc.exists) {
-      transaction.set(userRef, {
-        lifetime: currentScore,
-        name: user.displayName || "Guest",
-        photo: user.photoURL || ""
+          const li = document.createElement("li");
+          li.innerHTML = `<img src="${photo}" alt="${name}"><span>${name}: $${lifetimeScore}</span>`;
+          leaderboardList.appendChild(li);
+        });
       });
-    } else {
-      const previousLifetime = doc.data().lifetime || 0;
-      const newLifetime = previousLifetime + currentScore;
-      transaction.update(userRef, { lifetime: newLifetime });
-      lifetime = newLifetime; // update local variable
-    }
-  });
-}
+  }
 
-/* =================== FINAL SCREEN =================== */
-function showFinalScreen() {
-  stopAllSounds();
-  playSound("win");
-
-  // Add current quiz score to lifetime once
-  lifetime += score;
-  updateScoreRow();
-
-  // Save only the current quiz score to lifetime in Firebase
-  saveScore(score);
-
-  // Show main final screen
-  quizDiv.innerHTML = `
-    <div class="final-screen">
-      <h1>🎉 CONGRATULATIONS</h1>
-      <h2>You Won $${score}</h2>
-      <div id="statsDiv" class="stats-div"></div> <!-- Stats will appear here -->
-      <button onclick="location.reload()">Restart Quiz</button>
-    </div>
-  `;
-
-  // ---------- DISPLAY STATS ----------
-  displayStats();
-
-  // Load leaderboard as usual
-  loadLeaderboard();
-}
-
-/* =================== DISPLAY STATS =================== */
-function displayStats() {
-  if (!questions || questions.length === 0) return;
-
-  // Count correct/incorrect
-  const total = questions.length;
-  const correct = stats.correct;
-  const incorrect = stats.incorrect;
-
-  // Breakdown by category & difficulty
-  const categoryCounts = stats.categories; // {category: correctCount}
-  const difficultyCounts = stats.difficulties; // {difficulty: correctCount}
-
-  const statsDiv = document.getElementById("statsDiv");
-  statsDiv.innerHTML = `
-    <h3>Quiz Stats</h3>
-    <p>Correct: ${correct} / ${total}</p>
-    <p>Incorrect: ${incorrect} / ${total}</p>
-    <h4>By Category:</h4>
-    <ul>
-      ${Object.entries(categoryCounts).map(([cat, val]) => `<li>${cat}: ${val} correct</li>`).join('')}
-    </ul>
-    <h4>By Difficulty:</h4>
-    <ul>
-      ${Object.entries(difficultyCounts).map(([dif, val]) => `<li>${dif}: ${val} correct</li>`).join('')}
-    </ul>
-  `;
-}
-
-/* =================== FIREBASE SAVE SCORE =================== */
-async function saveScore(currentScore) {
-  if (!user) return;
-
-  const userRef = db.collection("users").doc(user.uid);
-
-  await db.runTransaction(async (transaction) => {
-    const doc = await transaction.get(userRef);
-    if (!doc.exists) {
-      transaction.set(userRef, {
-        lifetime: currentScore,
-        name: user.displayName || "Guest",
-        photo: user.photoURL || ""
-      });
-    } else {
-      const previousLifetime = doc.data().lifetime || 0;
-      const newLifetime = previousLifetime + currentScore;
-
-      transaction.update(userRef, { lifetime: newLifetime });
-      lifetime = newLifetime; // update local variable for UI
-    }
-  });
-}
-
+});
