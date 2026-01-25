@@ -59,6 +59,25 @@ const nightmare = document.getElementById("nightmare");
 const sound = document.getElementById("sound");
 
 
+/* ================= SOUNDS ================= */
+
+const sounds = {
+  correct: new Audio("correct.wav"),
+  wrong: new Audio("wrong.wav"),
+  win: new Audio("win.mp3"),
+  lose: new Audio("lose.mp3"),
+  tick: new Audio("tick.mp3")
+};
+
+let soundOn = true;
+
+function play(name){
+  if(!soundOn || !sounds[name]) return;
+  sounds[name].currentTime = 0;
+  sounds[name].play().catch(()=>{});
+}
+
+
 /* ================= STATE ================= */
 
 let user = null;
@@ -122,19 +141,23 @@ async function showProfile(){
   else if(user.email) name = user.email.split("@")[0];
   else name = "Guest" + user.uid.slice(0,4);
 
-  const snap = await db.collection("users").doc(user.uid).get();
+  const ref = db.collection("users").doc(user.uid);
+  const snap = await ref.get();
 
   let best = 0;
   let games = 0;
+  let total = 0;
 
   if(snap.exists){
     best = snap.data().best || 0;
     games = snap.data().games || 0;
+    total = snap.data().total || 0;
   }
 
   profile.innerHTML = `
     👤 <b>${name}</b><br>
     🏆 Best: $${best}<br>
+    💰 Total: $${total}<br>
     🎮 Games: ${games}
   `;
 }
@@ -143,6 +166,8 @@ async function showProfile(){
 /* ================= START ================= */
 
 start.onclick = async () => {
+
+  soundOn = sound.value === "on";
 
   timeLimit = nightmare.checked ? 20 : 30;
 
@@ -214,8 +239,11 @@ function startTimer(){
 
     updateTimer(t);
 
+    if(t<=5) play("tick");
+
     if(t<=0){
       clearInterval(timer);
+      play("lose");
       endGame();
     }
 
@@ -227,8 +255,7 @@ function updateTimer(t){
   timeTxt.textContent = t+"s";
   bar.style.width = (t/timeLimit*100)+"%";
 
-  if(t<6) bar.style.background="red";
-  else bar.style.background="#00ff00";
+  bar.style.background = t<6 ? "red" : "#00ff00";
 }
 
 
@@ -242,29 +269,46 @@ function checkAnswer(btn,ans){
 
   const all = document.querySelectorAll(".option-btn");
 
-  all.forEach(b=>{
-    b.disabled = true;
-    if(b.textContent===correct) b.classList.add("correct");
-  });
+  all.forEach(b=>b.disabled=true);
 
   if(ans===correct){
 
     btn.classList.add("correct");
     score += 100;
 
+    play("correct");
+
     setTimeout(next,1000);
 
   }else{
 
     btn.classList.add("wrong");
+    play("wrong");
 
     if(!usedSecond){
+
       usedSecond = true;
+      second.classList.add("used");
+
+      btn.disabled = true;
+
+      setTimeout(()=>{
+        btn.remove();
+        enableButtons();
+        startTimer();
+      },800);
+
       return;
     }
 
     endGame();
   }
+}
+
+function enableButtons(){
+  document.querySelectorAll(".option-btn").forEach(b=>{
+    b.disabled=false;
+  });
 }
 
 function next(){
@@ -325,7 +369,7 @@ call.onclick = ()=>{
   const chance = Math.random()<0.7 ? correct :
     questions[current].incorrectAnswers[Math.floor(Math.random()*3)];
 
-  callBox.innerHTML = `📞 Friend says: <b>${chance}</b>`;
+  callBox.innerHTML = `📞 Friend: <b>${chance}</b>`;
 };
 
 
@@ -342,9 +386,9 @@ audience.onclick = ()=>{
 
   document.querySelectorAll(".option-btn").forEach(b=>{
 
-    let p = b.textContent===correct ? 40+Math.random()*30 : Math.random()*30;
+    let p = b.textContent===correct ? 50+Math.random()*25 : Math.random()*25;
 
-    votes.push({a:b.textContent,p:Math.floor(p)});
+    votes.push({a:b.textContent,p});
 
   });
 
@@ -388,7 +432,7 @@ function buildLadder(){
 
   ladder.innerHTML="";
 
-  prizes.forEach((p,i)=>{
+  prizes.forEach(p=>{
 
     const li = document.createElement("li");
 
@@ -416,6 +460,8 @@ async function endGame(){
 
   clearInterval(timer);
 
+  play("win");
+
   await saveScore();
 
   quiz.innerHTML = `
@@ -429,6 +475,8 @@ async function endGame(){
   show(board);
 
   loadBoard();
+
+  showProfile();
 }
 
 
@@ -444,15 +492,18 @@ async function saveScore(){
 
   let best = 0;
   let games = 0;
+  let total = 0;
 
   if(snap.exists){
     best = snap.data().best || 0;
     games = snap.data().games || 0;
+    total = snap.data().total || 0;
   }
 
   await ref.set({
     name: user.displayName || user.email || "Guest",
     best: Math.max(best,score),
+    total: total + score,
     games: games+1,
     updated: firebase.firestore.FieldValue.serverTimestamp()
   });
