@@ -262,19 +262,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =================== LIFELINES =================== */
 fiftyBtn.onclick = () => {
-  if (fiftyUsed) return;
+  if (fiftyUsed) return; // prevent reuse
   fiftyUsed = true;
   fiftyBtn.classList.add("used");
 
   const correct = questions[current].correctAnswer;
   let removed = 0;
 
-  document.querySelectorAll(".option-btn").forEach(b => {
-    if (b.textContent !== correct && removed < 2) {
-      b.disabled = true; // prevent clicking
-      b.style.transition = "opacity 0.5s";
-      b.style.opacity = 0; // fade out
+  document.querySelectorAll(".option-btn").forEach(btn => {
+    btn.style.transition = "opacity 0.5s";
+
+    if (btn.textContent !== correct && removed < 2) {
+      btn.style.opacity = 0.3;    // fade out
+      btn.disabled = true;        // disable wrong options
       removed++;
+    } else if (btn.textContent === correct) {
+      btn.classList.add("highlight"); // add pulse effect
     }
   });
 
@@ -285,70 +288,63 @@ callFriendBtn.onclick = () => {
   if (friendUsed) return;
   friendUsed = true;
   callFriendBtn.classList.add("used");
-  playSound("call");
 
   const correct = questions[current].correctAnswer;
   const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
 
-  // Friend thinking animation
-  callFriendBox.innerHTML = "📞 Friend is thinking...";
+  // 85% chance friend is correct
+  const isCorrect = Math.random() < 0.85;
+  const friendAnswer = isCorrect
+    ? correct
+    : options.filter(o => o !== correct)[Math.floor(Math.random() * (options.length - 1))];
 
-  setTimeout(() => {
-    const chance = Math.random();
-    let friendAnswer = correct;
-
-    // 20% chance friend gives wrong answer
-    if (chance < 0.2) {
-      const wrongOptions = options.filter(o => o !== correct);
-      friendAnswer = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
-    }
-
-    callFriendBox.innerHTML = `📞 Friend says: <b>${friendAnswer}</b>`;
-    
-    setTimeout(() => {
-      callFriendBox.innerHTML = "";
-      stopAllSounds();
-    }, 5000);
-  }, 1500); // thinking delay
+  playSound("call");
+  callFriendBox.innerHTML = `📞 Friend says: <b>${friendAnswer}</b>`;
+  setTimeout(() => { 
+    callFriendBox.innerHTML = ""; 
+    stopAllSounds(); 
+  }, 5000);
 };
 
 audienceBtn.onclick = () => {
   if (audienceUsed) return;
   audienceUsed = true;
   audienceBtn.classList.add("used");
-  playSound("audience");
 
   const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
   const correct = questions[current].correctAnswer;
+  const votes = {};
 
-  let percentages = [];
-  let remaining = 100;
-
-  options.forEach((opt, i) => {
-    let pct;
-    if (i === options.length - 1) {
-      pct = remaining; // last option takes remaining
-    } else if (opt === correct) {
-      pct = Math.floor(Math.random() * 40 + 50); // 50–90% for correct
-      remaining -= pct;
-    } else {
-      pct = Math.floor(Math.random() * remaining / 2); // distribute remaining
-      remaining -= pct;
-    }
-    percentages.push(pct);
+  // Generate votes: correct gets more
+  options.forEach(opt => {
+    votes[opt] = opt === correct ? Math.floor(Math.random() * 50 + 50) : Math.floor(Math.random() * 50);
   });
 
   audienceVote.innerHTML = "";
-  options.forEach((opt, i) => {
-    const style = opt === correct ? "font-weight:bold; color:#00ff00;" : "";
-    audienceVote.innerHTML += `<div style="${style}">${opt}: ${percentages[i]}%</div>`;
+  options.forEach(opt => {
+    audienceVote.innerHTML += `
+      <div class="vote-row">
+        <span>${opt}</span>
+        <div class="vote-bar" style="width:0%;"></div>
+        <span> ${votes[opt]}%</span>
+      </div>
+    `;
   });
+
+  // Animate bars filling
+  document.querySelectorAll(".vote-bar").forEach((bar, i) => {
+    bar.style.transition = "width 1s";
+    bar.style.width = votes[options[i]] + "%";
+  });
+
+  playSound("audience");
 
   setTimeout(() => {
     audienceVote.innerHTML = "";
     stopAllSounds();
   }, 5000);
 };
+
 
 /* =================== SAFE MONEY =================== */
 safeMoneyBtn.onclick = () => {
