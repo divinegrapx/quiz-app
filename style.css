@@ -507,3 +507,59 @@ button.used {
     font-size: 0.9rem;
   }
 }
+/* ===============================
+   📱 MOBILE MONEY LADDER FIX
+================================ */
+
+@media (max-width: 768px) {
+
+  /* Money ladder container */
+  #money-list {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    padding: 6px 4px;
+    margin: 8px 0;
+
+    scrollbar-width: none; /* Firefox */
+  }
+
+  #money-list::-webkit-scrollbar {
+    display: none; /* Chrome */
+  }
+
+  /* Each step */
+  #money-list li {
+    min-width: 70px;
+    padding: 6px 8px;
+
+    font-size: 0.75rem;
+    text-align: center;
+
+    border-radius: 8px;
+    white-space: nowrap;
+
+    flex-shrink: 0;
+  }
+
+  /* Current level highlight */
+  #money-list li.current {
+    transform: scale(1.1);
+    font-weight: bold;
+    box-shadow: 0 0 8px rgba(0,255,255,0.7);
+  }
+}
+
+
+/* Extra small phones */
+@media (max-width: 400px) {
+
+  #money-list li {
+    min-width: 60px;
+    font-size: 0.7rem;
+  }
+}
