@@ -284,11 +284,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateMoneyLadder(correctAnswerGiven = false) {
-    [...moneyList.children].forEach(li => li.classList.remove("current","highlight"));
-    const idx = moneyList.children.length - 1 - ladderLevel;
-    const currentEl = moneyList.children[idx];
-    if (currentEl) { currentEl.classList.add("current"); if (correctAnswerGiven) currentEl.classList.add("highlight"); currentEl.scrollIntoView({ behavior:"smooth", block:window.innerWidth<=768?"nearest":"center" }); }
+  [...moneyList.children].forEach(li => li.classList.remove("current", "highlight"));
+
+  // Use ladderLevel as index from bottom
+  const idx = ladderLevel; 
+  const currentEl = moneyList.children[idx];
+
+  if (currentEl) {
+    currentEl.classList.add("current");
+    if (correctAnswerGiven) currentEl.classList.add("highlight");
+
+    // Scroll into view
+    const isMobile = window.innerWidth <= 768;
+    currentEl.scrollIntoView({
+      behavior: "smooth",
+      block: isMobile ? "nearest" : "center",
+      inline: isMobile ? "center" : "nearest"
+    });
   }
+}
+
 
   /* =================== LIFELINES =================== */
   fiftyBtn.addEventListener("click", () => {
