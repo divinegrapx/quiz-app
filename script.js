@@ -306,40 +306,38 @@ updateScoreRow();
 function buildMoneyLadder(count) {
   moneyList.innerHTML = "";
 
-  // Build ladder from $100 up to $count*100
-  for (let i = count; i >= 1; i--) {
+  // Start from $0 at bottom
+  for (let i = 0; i <= count; i++) {
     const li = document.createElement("li");
     li.className = "ladder-btn";
-    li.textContent = "$" + (i * 100);
-    li.style.background = "rgba(0,0,0,0.4)"; // default visible
-    li.style.color = "#fff";                 // default text color
+    li.textContent = "$" + (i * 100); // 0, 100, 200...
     moneyList.appendChild(li);
   }
 }
 
-function updateMoneyLadder() {
-  [...moneyList.children].forEach(li => li.classList.remove("current"));
+function updateMoneyLadder(correctAnswerGiven = false) {
+  [...moneyList.children].forEach(li => li.classList.remove("current", "highlight"));
 
-  // Skip highlighting if ladderLevel is 0
-  if (ladderLevel === 0) return;
-
-  const idx = moneyList.children.length - ladderLevel;
+  // Current index (count from bottom)
+  const idx = moneyList.children.length - 1 - ladderLevel;
   const currentEl = moneyList.children[idx];
 
   if (currentEl) {
     currentEl.classList.add("current");
 
-    // Scroll so player can always see the current step
+    // Highlight in yellow if correct answer
+    if (correctAnswerGiven) {
+      currentEl.classList.add("highlight");
+    }
+
+    // Scroll into view
+    const isMobile = window.innerWidth <= 768;
     currentEl.scrollIntoView({
       behavior: "smooth",
-      inline: "center",
-      block: "nearest"
+      block: isMobile ? "nearest" : "center",
+      inline: isMobile ? "center" : "nearest"
     });
   }
-}
-
-function updateScoreRow() {
-  scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
 }
 
 
