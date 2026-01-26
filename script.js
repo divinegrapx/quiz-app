@@ -303,18 +303,25 @@ updateScoreRow();
   }
 
   /* =================== MONEY LADDER =================== */
-  function buildMoneyLadder(count) {
-    moneyList.innerHTML = "";
-    for (let i = count; i >= 1; i--) {
-      const li = document.createElement("li");
-      li.className = "ladder-btn";
-      li.textContent = "$" + (i * 100);
-      moneyList.appendChild(li);
-    }
-  }
+function buildMoneyLadder(count) {
+  moneyList.innerHTML = "";
 
-  function updateMoneyLadder() {
+  // Build ladder from $100 up to $count*100
+  for (let i = count; i >= 1; i--) {
+    const li = document.createElement("li");
+    li.className = "ladder-btn";
+    li.textContent = "$" + (i * 100);
+    li.style.background = "rgba(0,0,0,0.4)"; // default visible
+    li.style.color = "#fff";                 // default text color
+    moneyList.appendChild(li);
+  }
+}
+
+function updateMoneyLadder() {
   [...moneyList.children].forEach(li => li.classList.remove("current"));
+
+  // Skip highlighting if ladderLevel is 0
+  if (ladderLevel === 0) return;
 
   const idx = moneyList.children.length - ladderLevel;
   const currentEl = moneyList.children[idx];
@@ -322,6 +329,7 @@ updateScoreRow();
   if (currentEl) {
     currentEl.classList.add("current");
 
+    // Scroll so player can always see the current step
     currentEl.scrollIntoView({
       behavior: "smooth",
       inline: "center",
@@ -333,6 +341,7 @@ updateScoreRow();
 function updateScoreRow() {
   scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
 }
+
 
 /* =================== LIFELINES =================== */
 
