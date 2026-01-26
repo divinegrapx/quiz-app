@@ -366,49 +366,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =================== FINAL SCREEN =================== */
   function showFinalScreen() {
-    stopAllSounds(); playSound("win"); updateScoreRow(); saveScore(score);
-    quizDiv.innerHTML=`
-      <div class="final-screen">
-        <h1>🎉 CONGRATULATIONS</h1>
-        <h2>You Won $${score}</h2>
-        <div id="statsDiv" class="stats-div"></div>
-        <!-- SHARE SECTION -->
-    <div id="shareDiv" class="share-div">
-      <h3>Share Your Score!</h3>
-      <button class="share-btn" id="shareFacebook">
-        <img src="images/facebook.png" alt="Facebook" width="32">
-      </button>
-      <button class="share-btn" id="shareTwitter">
-        <img src="images/X.png" alt="X (Twitter)" width="32">
-      </button>
-      <button class="share-btn" id="shareWhatsApp">
-        <img src="images/whatsapp.png" alt="WhatsApp" width="32">
-      </button>
-      <button class="share-btn" id="shareCopy">
-        <img src="images/copy.png" alt="Copy Link" width="32">
-      </button>
-    </div>
-        <button onclick="location.reload()">Restart Quiz</button>
+  stopAllSounds();
+  playSound("win");
+  updateScoreRow();
+  saveScore(score);
+
+  quizDiv.innerHTML=`
+    <div class="final-screen">
+      <h1>🎉 CONGRATULATIONS</h1>
+      <h2>You Won $${score}</h2>
+      <div id="statsDiv" class="stats-div"></div>
+      <!-- SHARE SECTION -->
+      <div id="shareDiv" class="share-div">
+        <h3>Share Your Score!</h3>
+        <button class="share-btn" id="shareFacebook">
+          <img src="images/facebook.png" alt="Facebook" width="32">
+        </button>
+        <button class="share-btn" id="shareTwitter">
+          <img src="images/X.png" alt="X (Twitter)" width="32">
+        </button>
+        <button class="share-btn" id="shareWhatsApp">
+          <img src="images/whatsapp.png" alt="WhatsApp" width="32">
+        </button>
+        <button class="share-btn" id="shareCopy">
+          <img src="images/copy.png" alt="Copy Link" width="32">
+        </button>
       </div>
-    `;
-    displayStats();
-  }
+      <button onclick="location.reload()">Restart Quiz</button>
+    </div>
+  `;
 
-  function displayStats() {
-    if(!questions || questions.length===0) return;
-    const total=questions.length;
-    let correct=0; Object.values(stats.categories).forEach(c=>correct+=c.correct);
-    const incorrect=total-correct;
-    const statsDiv=document.getElementById("statsDiv");
-    statsDiv.innerHTML=`
-      <h3>Quiz Stats</h3>
-      <p>Correct: ${correct} / ${total}</p>
-      <p>Incorrect: ${incorrect} / ${total}</p>
-      <h4>By Category:</h4>
-      <ul>${Object.entries(stats.categories).map(([cat,val])=>`<li>${cat}: ${val.correct} / ${val.total}</li>`).join('')}</ul>
-      <h4>By Difficulty:</h4>
-      <ul>${Object.entries(stats.difficulty).map(([dif,val])=>`<li>${dif}: ${val.correct} / ${val.total}</li>`).join('')}</ul>
-    `;
-  }
+  displayStats();
 
-});
+  // ==================== SHARE BUTTONS WITH SCORE ====================
+  const shareUrl = window.location.href;
+  const shareText = `I just won $${score} in Neon Quiz! Can you beat me? 🎮💰`;
+
+  document.getElementById("shareFacebook").addEventListener("click", () => {
+    // Facebook share only accepts URL, so append score in query param for tracking
+    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+    window.open(fbUrl, "_blank");
+  });
+
+  document.getElementById("shareTwitter").addEventListener("click", () => {
+    const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+    window.open(twitterUrl, "_blank");
+  });
+
+  document.getElementById("shareWhatsApp").addEventListener("click", () => {
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`;
+    window.open(waUrl, "_blank");
+  });
+
+  document.getElementById("shareCopy").addEventListener("click", () => {
+    navigator.clipboard.writeText(`${shareText} ${shareUrl}`).then(() => {
+      alert("Link copied to clipboard!");
+    }).catch(err => console.error("Copy failed", err));
+  });
+}
