@@ -69,21 +69,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let score = 0;
   let lifetime = 0;
 
-  /* =================== STATS TRACKING =================== */
-  let stats = {
-    categories: {},
-    difficulty: {}
-  };
-
-  let fiftyUsed = false;
-  let friendUsed = false;
-  let audienceUsed = false;
+  /* =================== STATS =================== */
+  let stats = { categories: {}, difficulty: {} };
+  let fiftyUsed = false, friendUsed = false, audienceUsed = false;
 
   function stopAllSounds() {
-    Object.values(sounds).forEach(s => {
-      s.pause();
-      s.currentTime = 0;
-    });
+    Object.values(sounds).forEach(s => { s.pause(); s.currentTime = 0; });
   }
 
   function playSound(name) {
@@ -93,81 +84,77 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =================== AUTH =================== */
+  console.log("Initializing login buttons...");
 
   // Google Login
-  googleLoginBtn.onclick = async () => {
+  googleLoginBtn.addEventListener("click", async () => {
     try {
-      const result = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const result = await auth.signInWithPopup(provider);
       user = result.user;
       showSettings();
     } catch (err) {
       alert("Google login failed: " + err.message);
+      console.error(err);
     }
-  };
+  });
 
   // Guest Login
-  guestLoginBtn.onclick = async () => {
+  guestLoginBtn.addEventListener("click", async () => {
     try {
       const result = await auth.signInAnonymously();
       user = result.user;
       showSettings();
     } catch (err) {
       alert("Guest login failed: " + err.message);
+      console.error(err);
     }
-  };
+  });
 
-  // Show Email Login/Register form
-  emailRegisterBtn.onclick = () => emailDiv.style.display = "block";
-  emailCancelBtn.onclick = () => emailDiv.style.display = "none";
+  // Email Login/Register
+  emailRegisterBtn.addEventListener("click", () => emailDiv.style.display = "block");
+  emailCancelBtn.addEventListener("click", () => emailDiv.style.display = "none");
 
-  // Email Login
-  emailLoginBtn.onclick = async () => {
+  emailLoginBtn.addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    if (!email || !password) return alert("Please enter both email and password.");
     try {
-      const result = await auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value);
+      const result = await auth.signInWithEmailAndPassword(email, password);
       user = result.user;
       showSettings();
-    } catch (err) {
-      alert("Email login failed: " + err.message);
-    }
-  };
+    } catch (err) { alert("Email login failed: " + err.message); console.error(err); }
+  });
 
-  // Email Register
-  emailRegisterSubmitBtn.onclick = async () => {
+  emailRegisterSubmitBtn.addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    if (!email || !password) return alert("Please enter both email and password.");
     try {
-      const result = await auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
+      const result = await auth.createUserWithEmailAndPassword(email, password);
       user = result.user;
       showSettings();
-    } catch (err) {
-      alert("Email registration failed: " + err.message);
-    }
-  };
+    } catch (err) { alert("Email registration failed: " + err.message); console.error(err); }
+  });
 
-  // Auth state changes
   auth.onAuthStateChanged(async u => {
     if (u) {
       user = u;
-
       const docRef = db.collection("users").doc(user.uid);
       const docSnap = await docRef.get();
-      if (docSnap.exists) {
-        lifetime = docSnap.data().lifetime || 0;
-      } else {
+      if (!docSnap.exists) {
+        await docRef.set({ lifetime: 0, name: user.displayName || "Guest", photo: user.photoURL || "" });
         lifetime = 0;
-        await docRef.set({
-          lifetime: 0,
-          name: user.displayName || "Guest",
-          photo: user.photoURL || ""
-        });
+      } else {
+        lifetime = docSnap.data().lifetime || 0;
       }
-
-      updateScoreRow();
-
       document.getElementById("profileDiv").innerHTML = `
         <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
         <h3>${user.displayName || "Guest"}</h3>
       `;
-
       loadLeaderboard();
+    } else {
+      document.getElementById("profileDiv").innerHTML = "";
     }
   });
 
@@ -178,48 +165,39 @@ document.addEventListener("DOMContentLoaded", () => {
     playSound("intro");
   }
 
-  startBtn.onclick = startQuiz;
+  /* =================== START QUIZ =================== */
+  startBtn.addEventListener("click", startQuiz);
 
-async function startQuiz() {
-  const category = categorySelect.value;
-  const difficulty = difficultySelect.value;
-  soundEnabled = soundToggle.value === "on";
+  async function startQuiz() {
+    const category = categorySelect.value;
+    const difficulty = difficultySelect.value;
+    soundEnabled = soundToggle.value === "on";
+    quizDiv.innerHTML = "<p>Loading questions...</p>";
 
-  // Show loading
-  quizDiv.innerHTML = "<p>Loading questions...</p>";
+    try {
+      const res = await fetch(`https://the-trivia-api.com/api/questions?limit=20&categories=${category}&difficulty=${difficulty}`);
+      if (!res.ok) throw new Error("Failed to fetch questions");
+      const data = await res.json();
+      if (!data || data.length === 0) throw new Error("No questions returned");
+      questions = data;
+    } catch (err) {
+      quizDiv.innerHTML = "<p>Error loading questions. Please refresh and try again.</p>";
+      console.error(err);
+      return;
+    }
 
-  let questionsData;
-  try {
-    const res = await fetch(`https://the-trivia-api.com/api/questions?limit=20&categories=${category}&difficulty=${difficulty}`);
-    if (!res.ok) throw new Error("Failed to fetch questions");
-    questionsData = await res.json();
-    if (!questionsData || questionsData.length === 0) throw new Error("No questions returned");
-  } catch (err) {
-    alert("Error loading questions: " + err.message);
-    return;
+    document.getElementById("categoryDiv").style.display = "none";
+    document.getElementById("quiz-container").style.display = "block";
+
+    buildMoneyLadder(20);
+    current = ladderLevel = score = 0;
+    fiftyUsed = friendUsed = audienceUsed = false;
+
+    playSound("thinking");
+    showQuestion();
+    updateScoreRow();
+    loadLeaderboard();
   }
-
-  questions = questionsData;
-
-  // Show quiz container
-  document.getElementById("categoryDiv").style.display = "none";
-  document.getElementById("quiz-container").style.display = "block";
-
-  // Reset variables
-  buildMoneyLadder(20);
-  current = 0;
-  ladderLevel = 0;
-  score = 0;
-  fiftyUsed = friendUsed = audienceUsed = false;
-
-  playSound("thinking");
-  showQuestion();
-  updateScoreRow();
-
-  // Load leaderboard after quiz starts
-  loadLeaderboard();
-}
-
 
   /* =================== QUESTION DISPLAY =================== */
   function showQuestion() {
@@ -229,13 +207,12 @@ async function startQuiz() {
 
     const q = questions[current];
     quizDiv.innerHTML = `<h2>Q${current + 1}: ${q.question}</h2>`;
-
     const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
     answers.forEach(a => {
       const btn = document.createElement("button");
       btn.className = "option-btn";
       btn.textContent = a;
-      btn.onclick = () => checkAnswer(a);
+      btn.addEventListener("click", () => checkAnswer(a));
       quizDiv.appendChild(btn);
     });
 
@@ -268,20 +245,10 @@ async function startQuiz() {
       if (b.textContent === ans && ans !== correct) b.classList.add("wrong");
     });
 
-    // Track stats
     trackStats(ans);
 
-    if (ans === correct) {
-      ladderLevel++;
-      score += 100;
-      playSound("correct");
-    } else {
-      playSound("wrong");
-      if (nightmareCheck.checked) {
-        setTimeout(() => showFinalScreen(), 1500);
-        return;
-      }
-    }
+    if (ans === correct) { ladderLevel++; score += 100; playSound("correct"); }
+    else { playSound("wrong"); if (nightmareCheck.checked) { setTimeout(showFinalScreen, 1500); return; } }
 
     updateMoneyLadder();
     updateScoreRow();
@@ -290,10 +257,7 @@ async function startQuiz() {
 
   function nextQuestion() {
     current++;
-    if (current >= questions.length) {
-      showFinalScreen();
-      return;
-    }
+    if (current >= questions.length) { showFinalScreen(); return; }
     playSound("thinking");
     showQuestion();
   }
@@ -301,181 +265,94 @@ async function startQuiz() {
   function trackStats(ans) {
     const q = questions[current];
     const correct = q.correctAnswer;
-
     if (!stats.categories[q.category]) stats.categories[q.category] = { correct: 0, total: 0 };
     if (!stats.difficulty[q.difficulty]) stats.difficulty[q.difficulty] = { correct: 0, total: 0 };
-
     stats.categories[q.category].total++;
     stats.difficulty[q.difficulty].total++;
-
-    if (ans === correct) {
-      stats.categories[q.category].correct++;
-      stats.difficulty[q.difficulty].correct++;
-    }
+    if (ans === correct) { stats.categories[q.category].correct++; stats.difficulty[q.difficulty].correct++; }
   }
 
   /* =================== MONEY LADDER =================== */
-function buildMoneyLadder(count) {
-  moneyList.innerHTML = "";
-
-  // Start from $0 at bottom
-  for (let i = 0; i <= count; i++) {
-    const li = document.createElement("li");
-    li.className = "ladder-btn";
-    li.textContent = "$" + (i * 100); // 0, 100, 200...
-    moneyList.appendChild(li);
-  }
-}
-
-function updateMoneyLadder(correctAnswerGiven = false) {
-  [...moneyList.children].forEach(li => li.classList.remove("current", "highlight"));
-
-  // Current index (count from bottom)
-  const idx = moneyList.children.length - 1 - ladderLevel;
-  const currentEl = moneyList.children[idx];
-
-  if (currentEl) {
-    currentEl.classList.add("current");
-
-    // Highlight in yellow if correct answer
-    if (correctAnswerGiven) {
-      currentEl.classList.add("highlight");
+  function buildMoneyLadder(count) {
+    moneyList.innerHTML = "";
+    for (let i = 0; i <= count; i++) {
+      const li = document.createElement("li");
+      li.className = "ladder-btn";
+      li.textContent = "$" + (i * 100);
+      moneyList.appendChild(li);
     }
-
-    // Scroll into view
-    const isMobile = window.innerWidth <= 768;
-    currentEl.scrollIntoView({
-      behavior: "smooth",
-      block: isMobile ? "nearest" : "center",
-      inline: isMobile ? "center" : "nearest"
-    });
   }
-}
 
-
-/* =================== LIFELINES =================== */
+  function updateMoneyLadder(correctAnswerGiven = false) {
+    [...moneyList.children].forEach(li => li.classList.remove("current","highlight"));
+    const idx = moneyList.children.length - 1 - ladderLevel;
+    const currentEl = moneyList.children[idx];
+    if (currentEl) { currentEl.classList.add("current"); if (correctAnswerGiven) currentEl.classList.add("highlight"); currentEl.scrollIntoView({ behavior:"smooth", block:window.innerWidth<=768?"nearest":"center" }); }
+  }
 
   /* =================== LIFELINES =================== */
-  fiftyBtn.onclick = () => {
-    if (fiftyUsed) return;
-    fiftyUsed = true;
-    fiftyBtn.classList.add("used");
-
-    const correct = questions[current].correctAnswer;
-    let removed = 0;
-
+  fiftyBtn.addEventListener("click", () => {
+    if (fiftyUsed) return; fiftyUsed=true; fiftyBtn.classList.add("used");
+    const correct = questions[current].correctAnswer; let removed=0;
     document.querySelectorAll(".option-btn").forEach(btn => {
-      btn.style.transition = "opacity 0.5s";
-      if (btn.textContent !== correct && removed < 2) {
-        btn.style.opacity = 0.3;
-        btn.disabled = true;
-        removed++;
-      } else if (btn.textContent === correct) {
-        btn.classList.add("highlight");
-      }
+      btn.style.transition="opacity 0.5s";
+      if(btn.textContent!==correct && removed<2){ btn.style.opacity=0.3; btn.disabled=true; removed++; } 
+      else if(btn.textContent===correct) btn.classList.add("highlight");
     });
-
     playSound("thinking");
-  };
+  });
 
-  callFriendBtn.onclick = () => {
-    if (friendUsed) return;
-    friendUsed = true;
-    callFriendBtn.classList.add("used");
-
+  callFriendBtn.addEventListener("click", () => {
+    if(friendUsed) return; friendUsed=true; callFriendBtn.classList.add("used");
     const correct = questions[current].correctAnswer;
-    const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
-
-    const isCorrect = Math.random() < 0.85;
-    const friendAnswer = isCorrect
-      ? correct
-      : options.filter(o => o !== correct)[Math.floor(Math.random() * (options.length - 1))];
-
+    const options = [...document.querySelectorAll(".option-btn")].map(b=>b.textContent);
+    const friendAnswer = Math.random()<0.85? correct : options.filter(o=>o!==correct)[Math.floor(Math.random()*(options.length-1))];
     playSound("call");
     callFriendBox.innerHTML = `📞 Friend says: <b>${friendAnswer}</b>`;
-    setTimeout(() => { callFriendBox.innerHTML = ""; stopAllSounds(); }, 5000);
-  };
+    setTimeout(()=>{callFriendBox.innerHTML=""; stopAllSounds();},5000);
+  });
 
-  audienceBtn.onclick = () => {
-    if (audienceUsed) return;
-    audienceUsed = true;
-    audienceBtn.classList.add("used");
-
+  audienceBtn.addEventListener("click", () => {
+    if(audienceUsed) return; audienceUsed=true; audienceBtn.classList.add("used");
     const correct = questions[current].correctAnswer;
-    const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
-    const votes = {};
-
-    options.forEach(opt => {
-      votes[opt] = opt === correct ? Math.floor(Math.random() * 50 + 50) : Math.floor(Math.random() * 50);
-    });
-
-    audienceVote.innerHTML = "";
-    options.forEach(opt => {
-      audienceVote.innerHTML += `
-        <div class="vote-row">
-          <span>${opt}</span>
-          <div class="vote-bar" style="width:0%;"></div>
-          <span> ${votes[opt]}%</span>
-        </div>
-      `;
-    });
-
-    document.querySelectorAll(".vote-bar").forEach((bar, i) => {
-      bar.style.transition = "width 1s";
-      bar.style.width = votes[options[i]] + "%";
-    });
-
+    const options = [...document.querySelectorAll(".option-btn")].map(b=>b.textContent);
+    const votes={}; options.forEach(opt=>votes[opt]=opt===correct?Math.floor(Math.random()*50+50):Math.floor(Math.random()*50));
+    audienceVote.innerHTML="";
+    options.forEach(opt=>audienceVote.innerHTML+=`<div class="vote-row"><span>${opt}</span><div class="vote-bar" style="width:0%;"></div><span> ${votes[opt]}%</span></div>`);
+    document.querySelectorAll(".vote-bar").forEach((bar,i)=>{bar.style.transition="width 1s"; bar.style.width=votes[options[i]]+"%";});
     playSound("audience");
-    setTimeout(() => { audienceVote.innerHTML = ""; stopAllSounds(); }, 5000);
-  };
+    setTimeout(()=>{audienceVote.innerHTML=""; stopAllSounds();},5000);
+  });
 
-  safeMoneyBtn.onclick = () => {
-    score = getLastMilestone();
-    updateScoreRow();
-    showFinalScreen();
-  };
+  safeMoneyBtn.addEventListener("click", () => { score=getLastMilestone(); updateScoreRow(); showFinalScreen(); });
 
-  function getLastMilestone() {
-    let amt = 0;
-    [...moneyList.children].forEach(li => {
-      const val = parseInt(li.textContent.replace("$", ""));
-      if (score >= val) amt = val;
-    });
-    return amt;
-  }
+  function getLastMilestone() { let amt=0; [...moneyList.children].forEach(li=>{ const val=parseInt(li.textContent.replace("$","")); if(score>=val) amt=val; }); return amt; }
 
-  /* =================== SAVE SCORE =================== */
+  /* =================== SCORE & LEADERBOARD =================== */
   async function saveScore(currentScore) {
-    if (!user) return;
-
+    if(!user) return;
     const userRef = db.collection("users").doc(user.uid);
-
-    await db.runTransaction(async transaction => {
-      const doc = await transaction.get(userRef);
-      if (!doc.exists) {
-        transaction.set(userRef, {
-          lifetime: currentScore,
-          name: user.displayName || "Guest",
-          photo: user.photoURL || ""
-        });
-      } else {
-        const previousLifetime = doc.data().lifetime || 0;
-        const newLifetime = previousLifetime + currentScore;
-        transaction.update(userRef, { lifetime: newLifetime });
-        lifetime = newLifetime;
-      }
+    await db.runTransaction(async t=> {
+      const doc = await t.get(userRef);
+      if(!doc.exists) t.set(userRef,{ lifetime: currentScore, name: user.displayName||"Guest", photo: user.photoURL||"" });
+      else { const newLifetime=(doc.data().lifetime||0)+currentScore; t.update(userRef,{lifetime:newLifetime}); lifetime=newLifetime; }
     });
   }
+
+  async function loadLeaderboard() {
+    try {
+      const snapshot = await db.collection("users").orderBy("lifetime","desc").limit(10).get();
+      leaderboardList.innerHTML="";
+      snapshot.forEach(doc=>{ const u=doc.data(); const li=document.createElement("li"); li.textContent=`${u.name||"Guest"} - $${u.lifetime||0}`; leaderboardList.appendChild(li); });
+    } catch(err){ console.error(err); leaderboardList.innerHTML="<li>Unable to load leaderboard</li>"; }
+  }
+
+  function updateScoreRow() { scoreRow.textContent=`Score: $${score} | Total: $${lifetime}`; }
 
   /* =================== FINAL SCREEN =================== */
   function showFinalScreen() {
-    stopAllSounds();
-    playSound("win");
-
-    updateScoreRow();
-    saveScore(score);
-
-    quizDiv.innerHTML = `
+    stopAllSounds(); playSound("win"); updateScoreRow(); saveScore(score);
+    quizDiv.innerHTML=`
       <div class="final-screen">
         <h1>🎉 CONGRATULATIONS</h1>
         <h2>You Won $${score}</h2>
@@ -483,55 +360,24 @@ function updateMoneyLadder(correctAnswerGiven = false) {
         <button onclick="location.reload()">Restart Quiz</button>
       </div>
     `;
-
     displayStats();
   }
 
-  /* =================== DISPLAY STATS =================== */
   function displayStats() {
-    if (!questions || questions.length === 0) return;
-
-    const total = questions.length;
-
-    let correct = 0;
-    Object.values(stats.categories).forEach(c => correct += c.correct);
-    const incorrect = total - correct;
-
-    const statsDiv = document.getElementById("statsDiv");
-    const categoryCounts = stats.categories;
-    const difficultyCounts = stats.difficulty;
-
-    statsDiv.innerHTML = `
+    if(!questions || questions.length===0) return;
+    const total=questions.length;
+    let correct=0; Object.values(stats.categories).forEach(c=>correct+=c.correct);
+    const incorrect=total-correct;
+    const statsDiv=document.getElementById("statsDiv");
+    statsDiv.innerHTML=`
       <h3>Quiz Stats</h3>
       <p>Correct: ${correct} / ${total}</p>
       <p>Incorrect: ${incorrect} / ${total}</p>
       <h4>By Category:</h4>
-      <ul>
-        ${Object.entries(categoryCounts).map(([cat, val]) => `<li>${cat}: ${val.correct} / ${val.total}</li>`).join('')}
-      </ul>
+      <ul>${Object.entries(stats.categories).map(([cat,val])=>`<li>${cat}: ${val.correct} / ${val.total}</li>`).join('')}</ul>
       <h4>By Difficulty:</h4>
-      <ul>
-        ${Object.entries(difficultyCounts).map(([dif, val]) => `<li>${dif}: ${val.correct} / ${val.total}</li>`).join('')}
-      </ul>
+      <ul>${Object.entries(stats.difficulty).map(([dif,val])=>`<li>${dif}: ${val.correct} / ${val.total}</li>`).join('')}</ul>
     `;
   }
 
-  /* =================== LOAD LEADERBOARD =================== */
-async function loadLeaderboard() {
-  if (!db) return;
-
-  try {
-    const snapshot = await db.collection("users").orderBy("lifetime", "desc").limit(10).get();
-    leaderboardList.innerHTML = "";
-
-    snapshot.forEach(doc => {
-      const userData = doc.data();
-      const li = document.createElement("li");
-      li.textContent = `${userData.name || "Guest"} - $${userData.lifetime || 0}`;
-      leaderboardList.appendChild(li);
-    });
-  } catch (err) {
-    console.error("Error loading leaderboard:", err);
-    leaderboardList.innerHTML = "<li>Unable to load leaderboard</li>";
-  }
-}
+});
