@@ -220,6 +220,7 @@ async function startQuiz() {
   loadLeaderboard();
 }
 
+
   /* =================== QUESTION DISPLAY =================== */
   function showQuestion() {
     clearInterval(timer);
@@ -515,26 +516,22 @@ function updateMoneyLadder(correctAnswerGiven = false) {
     `;
   }
 
-  /* =================== LEADERBOARD =================== */
-  function loadLeaderboard() {
-    leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
+  /* =================== LOAD LEADERBOARD =================== */
+async function loadLeaderboard() {
+  if (!db) return;
 
-    db.collection("users")
-      .orderBy("lifetime", "desc")
-      .limit(10)
-      .onSnapshot(snapshot => {
-        leaderboardList.innerHTML = "<h3>Top 10 Players</h3>";
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const name = data.name || "Guest";
-          const photo = data.photo || "https://i.imgur.com/6VBx3io.png";
-          const lifetimeScore = data.lifetime || 0;
+  try {
+    const snapshot = await db.collection("users").orderBy("lifetime", "desc").limit(10).get();
+    leaderboardList.innerHTML = "";
 
-          const li = document.createElement("li");
-          li.innerHTML = `<img src="${photo}" alt="${name}"><span>${name}: $${lifetimeScore}</span>`;
-          leaderboardList.appendChild(li);
-        });
-      });
+    snapshot.forEach(doc => {
+      const userData = doc.data();
+      const li = document.createElement("li");
+      li.textContent = `${userData.name || "Guest"} - $${userData.lifetime || 0}`;
+      leaderboardList.appendChild(li);
+    });
+  } catch (err) {
+    console.error("Error loading leaderboard:", err);
+    leaderboardList.innerHTML = "<li>Unable to load leaderboard</li>";
   }
-
-});
+}
