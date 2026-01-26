@@ -193,9 +193,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("quiz-container").style.display = "block";
 
     buildMoneyLadder(20);
-    current = 0;
-    ladderLevel = 0;
-    score = 0;
+
+current = 0;
+ladderLevel = 0;
+score = 0;
+
+// Reset ladder display
+updateMoneyLadder();
+updateScoreRow();
 
     fiftyUsed = friendUsed = audienceUsed = false;
 
