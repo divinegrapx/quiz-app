@@ -178,36 +178,47 @@ document.addEventListener("DOMContentLoaded", () => {
     playSound("intro");
   }
 
-  /* =================== START QUIZ =================== */
   startBtn.onclick = startQuiz;
 
-  async function startQuiz() {
-    const category = categorySelect.value;
-    const difficulty = difficultySelect.value;
-    soundEnabled = soundToggle.value === "on";
+async function startQuiz() {
+  const category = categorySelect.value;
+  const difficulty = difficultySelect.value;
+  soundEnabled = soundToggle.value === "on";
 
+  // Show loading
+  quizDiv.innerHTML = "<p>Loading questions...</p>";
+
+  let questionsData;
+  try {
     const res = await fetch(`https://the-trivia-api.com/api/questions?limit=20&categories=${category}&difficulty=${difficulty}`);
-    questions = await res.json();
-
-    document.getElementById("categoryDiv").style.display = "none";
-    document.getElementById("quiz-container").style.display = "block";
-
-    buildMoneyLadder(20);
-
-current = 0;
-ladderLevel = 0;
-score = 0;
-
-// Reset ladder display
-updateMoneyLadder();
-updateScoreRow();
-
-    fiftyUsed = friendUsed = audienceUsed = false;
-
-    playSound("thinking");
-    showQuestion();
-    updateScoreRow();
+    if (!res.ok) throw new Error("Failed to fetch questions");
+    questionsData = await res.json();
+    if (!questionsData || questionsData.length === 0) throw new Error("No questions returned");
+  } catch (err) {
+    alert("Error loading questions: " + err.message);
+    return;
   }
+
+  questions = questionsData;
+
+  // Show quiz container
+  document.getElementById("categoryDiv").style.display = "none";
+  document.getElementById("quiz-container").style.display = "block";
+
+  // Reset variables
+  buildMoneyLadder(20);
+  current = 0;
+  ladderLevel = 0;
+  score = 0;
+  fiftyUsed = friendUsed = audienceUsed = false;
+
+  playSound("thinking");
+  showQuestion();
+  updateScoreRow();
+
+  // Load leaderboard after quiz starts
+  loadLeaderboard();
+}
 
   /* =================== QUESTION DISPLAY =================== */
   function showQuestion() {
