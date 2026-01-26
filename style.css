@@ -354,3 +354,156 @@ button.used {
 .ladder-btn {
   min-width: 100px;
 }
+/* ===============================
+   📱 MOBILE RESPONSIVE MODE
+================================ */
+
+@media (max-width: 768px) {
+
+  body {
+    overflow-x: hidden;
+    font-size: 15px;
+  }
+
+  .container {
+    width: 100%;
+    padding: 10px;
+  }
+
+  /* Title */
+  .title {
+    font-size: 1.8rem;
+    text-align: center;
+  }
+
+  /* Profile */
+  #profileDiv {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  #profileDiv img {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Buttons */
+  button {
+    min-height: 48px; /* Touch friendly */
+    font-size: 1rem;
+    border-radius: 12px;
+  }
+
+  /* Auth buttons */
+  #authDiv button,
+  #emailDiv button {
+    width: 100%;
+    margin: 6px 0;
+  }
+
+  /* Inputs */
+  input, select {
+    width: 100%;
+    font-size: 1rem;
+    padding: 10px;
+    margin: 6px 0;
+    border-radius: 10px;
+  }
+
+  /* Settings */
+  #categoryDiv {
+    padding: 10px;
+    text-align: center;
+  }
+
+  /* Quiz */
+  #quiz {
+    padding: 10px;
+  }
+
+  /* Question */
+  .question {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-bottom: 12px;
+  }
+
+  /* Answers */
+  .option-btn {
+    width: 100%;
+    margin: 8px 0;
+    font-size: 1rem;
+  }
+
+  /* Lifelines */
+  .lifelines {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .lifelines button {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+
+  /* Timer */
+  #timer-text {
+    font-size: 0.9rem;
+  }
+
+  #timer-bar {
+    height: 6px;
+  }
+
+  /* Money ladder */
+  #money-list {
+    max-height: 180px;
+    font-size: 0.85rem;
+    overflow-y: auto;
+  }
+
+  /* Audience */
+  #audienceVote {
+    font-size: 0.85rem;
+  }
+
+  /* Final screen */
+  .final-screen {
+    padding: 20px 10px;
+    text-align: center;
+  }
+
+  .final-screen h1 {
+    font-size: 1.6rem;
+  }
+
+  .final-screen h2 {
+    font-size: 1.2rem;
+  }
+
+  /* Leaderboard */
+  #leaderboard-list {
+    font-size: 0.85rem;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 400px) {
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .question {
+    font-size: 1rem;
+  }
+
+  button {
+    font-size: 0.9rem;
+  }
+}
