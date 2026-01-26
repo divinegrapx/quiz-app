@@ -356,66 +356,82 @@ button.used {
 }
 
 /* ===============================
-   📱 MOBILE MONEY LADDER FIX
+   📱 MOBILE FRIENDLY MONEY LADDER
 ================================ */
 
-@media (max-width: 768px) {
+/* Base ladder for desktop */
+#money-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 500px;
+  overflow-y: auto;
+}
 
+#money-list li {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  text-align: center;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+/* Highlight current prize */
+#money-list li.current {
+  background: linear-gradient(135deg, #00ffff, #0066ff);
+  color: #000; /* readable text */
+  font-weight: bold;
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.9);
+  border-color: gold;
+}
+
+/* ===== MOBILE LAYOUT ===== */
+@media (max-width: 768px) {
   #money-list {
-    display: flex;
     flex-direction: row;
     align-items: center;
-
-    gap: 8px;
-
-    width: 100%;
-    max-width: 100%;
-
     overflow-x: auto;
     overflow-y: hidden;
-
-    padding: 8px 6px;
-    margin: 10px 0;
-
-    scrollbar-width: none;
+    padding: 6px;
+    gap: 6px;
+    width: 100%;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
   }
 
   #money-list::-webkit-scrollbar {
-    display: none;
+    display: none; /* Chrome, Safari */
   }
 
   #money-list li {
-    min-width: 85px;
-    padding: 8px 10px;
-
-    font-size: 0.8rem;
-    text-align: center;
-
-    border-radius: 10px;
+    min-width: 70px;
+    padding: 6px 10px;
+    font-size: 0.75rem;
     white-space: nowrap;
-
     flex-shrink: 0;
+  }
 
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(0,255,255,0.3);
+  #money-list li.current {
+    transform: scale(1.2);
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 400px) {
+  #money-list li {
+    min-width: 60px;
+    font-size: 0.7rem;
+    padding: 5px 8px;
   }
 
   #money-list li.current {
     transform: scale(1.15);
-    font-weight: bold;
-
-    box-shadow: 0 0 12px rgba(0,255,255,0.9);
-    border-color: gold;
-  }
-}
-
-
-/* Extra small phones */
-@media (max-width: 400px) {
-
-  #money-list li {
-    min-width: 70px;
-    font-size: 0.7rem;
   }
 }
