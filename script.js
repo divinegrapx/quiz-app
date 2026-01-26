@@ -372,6 +372,22 @@ document.addEventListener("DOMContentLoaded", () => {
         <h1>🎉 CONGRATULATIONS</h1>
         <h2>You Won $${score}</h2>
         <div id="statsDiv" class="stats-div"></div>
+        <!-- SHARE SECTION -->
+    <div id="shareDiv" class="share-div">
+      <h3>Share Your Score!</h3>
+      <button class="share-btn" id="shareFacebook">
+        <img src="images/facebook.png" alt="Facebook" width="32">
+      </button>
+      <button class="share-btn" id="shareTwitter">
+        <img src="images/X.png" alt="X (Twitter)" width="32">
+      </button>
+      <button class="share-btn" id="shareWhatsApp">
+        <img src="images/whatsapp.png" alt="WhatsApp" width="32">
+      </button>
+      <button class="share-btn" id="shareCopy">
+        <img src="images/copy.png" alt="Copy Link" width="32">
+      </button>
+    </div>
         <button onclick="location.reload()">Restart Quiz</button>
       </div>
     `;
