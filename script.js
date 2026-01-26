@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     appId: "1:891061147021:web:7b3d80020f642da7b699c4"
   };
 
-  firebase.initializeApp(firebaseConfig);
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
@@ -69,19 +69,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let score = 0;
   let lifetime = 0;
 
-  /* =================== STATS =================== */
   let stats = { categories: {}, difficulty: {} };
   let fiftyUsed = false, friendUsed = false, audienceUsed = false;
 
-  function stopAllSounds() {
-    Object.values(sounds).forEach(s => { s.pause(); s.currentTime = 0; });
-  }
-
-  function playSound(name) {
-    if (!soundEnabled || !sounds[name]) return;
-    stopAllSounds();
-    sounds[name].play();
-  }
+  function stopAllSounds() { Object.values(sounds).forEach(s => { s.pause(); s.currentTime = 0; }); }
+  function playSound(name) { if (!soundEnabled || !sounds[name]) return; stopAllSounds(); sounds[name].play(); }
 
   /* =================== AUTH =================== */
   console.log("Initializing login buttons...");
@@ -93,10 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await auth.signInWithPopup(provider);
       user = result.user;
       showSettings();
-    } catch (err) {
-      alert("Google login failed: " + err.message);
-      console.error(err);
-    }
+    } catch (err) { alert("Google login failed: " + err.message); console.error(err); }
   });
 
   // Guest Login
@@ -105,36 +94,27 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await auth.signInAnonymously();
       user = result.user;
       showSettings();
-    } catch (err) {
-      alert("Guest login failed: " + err.message);
-      console.error(err);
-    }
+    } catch (err) { alert("Guest login failed: " + err.message); console.error(err); }
   });
 
-  // Email Login/Register
+  // Email Register/Login
   emailRegisterBtn.addEventListener("click", () => emailDiv.style.display = "block");
   emailCancelBtn.addEventListener("click", () => emailDiv.style.display = "none");
 
   emailLoginBtn.addEventListener("click", async () => {
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
-    if (!email || !password) return alert("Please enter both email and password.");
-    try {
-      const result = await auth.signInWithEmailAndPassword(email, password);
-      user = result.user;
-      showSettings();
-    } catch (err) { alert("Email login failed: " + err.message); console.error(err); }
+    if (!email || !password) return alert("Enter both email and password.");
+    try { const result = await auth.signInWithEmailAndPassword(email, password); user = result.user; showSettings(); } 
+    catch (err) { alert("Email login failed: " + err.message); console.error(err); }
   });
 
   emailRegisterSubmitBtn.addEventListener("click", async () => {
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
-    if (!email || !password) return alert("Please enter both email and password.");
-    try {
-      const result = await auth.createUserWithEmailAndPassword(email, password);
-      user = result.user;
-      showSettings();
-    } catch (err) { alert("Email registration failed: " + err.message); console.error(err); }
+    if (!email || !password) return alert("Enter both email and password.");
+    try { const result = await auth.createUserWithEmailAndPassword(email, password); user = result.user; showSettings(); } 
+    catch (err) { alert("Email registration failed: " + err.message); console.error(err); }
   });
 
   auth.onAuthStateChanged(async u => {
@@ -142,20 +122,14 @@ document.addEventListener("DOMContentLoaded", () => {
       user = u;
       const docRef = db.collection("users").doc(user.uid);
       const docSnap = await docRef.get();
-      if (!docSnap.exists) {
-        await docRef.set({ lifetime: 0, name: user.displayName || "Guest", photo: user.photoURL || "" });
-        lifetime = 0;
-      } else {
-        lifetime = docSnap.data().lifetime || 0;
-      }
+      if (!docSnap.exists) await docRef.set({ lifetime: 0, name: user.displayName || "Guest", photo: user.photoURL || "" });
+      lifetime = docSnap.exists ? docSnap.data().lifetime || 0 : 0;
       document.getElementById("profileDiv").innerHTML = `
         <img src="${user.photoURL || 'https://i.imgur.com/6VBx3io.png'}">
         <h3>${user.displayName || "Guest"}</h3>
       `;
       loadLeaderboard();
-    } else {
-      document.getElementById("profileDiv").innerHTML = "";
-    }
+    } else { document.getElementById("profileDiv").innerHTML = ""; }
   });
 
   function showSettings() {
@@ -167,44 +141,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =================== START QUIZ =================== */
   startBtn.addEventListener("click", startQuiz);
-
   async function startQuiz() {
     const category = categorySelect.value;
     const difficulty = difficultySelect.value;
     soundEnabled = soundToggle.value === "on";
     quizDiv.innerHTML = "<p>Loading questions...</p>";
-
     try {
       const res = await fetch(`https://the-trivia-api.com/api/questions?limit=20&categories=${category}&difficulty=${difficulty}`);
       if (!res.ok) throw new Error("Failed to fetch questions");
       const data = await res.json();
       if (!data || data.length === 0) throw new Error("No questions returned");
       questions = data;
-    } catch (err) {
-      quizDiv.innerHTML = "<p>Error loading questions. Please refresh and try again.</p>";
-      console.error(err);
-      return;
-    }
-
+    } catch (err) { quizDiv.innerHTML = "<p>Error loading questions.</p>"; console.error(err); return; }
     document.getElementById("categoryDiv").style.display = "none";
     document.getElementById("quiz-container").style.display = "block";
-
     buildMoneyLadder(20);
     current = ladderLevel = score = 0;
     fiftyUsed = friendUsed = audienceUsed = false;
-
     playSound("thinking");
     showQuestion();
     updateScoreRow();
     loadLeaderboard();
   }
 
-  /* =================== QUESTION DISPLAY =================== */
+  /* =================== QUESTIONS =================== */
   function showQuestion() {
     clearInterval(timer);
     callFriendBox.innerHTML = "";
     audienceVote.innerHTML = "";
-
     const q = questions[current];
     quizDiv.innerHTML = `<h2>Q${current + 1}: ${q.question}</h2>`;
     const answers = [...q.incorrectAnswers, q.correctAnswer].sort(() => Math.random() - 0.5);
@@ -215,99 +179,52 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.addEventListener("click", () => checkAnswer(a));
       quizDiv.appendChild(btn);
     });
-
     let timeLeft = 30;
     updateTimer(timeLeft);
-
-    timer = setInterval(() => {
-      timeLeft--;
-      updateTimer(timeLeft);
-      if (timeLeft <= 5) playSound("tick");
-      if (timeLeft <= 0) nextQuestion();
-    }, 1000);
+    timer = setInterval(() => { timeLeft--; updateTimer(timeLeft); if (timeLeft <= 5) playSound("tick"); if (timeLeft <= 0) nextQuestion(); }, 1000);
   }
 
-  function updateTimer(t) {
-    timerText.textContent = t + "s";
-    timerBar.style.width = (t / 30 * 100) + "%";
-    timerBar.style.background = t > 10 ? "#00ff00" : t > 5 ? "#ffcc00" : "#ff4d4d";
-  }
+  function updateTimer(t) { timerText.textContent = t + "s"; timerBar.style.width = (t / 30 * 100) + "%"; timerBar.style.background = t > 10 ? "#00ff00" : t > 5 ? "#ffcc00" : "#ff4d4d"; }
 
-  /* =================== CHECK ANSWER =================== */
   function checkAnswer(ans) {
-    clearInterval(timer);
-    stopAllSounds();
+    clearInterval(timer); stopAllSounds();
     const correct = questions[current].correctAnswer;
-
     document.querySelectorAll(".option-btn").forEach(b => {
       b.disabled = true;
       if (b.textContent === correct) b.classList.add("correct");
       if (b.textContent === ans && ans !== correct) b.classList.add("wrong");
     });
-
     trackStats(ans);
-
     if (ans === correct) { ladderLevel++; score += 100; playSound("correct"); }
     else { playSound("wrong"); if (nightmareCheck.checked) { setTimeout(showFinalScreen, 1500); return; } }
-
     updateMoneyLadder();
     updateScoreRow();
     setTimeout(nextQuestion, 2000);
   }
 
-  function nextQuestion() {
-    current++;
-    if (current >= questions.length) { showFinalScreen(); return; }
-    playSound("thinking");
-    showQuestion();
-  }
+  function nextQuestion() { current++; if (current >= questions.length) { showFinalScreen(); return; } playSound("thinking"); showQuestion(); }
 
   function trackStats(ans) {
     const q = questions[current];
     const correct = q.correctAnswer;
     if (!stats.categories[q.category]) stats.categories[q.category] = { correct: 0, total: 0 };
     if (!stats.difficulty[q.difficulty]) stats.difficulty[q.difficulty] = { correct: 0, total: 0 };
-    stats.categories[q.category].total++;
-    stats.difficulty[q.difficulty].total++;
+    stats.categories[q.category].total++; stats.difficulty[q.difficulty].total++;
     if (ans === correct) { stats.categories[q.category].correct++; stats.difficulty[q.difficulty].correct++; }
   }
 
   /* =================== MONEY LADDER =================== */
-  function buildMoneyLadder(count) {
-    moneyList.innerHTML = "";
-    for (let i = 0; i <= count; i++) {
-      const li = document.createElement("li");
-      li.className = "ladder-btn";
-      li.textContent = "$" + (i * 100);
-      moneyList.appendChild(li);
-    }
-  }
-
+  function buildMoneyLadder(count) { moneyList.innerHTML = ""; for (let i = 0; i <= count; i++) { const li = document.createElement("li"); li.className = "ladder-btn"; li.textContent = "$" + (i * 100); moneyList.appendChild(li); } }
   function updateMoneyLadder(correctAnswerGiven = false) {
-  [...moneyList.children].forEach(li => li.classList.remove("current", "highlight"));
-
-  // Use ladderLevel as index from bottom
-  const idx = ladderLevel; 
-  const currentEl = moneyList.children[idx];
-
-  if (currentEl) {
-    currentEl.classList.add("current");
-    if (correctAnswerGiven) currentEl.classList.add("highlight");
-
-    // Scroll into view
-    const isMobile = window.innerWidth <= 768;
-    currentEl.scrollIntoView({
-      behavior: "smooth",
-      block: isMobile ? "nearest" : "center",
-      inline: isMobile ? "center" : "nearest"
-    });
+    [...moneyList.children].forEach(li => li.classList.remove("current", "highlight"));
+    const idx = ladderLevel; 
+    const currentEl = moneyList.children[idx];
+    if (currentEl) { currentEl.classList.add("current"); if (correctAnswerGiven) currentEl.classList.add("highlight"); currentEl.scrollIntoView({behavior:"smooth", block:window.innerWidth<=768?"nearest":"center", inline:window.innerWidth<=768?"center":"nearest"}); }
   }
-}
-
 
   /* =================== LIFELINES =================== */
   fiftyBtn.addEventListener("click", () => {
-    if (fiftyUsed) return; fiftyUsed=true; fiftyBtn.classList.add("used");
+    if (fiftyUsed) return; fiftyUsed = true; fiftyBtn.classList.add("used");
     const correct = questions[current].correctAnswer; let removed=0;
     document.querySelectorAll(".option-btn").forEach(btn => {
       btn.style.transition="opacity 0.5s";
@@ -318,9 +235,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   callFriendBtn.addEventListener("click", () => {
-    if(friendUsed) return; friendUsed=true; callFriendBtn.classList.add("used");
+    if(friendUsed) return; friendUsed = true; callFriendBtn.classList.add("used");
     const correct = questions[current].correctAnswer;
-    const options = [...document.querySelectorAll(".option-btn")].map(b=>b.textContent);
+    const options = [...document.querySelectorAll(".option-btn")].map(b => b.textContent);
     const friendAnswer = Math.random()<0.85? correct : options.filter(o=>o!==correct)[Math.floor(Math.random()*(options.length-1))];
     playSound("call");
     callFriendBox.innerHTML = `📞 Friend says: <b>${friendAnswer}</b>`;
@@ -328,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   audienceBtn.addEventListener("click", () => {
-    if(audienceUsed) return; audienceUsed=true; audienceBtn.classList.add("used");
+    if(audienceUsed) return; audienceUsed = true; audienceBtn.classList.add("used");
     const correct = questions[current].correctAnswer;
     const options = [...document.querySelectorAll(".option-btn")].map(b=>b.textContent);
     const votes={}; options.forEach(opt=>votes[opt]=opt===correct?Math.floor(Math.random()*50+50):Math.floor(Math.random()*50));
@@ -339,15 +256,14 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(()=>{audienceVote.innerHTML=""; stopAllSounds();},5000);
   });
 
-  safeMoneyBtn.addEventListener("click", () => { score=getLastMilestone(); updateScoreRow(); showFinalScreen(); });
-
+  safeMoneyBtn.addEventListener("click", () => { score = getLastMilestone(); updateScoreRow(); showFinalScreen(); });
   function getLastMilestone() { let amt=0; [...moneyList.children].forEach(li=>{ const val=parseInt(li.textContent.replace("$","")); if(score>=val) amt=val; }); return amt; }
 
   /* =================== SCORE & LEADERBOARD =================== */
   async function saveScore(currentScore) {
     if(!user) return;
     const userRef = db.collection("users").doc(user.uid);
-    await db.runTransaction(async t=> {
+    await db.runTransaction(async t => {
       const doc = await t.get(userRef);
       if(!doc.exists) t.set(userRef,{ lifetime: currentScore, name: user.displayName||"Guest", photo: user.photoURL||"" });
       else { const newLifetime=(doc.data().lifetime||0)+currentScore; t.update(userRef,{lifetime:newLifetime}); lifetime=newLifetime; }
@@ -358,69 +274,60 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const snapshot = await db.collection("users").orderBy("lifetime","desc").limit(10).get();
       leaderboardList.innerHTML="";
-      snapshot.forEach(doc=>{ const u=doc.data(); const li=document.createElement("li"); li.textContent=`${u.name||"Guest"} - $${u.lifetime||0}`; leaderboardList.appendChild(li); });
-    } catch(err){ console.error(err); leaderboardList.innerHTML="<li>Unable to load leaderboard</li>"; }
+      snapshot.forEach(doc => { const u=doc.data(); const li=document.createElement("li"); li.textContent=`${u.name||"Guest"} - $${u.lifetime||0}`; leaderboardList.appendChild(li); });
+    } catch(err) { console.error(err); leaderboardList.innerHTML="<li>Unable to load leaderboard</li>"; }
   }
 
-  function updateScoreRow() { scoreRow.textContent=`Score: $${score} | Total: $${lifetime}`; }
+  function updateScoreRow() { scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`; }
 
-  /* =================== FINAL SCREEN =================== */
+  /* =================== FINAL SCREEN & SHARE =================== */
   function showFinalScreen() {
-  stopAllSounds();
-  playSound("win");
-  updateScoreRow();
-  saveScore(score);
-
-  quizDiv.innerHTML=`
-    <div class="final-screen">
-      <h1>🎉 CONGRATULATIONS</h1>
-      <h2>You Won $${score}</h2>
-      <div id="statsDiv" class="stats-div"></div>
-      <!-- SHARE SECTION -->
-      <div id="shareDiv" class="share-div">
-        <h3>Share Your Score!</h3>
-        <button class="share-btn" id="shareFacebook">
-          <img src="images/facebook.png" alt="Facebook" width="32">
-        </button>
-        <button class="share-btn" id="shareTwitter">
-          <img src="images/X.png" alt="X (Twitter)" width="32">
-        </button>
-        <button class="share-btn" id="shareWhatsApp">
-          <img src="images/whatsapp.png" alt="WhatsApp" width="32">
-        </button>
-        <button class="share-btn" id="shareCopy">
-          <img src="images/copy.png" alt="Copy Link" width="32">
-        </button>
+    stopAllSounds(); playSound("win"); updateScoreRow(); saveScore(score);
+    quizDiv.innerHTML = `
+      <div class="final-screen">
+        <h1>🎉 CONGRATULATIONS</h1>
+        <h2>You Won $${score}</h2>
+        <div id="statsDiv" class="stats-div"></div>
+        <div id="shareDiv" class="share-div">
+          <h3>Share Your Score!</h3>
+          <button class="share-btn" id="shareFacebook"><img src="images/facebook.png" alt="Facebook" width="32"></button>
+          <button class="share-btn" id="shareTwitter"><img src="images/X.png" alt="X (Twitter)" width="32"></button>
+          <button class="share-btn" id="shareWhatsApp"><img src="images/whatsapp.png" alt="WhatsApp" width="32"></button>
+          <button class="share-btn" id="shareCopy"><img src="images/copy.png" alt="Copy Link" width="32"></button>
+        </div>
+        <button onclick="location.reload()">Restart Quiz</button>
       </div>
-      <button onclick="location.reload()">Restart Quiz</button>
-    </div>
-  `;
+    `;
+    displayStats();
 
-  displayStats();
+    const shareUrl = window.location.href;
+    const shareText = `I just won $${score} in Neon Quiz! Can you beat me? 🎮💰`;
 
-  // ==================== SHARE BUTTONS WITH SCORE ====================
-  const shareUrl = window.location.href;
-  const shareText = `I just won $${score} in Neon Quiz! Can you beat me? 🎮💰`;
+    document.getElementById("shareFacebook").addEventListener("click", () => {
+      const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+      window.open(fbUrl, "_blank");
+    });
 
-  document.getElementById("shareFacebook").addEventListener("click", () => {
-    // Facebook share only accepts URL, so append score in query param for tracking
-    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
-    window.open(fbUrl, "_blank");
-  });
+    document.getElementById("shareTwitter").addEventListener("click", () => {
+      const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+      window.open(twitterUrl, "_blank");
+    });
 
-  document.getElementById("shareTwitter").addEventListener("click", () => {
-    const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
-    window.open(twitterUrl, "_blank");
-  });
+    document.getElementById("shareWhatsApp").addEventListener("click", () => {
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`;
+      window.open(waUrl, "_blank");
+    });
 
-  document.getElementById("shareWhatsApp").addEventListener("click", () => {
-    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`;
-    window.open(waUrl, "_blank");
-  });
+    document.getElementById("shareCopy").addEventListener("click", () => {
+      navigator.clipboard.writeText(`${shareText} ${shareUrl}`).then(() => alert("Link copied to clipboard!")).catch(err => console.error(err));
+    });
+  }
 
-  document.getElementById("shareCopy").addEventListener("click", () => {
-    navigator.clipboard.writeText(`${shareText} ${shareUrl}`).then(() => {
-      alert("Link copied to clipboard!");
-    }).catch(err => console.error("Copy failed", err));
-  });
-}
+  function displayStats() {
+    const statsDiv = document.getElementById("statsDiv");
+    statsDiv.innerHTML = "<h4>Stats:</h4>";
+    for (const cat in stats.categories) statsDiv.innerHTML += `<p>${cat}: ${stats.categories[cat].correct}/${stats.categories[cat].total}</p>`;
+    for (const diff in stats.difficulty) statsDiv.innerHTML += `<p>${diff}: ${stats.difficulty[diff].correct}/${stats.difficulty[diff].total}</p>`;
+  }
+
+});
