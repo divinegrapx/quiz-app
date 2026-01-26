@@ -309,14 +309,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateMoneyLadder() {
-    [...moneyList.children].forEach(li => li.classList.remove("current"));
-    const idx = moneyList.children.length - ladderLevel;
-    if (moneyList.children[idx]) moneyList.children[idx].classList.add("current");
-  }
+  [...moneyList.children].forEach(li => li.classList.remove("current"));
 
-  function updateScoreRow() {
-    scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
+  const idx = moneyList.children.length - ladderLevel;
+  const currentEl = moneyList.children[idx];
+
+  if (currentEl) {
+    currentEl.classList.add("current");
+
+    currentEl.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest"
+    });
   }
+}
+
+function updateScoreRow() {
+  scoreRow.textContent = `Score: $${score} | Total: $${lifetime}`;
+}
+
+/* =================== LIFELINES =================== */
 
   /* =================== LIFELINES =================== */
   fiftyBtn.onclick = () => {
