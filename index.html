@@ -1,14 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>NEON MILLIONAIRE</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>NEON MILLIONAIRE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <!-- Facebook / Twitter social preview -->
+  <meta property="og:title" content="Neon Millionaire Quiz">
+  <meta property="og:description" content="Play the Neon Millionaire quiz! Answer questions, climb the money ladder, and beat your high score!">
+  <meta property="og:image" content="https://divinegrapx.github.io/quiz-app/images/quiz-preview.jpg">
+  <meta property="og:url" content="https://divinegrapx.github.io/quiz-app/">
+  <meta property="og:type" content="website">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Neon Millionaire Quiz">
+  <meta name="twitter:description" content="Play the Neon Millionaire quiz! Answer questions, climb the money ladder, and beat your high score!">
+  <meta name="twitter:image" content="https://divinegrapx.github.io/quiz-app/images/quiz-preview.jpg">
 </head>
 <body>
 
@@ -24,6 +39,7 @@
     <button id="guestLoginBtn">Play as Guest</button>
     <button id="emailRegisterBtn">Login / Register with Email</button>
   </div>
+
 
   <!-- EMAIL LOGIN -->
   <div id="emailDiv" style="display:none;">
