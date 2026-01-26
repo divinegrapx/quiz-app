@@ -354,203 +354,59 @@ button.used {
 .ladder-btn {
   min-width: 100px;
 }
-/* ===============================
-   📱 MOBILE RESPONSIVE MODE
-================================ */
 
-@media (max-width: 768px) {
-
-  body {
-    overflow-x: hidden;
-    font-size: 15px;
-  }
-
-  .container {
-    width: 100%;
-    padding: 10px;
-  }
-
-  /* Title */
-  .title {
-    font-size: 1.8rem;
-    text-align: center;
-  }
-
-  /* Profile */
-  #profileDiv {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-
-  #profileDiv img {
-    width: 40px;
-    height: 40px;
-  }
-
-  /* Buttons */
-  button {
-    min-height: 48px; /* Touch friendly */
-    font-size: 1rem;
-    border-radius: 12px;
-  }
-
-  /* Auth buttons */
-  #authDiv button,
-  #emailDiv button {
-    width: 100%;
-    margin: 6px 0;
-  }
-
-  /* Inputs */
-  input, select {
-    width: 100%;
-    font-size: 1rem;
-    padding: 10px;
-    margin: 6px 0;
-    border-radius: 10px;
-  }
-
-  /* Settings */
-  #categoryDiv {
-    padding: 10px;
-    text-align: center;
-  }
-
-  /* Quiz */
-  #quiz {
-    padding: 10px;
-  }
-
-  /* Question */
-  .question {
-    font-size: 1.1rem;
-    line-height: 1.4;
-    margin-bottom: 12px;
-  }
-
-  /* Answers */
-  .option-btn {
-    width: 100%;
-    margin: 8px 0;
-    font-size: 1rem;
-  }
-
-  /* Lifelines */
-  .lifelines {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-
-  .lifelines button {
-    font-size: 0.9rem;
-    padding: 8px;
-  }
-
-  /* Timer */
-  #timer-text {
-    font-size: 0.9rem;
-  }
-
-  #timer-bar {
-    height: 6px;
-  }
-
-  /* Money ladder */
-  #money-list {
-    max-height: 180px;
-    font-size: 0.85rem;
-    overflow-y: auto;
-  }
-
-  /* Audience */
-  #audienceVote {
-    font-size: 0.85rem;
-  }
-
-  /* Final screen */
-  .final-screen {
-    padding: 20px 10px;
-    text-align: center;
-  }
-
-  .final-screen h1 {
-    font-size: 1.6rem;
-  }
-
-  .final-screen h2 {
-    font-size: 1.2rem;
-  }
-
-  /* Leaderboard */
-  #leaderboard-list {
-    font-size: 0.85rem;
-  }
-}
-
-/* Extra small phones */
-@media (max-width: 400px) {
-
-  .title {
-    font-size: 1.5rem;
-  }
-
-  .question {
-    font-size: 1rem;
-  }
-
-  button {
-    font-size: 0.9rem;
-  }
-}
 /* ===============================
    📱 MOBILE MONEY LADDER FIX
 ================================ */
 
 @media (max-width: 768px) {
 
-  /* Money ladder container */
   #money-list {
     display: flex;
     flex-direction: row;
-    gap: 6px;
+    align-items: center;
+
+    gap: 8px;
+
+    width: 100%;
+    max-width: 100%;
 
     overflow-x: auto;
     overflow-y: hidden;
 
-    padding: 6px 4px;
-    margin: 8px 0;
+    padding: 8px 6px;
+    margin: 10px 0;
 
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   #money-list::-webkit-scrollbar {
-    display: none; /* Chrome */
+    display: none;
   }
 
-  /* Each step */
   #money-list li {
-    min-width: 70px;
-    padding: 6px 8px;
+    min-width: 85px;
+    padding: 8px 10px;
 
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     text-align: center;
 
-    border-radius: 8px;
+    border-radius: 10px;
     white-space: nowrap;
 
     flex-shrink: 0;
+
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(0,255,255,0.3);
   }
 
-  /* Current level highlight */
   #money-list li.current {
-    transform: scale(1.1);
+    transform: scale(1.15);
     font-weight: bold;
-    box-shadow: 0 0 8px rgba(0,255,255,0.7);
+
+    box-shadow: 0 0 12px rgba(0,255,255,0.9);
+    border-color: gold;
   }
 }
 
@@ -559,7 +415,7 @@ button.used {
 @media (max-width: 400px) {
 
   #money-list li {
-    min-width: 60px;
+    min-width: 70px;
     font-size: 0.7rem;
   }
 }
