@@ -356,7 +356,7 @@ button.used {
 }
 
 /* ===============================
-   📱 MOBILE FRIENDLY MONEY LADDER
+   📱 MONEY LADDER — DESKTOP & MOBILE
 ================================ */
 
 /* Base ladder for desktop */
@@ -382,14 +382,24 @@ button.used {
   transition: all 0.3s ease;
 }
 
-/* Highlight current prize */
+/* Highlight current step */
 #money-list li.current {
   background: linear-gradient(135deg, #00ffff, #0066ff);
-  color: #000; /* readable text */
+  color: #000;
   font-weight: bold;
   transform: scale(1.15);
   box-shadow: 0 0 12px rgba(0, 255, 255, 0.9);
   border-color: gold;
+}
+
+/* Highlight correct answer step in yellow */
+#money-list li.highlight {
+  background: gold !important;
+  color: black !important;
+  font-weight: bold;
+  box-shadow: 0 0 12px rgba(255, 255, 0, 0.9);
+  border-color: orange;
+  transform: scale(1.15);
 }
 
 /* ===== MOBILE LAYOUT ===== */
@@ -403,11 +413,11 @@ button.used {
     gap: 6px;
     width: 100%;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
   }
 
   #money-list::-webkit-scrollbar {
-    display: none; /* Chrome, Safari */
+    display: none;
   }
 
   #money-list li {
@@ -421,9 +431,13 @@ button.used {
   #money-list li.current {
     transform: scale(1.2);
   }
+
+  #money-list li.highlight {
+    transform: scale(1.2);
+  }
 }
 
-/* Extra small phones */
+/* ===== EXTRA SMALL PHONES ===== */
 @media (max-width: 400px) {
   #money-list li {
     min-width: 60px;
@@ -431,7 +445,8 @@ button.used {
     padding: 5px 8px;
   }
 
-  #money-list li.current {
+  #money-list li.current,
+  #money-list li.highlight {
     transform: scale(1.15);
   }
 }
